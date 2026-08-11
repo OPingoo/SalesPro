@@ -290,7 +290,374 @@ box-shadow:none;
 </style>
 </head>
 
-<body>
+<body><!-- ================= BARCODE SCANNER ================= -->
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+#barcodeScannerModal {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    z-index:99999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.barcode-box {
+    background:white;
+    width:100%;
+    max-width:500px;
+    border-radius:20px;
+    padding:20px;
+    text-align:center;
+}
+
+.barcode-box h2 {
+    margin-top:0;
+}
+
+#reader {
+    width:100%;
+    margin:15px auto;
+}
+
+.barcode-close {
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#222;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+}
+
+#barcodeResult {
+    margin:10px 0;
+    font-weight:bold;
+    word-break:break-all;
+}
+</style>
+
+<!-- Scanner Window -->
+<div id="barcodeScannerModal">
+
+    <div class="barcode-box">
+
+        <h2>📷 Scan Product Barcode</h2>
+
+        <p>
+            Point your iPhone camera at the product barcode.
+        </p>
+
+        <div id="reader"></div>
+
+        <div id="barcodeResult"></div>
+
+        <button class="barcode-close" onclick="closeBarcodeScanner()">
+            Close Scanner
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+let barcodeScanner = null;
+let barcodeScanning = false;
+
+/* OPEN SCANNER */
+function openBarcodeScanner() {
+
+    document.getElementById("barcodeScannerModal").style.display = "flex";
+
+    document.getElementById("barcodeResult").innerHTML =
+        "Starting camera...";
+
+    setTimeout(() => {
+
+        barcodeScanner = new Html5Qrcode("reader");
+
+        barcodeScanner.start(
+
+            { facingMode: "environment" },
+
+            {
+                fps: 10,
+
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+
+                    let width = Math.floor(viewfinderWidth * 0.85);
+                    let height = Math.floor(viewfinderHeight * 0.35);
+
+                    return {
+                        width: width,
+                        height: height
+                    };
+                },
+
+                aspectRatio: 1.5,
+
+                formatsToSupport: [
+
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.ITF
+
+                ]
+
+            },
+
+            function(decodedText) {
+
+                barcodeScanning = true;
+
+                document.getElementById("barcodeResult").innerHTML =
+                    "✅ Barcode: <strong>" + decodedText + "</strong>";
+
+                /* Put barcode into barcode input */
+                let barcodeInput =
+                    document.getElementById("barcode");
+
+                if (barcodeInput) {
+
+                    barcodeInput.value = decodedText;
+
+                    barcodeInput.dispatchEvent(
+                        new Event("input", { bubbles:true })
+                    );
+
+                    barcodeInput.dispatchEvent(
+                        new Event("change", { bubbles:true })
+                    );
+
+                }
+
+                /* Also look for common barcode fields */
+                let possibleInputs = [
+                    "productBarcode",
+                    "barcodeInput",
+                    "product-barcode",
+                    "product_code"
+                ];
+
+                possibleInputs.forEach(function(id) {
+
+                    let input = document.getElementById(id);
+
+                    if (input) {
+
+                        input.value = decodedText;
+
+                        input.dispatchEvent(
+                            new Event("input", { bubbles:true })
+                        );
+
+                    }
+
+                });
+
+                /* Copy barcode */
+                if (navigator.clipboard) {
+
+                    navigator.clipboard.writeText(decodedText)
+                    .catch(function(){});
+
+                }
+
+                /* Stop after successful scan */
+                stopBarcodeScanner();
+
+            },
+
+            function(errorMessage) {
+
+                /* Ignore normal scanning errors */
+
+            }
+
+        ).then(function() {
+
+            barcodeScanning = true;
+
+            document.getElementById("barcodeResult").innerHTML =
+                "📷 Camera ready — scan a barcode.";
+
+        }).catch(function(error) {
+
+            document.getElementById("barcodeResult").innerHTML =
+                "❌ Camera could not start.<br><br>" +
+                "Please allow camera access for Safari.";
+
+            console.log(error);
+
+        });
+
+    }, 300);
+
+}
+
+
+/* STOP SCANNER */
+function stopBarcodeScanner() {
+
+    if (barcodeScanner && barcodeScanning) {
+
+        barcodeScanner.stop()
+        .then(function() {
+
+            barcodeScanner.clear();
+
+            barcodeScanning = false;
+
+        })
+        .catch(function(error) {
+
+            console.log(error);
+
+        });
+
+    }
+
+}
+
+
+/* CLOSE SCANNER */
+function closeBarcodeScanner() {
+
+    stopBarcodeScanner();
+
+    document.getElementById("barcodeScannerModal").style.display = "none";
+
+    document.getElementById("reader").innerHTML = "";
+
+}
+
+
+/* CREATE SCAN BUTTON AUTOMATICALLY */
+function createBarcodeButton() {
+
+    if (document.getElementById("scanBarcodeButton")) {
+        return;
+    }
+
+    let barcodeInput = document.getElementById("barcode");
+
+    if (!barcodeInput) {
+
+        /* Create barcode field if app doesn't already have one */
+
+        let container =
+            document.querySelector("form") ||
+            document.querySelector(".form") ||
+            document.querySelector("main");
+
+        if (container) {
+
+            let wrapper = document.createElement("div");
+
+            wrapper.style.margin = "10px 0";
+
+            wrapper.innerHTML = `
+                <label style="
+                    display:block;
+                    font-weight:bold;
+                    margin-bottom:6px;
+                ">
+                    Product Barcode
+                </label>
+
+                <div style="
+                    display:flex;
+                    gap:8px;
+                ">
+
+                    <input
+                        id="barcode"
+                        type="text"
+                        placeholder="Enter or scan barcode"
+                        style="
+                            flex:1;
+                            padding:12px;
+                            border:1px solid #ccc;
+                            border-radius:8px;
+                            font-size:16px;
+                        "
+                    >
+
+                    <button
+                        id="scanBarcodeButton"
+                        type="button"
+                        onclick="openBarcodeScanner()"
+                        style="
+                            padding:12px 15px;
+                            border:none;
+                            border-radius:8px;
+                            background:#1456a0;
+                            color:white;
+                            font-weight:bold;
+                        "
+                    >
+                        📷 Scan
+                    </button>
+
+                </div>
+            `;
+
+            container.insertBefore(wrapper, container.firstChild);
+
+        }
+
+    } else {
+
+        /* Add scanner button beside existing barcode field */
+
+        let button = document.createElement("button");
+
+        button.id = "scanBarcodeButton";
+
+        button.type = "button";
+
+        button.innerHTML = "📷 Scan Barcode";
+
+        button.onclick = openBarcodeScanner;
+
+        button.style.cssText = `
+            margin:8px 0;
+            padding:12px 16px;
+            border:none;
+            border-radius:8px;
+            background:#1456a0;
+            color:white;
+            font-weight:bold;
+            font-size:15px;
+        `;
+
+        barcodeInput.parentNode.appendChild(button);
+
+    }
+
+}
+
+
+/* WAIT FOR APP TO LOAD */
+window.addEventListener("load", function() {
+
+    setTimeout(createBarcodeButton, 1000);
+
+});
+
+</script>
+
+<!-- ================= END BARCODE SCANNER ================= -->
 
 <header class="header">
 
