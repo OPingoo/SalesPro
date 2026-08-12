@@ -1,159 +1,4245 @@
--- ============================================================
--- SALESPRO - AUTOMATIC BUSINESS + OWNER PROFILE CREATION
--- KC INTEGRATED GLOBAL SERVICES
--- ============================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
--- Remove old trigger/function if they exist
-drop trigger if exists on_auth_user_created on auth.users;
-drop function if exists public.handle_new_salespro_user();
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SalesPro">
+<meta name="theme-color" content="#0b2a52">
 
--- Create function that runs automatically after signup
-create or replace function public.handle_new_salespro_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-    new_business_id uuid;
-    business_name text;
-    full_name text;
-begin
+<title>SalesPro - KC Integrated Global Services</title>
 
-    -- Get information supplied during registration
-    business_name :=
-        coalesce(
-            new.raw_user_meta_data->>'business_name',
-            'KC Integrated Global Services'
-        );
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    full_name :=
-        coalesce(
-            new.raw_user_meta_data->>'full_name',
-            new.email
-        );
+<style>
+:root{
+--navy:#0b2a52;
+--blue:#155fa0;
+--gold:#c6a15b;
+--bg:#f4f6f9;
+--white:#fff;
+--text:#172033;
+--muted:#667085;
+--green:#087443;
+--red:#b42318;
+--border:#e2e6ec;
+}
 
-    -- Create the business
-    insert into public.businesses (
-        name,
-        created_at
-    )
-    values (
-        business_name,
-        now()
-    )
-    returning id into new_business_id;
+*{box-sizing:border-box}
 
-    -- Create the owner profile
-    insert into public.profiles (
-        id,
-        full_name,
-        role,
-        business_id,
-        active,
-        created_at,
-        updated_at
-    )
-    values (
-        new.id,
-        full_name,
-        'owner',
-        new_business_id,
-        true,
-        now(),
-        now()
-    );
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
 
-    return new;
+button,input,select,textarea{font:inherit}
 
-exception
-    when others then
-        raise exception 'SalesPro account setup failed: %', SQLERRM;
-end;
-$$;
+button{
+border:0;
+border-radius:11px;
+padding:11px 15px;
+font-weight:700;
+background:var(--navy);
+color:white;
+cursor:pointer;
+}
 
--- Automatically execute after every new Auth user
-create trigger on_auth_user_created
-after insert on auth.users
-for each row
-execute function public.handle_new_salespro_user();
+button:disabled{
+opacity:.55;
+cursor:not-allowed;
+}
+
+button.secondary{
+background:#e8edf3;
+color:var(--navy);
+}
+
+button.green{
+background:var(--green);
+}
+
+button.red{
+background:#fee4e2;
+color:var(--red);
+}
+
+button.gold{
+background:var(--gold);
+color:#fff;
+}
+
+input,select,textarea{
+width:100%;
+border:1px solid #d0d5dd;
+border-radius:10px;
+padding:11px;
+background:white;
+outline:none;
+}
+
+textarea{
+min-height:90px;
+resize:vertical;
+}
+
+label{
+font-size:12px;
+font-weight:700;
+color:var(--muted);
+display:block;
+margin:8px 0 5px;
+}
+
+.header{
+position:sticky;
+top:0;
+z-index:20;
+background:white;
+border-bottom:1px solid var(--border);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+padding:10px 14px;
+}
+
+.logo{
+width:52px;
+height:52px;
+border-radius:12px;
+background:white;
+object-fit:contain;
+}
+
+.brand strong{
+font-size:18px;
+display:block;
+}
+
+.brand small{
+color:var(--muted);
+}
+
+.nav{
+display:flex;
+overflow-x:auto;
+gap:7px;
+padding:0 12px 10px;
+}
+
+.nav button{
+white-space:nowrap;
+background:#edf2f7;
+color:var(--navy);
+}
+
+.nav button.active{
+background:var(--navy);
+color:white;
+}
+
+.container{
+max-width:1150px;
+margin:auto;
+padding:15px 12px 100px;
+}
+
+h1{
+font-size:25px;
+margin:18px 0 13px;
+}
+
+h2{
+font-size:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.card{
+background:white;
+border:1px solid var(--border);
+border-radius:16px;
+padding:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+.stat{
+font-size:13px;
+color:var(--muted);
+}
+
+.stat strong{
+display:block;
+font-size:23px;
+color:var(--text);
+margin-top:5px;
+}
+
+.toolbar{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin:12px 0;
+}
+
+.formgrid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.full{
+grid-column:1/-1;
+}
+
+.table{
+overflow-x:auto;
+background:white;
+border:1px solid var(--border);
+border-radius:14px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+min-width:700px;
+}
+
+th,td{
+padding:11px;
+border-bottom:1px solid #edf0f3;
+text-align:left;
+}
+
+th{
+font-size:12px;
+background:#f8fafc;
+}
+
+.money{
+font-weight:800;
+}
+
+.good{
+color:var(--green);
+}
+
+.bad{
+color:var(--red);
+}
+
+.empty{
+padding:35px;
+text-align:center;
+color:var(--muted);
+}
+
+.badge{
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#edf2f7;
+font-size:12px;
+}
+
+.footer{
+text-align:center;
+color:var(--muted);
+padding:30px 10px;
+font-size:12px;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+z-index:100;
+align-items:flex-end;
+}
+
+.modal.show{
+display:flex;
+}
+
+.sheet{
+background:white;
+width:100%;
+max-height:94vh;
+overflow:auto;
+border-radius:22px 22px 0 0;
+padding:18px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+justify-content:flex-end;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.auth-screen{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:linear-gradient(135deg,#0b2a52,#155fa0);
+}
+
+.auth-box{
+width:100%;
+max-width:430px;
+background:white;
+border-radius:22px;
+padding:25px;
+box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+.auth-logo{
+width:80px;
+height:80px;
+display:block;
+margin:0 auto 12px;
+}
+
+.auth-title{
+text-align:center;
+font-size:25px;
+font-weight:800;
+color:var(--navy);
+}
+
+.auth-subtitle{
+text-align:center;
+color:var(--muted);
+margin-bottom:20px;
+}
+
+.auth-actions{
+display:grid;
+gap:10px;
+margin-top:15px;
+}
+
+.auth-message{
+padding:11px;
+border-radius:10px;
+margin-top:12px;
+display:none;
+font-size:14px;
+}
+
+.auth-message.error{
+display:block;
+background:#fee4e2;
+color:#b42318;
+}
+
+.auth-message.success{
+display:block;
+background:#e8f5ee;
+color:#087443;
+}
+
+.userbar{
+margin-left:auto;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.user-name{
+font-size:12px;
+color:var(--muted);
+}
+
+.logout{
+padding:8px 11px;
+font-size:12px;
+}
+
+.scan-row{
+display:flex;
+gap:8px;
+}
+
+.scan-row input{
+flex:1;
+}
+
+#scannerModal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.88);
+z-index:9999;
+align-items:center;
+justify-content:center;
+padding:15px;
+}
+
+.scanner-box{
+background:white;
+width:100%;
+max-width:520px;
+border-radius:20px;
+padding:18px;
+}
+
+#reader{
+width:100%;
+margin:15px auto;
+}
+
+.scan-result{
+padding:10px;
+font-weight:700;
+word-break:break-all;
+}
+
+.loading{
+text-align:center;
+padding:35px;
+color:var(--muted);
+}
+
+.sync{
+font-size:11px;
+color:var(--green);
+margin-left:8px;
+}
+
+@media(max-width:700px){
+
+.grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.formgrid{
+grid-template-columns:1fr;
+}
+
+.full{
+grid-column:auto;
+}
+
+.user-name{
+display:none;
+}
+
+.brand strong{
+font-size:16px;
+}
+}
+
+@media print{
+
+.header,
+.toolbar,
+.noPrint{
+display:none!important;
+}
+
+.container{
+padding:0;
+}
+
+.card{
+box-shadow:none;
+}
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     SUPABASE
+===================================================== -->
+
+<script>
+
+const SUPABASE_URL =
+"https://olkugewqersskavvcrhm.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_35hM0m_Gy7HVDmgs-CoEvA_QcJMv3te";
+
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+</script>
 
 
--- ============================================================
--- RLS POLICIES
--- ============================================================
+<!-- =====================================================
+     AUTH SCREEN
+===================================================== -->
 
-alter table public.businesses enable row level security;
-alter table public.profiles enable row level security;
+<div id="authScreen" class="auth-screen">
 
--- Remove possible old policies with these names
-drop policy if exists "Users can view their business" on public.businesses;
-drop policy if exists "Users can update their business" on public.businesses;
+<div class="auth-box">
 
-drop policy if exists "Users can view their own profile" on public.profiles;
-drop policy if exists "Users can update their own profile" on public.profiles;
+<svg class="auth-logo" viewBox="0 0 100 100">
+<rect width="100" height="100" rx="18" fill="white"/>
+<path d="M18 75V52l10-7v30H18z" fill="#123c70"/>
+<path d="M34 75V32l10-7v50H34z" fill="#123c70"/>
+<path d="M50 75V18l10-8v65H50z" fill="#123c70"/>
+<path d="M55 49l20-20h15L68 50l22 25H75L55 56z" fill="#123c70"/>
+<path d="M79 29c11 1 18 9 18 20 0 10-7 19-17 21 7-3 11-9 11-17 0-10-7-18-18-19z" fill="#7b8188"/>
+</svg>
+
+<div class="auth-title">SalesPro</div>
+
+<div class="auth-subtitle">
+KC Integrated Global Services
+</div>
+
+<div id="loginForm">
+
+<label>Email Address</label>
+<input id="loginEmail" type="email" autocomplete="email">
+
+<label>Password</label>
+<input id="loginPassword" type="password" autocomplete="current-password">
+
+<div class="auth-actions">
+
+<button onclick="loginUser()">
+🔐 Login
+</button>
+
+<button class="secondary" onclick="showSignup()">
+Create Owner Account
+</button>
+
+</div>
+
+</div>
 
 
--- BUSINESS: authenticated users can view their own business
-create policy "Users can view their business"
-on public.businesses
-for select
-to authenticated
-using (
-    id in (
-        select business_id
-        from public.profiles
-        where id = auth.uid()
-    )
+<div id="signupForm" style="display:none">
+
+<label>Full Name</label>
+<input id="signupName" type="text">
+
+<label>Business Name</label>
+<input id="signupBusiness" type="text"
+value="KC Integrated Global Services">
+
+<label>Phone</label>
+<input id="signupPhone" type="tel">
+
+<label>Email Address</label>
+<input id="signupEmail" type="email">
+
+<label>Password</label>
+<input id="signupPassword" type="password">
+
+<label>Confirm Password</label>
+<input id="signupConfirm" type="password">
+
+<div class="auth-actions">
+
+<button onclick="createOwnerAccount()">
+Create Owner Account
+</button>
+
+<button class="secondary" onclick="showLogin()">
+Back to Login
+</button>
+
+</div>
+
+</div>
+
+<div id="authMessage" class="auth-message"></div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN APPLICATION
+===================================================== -->
+
+<div id="mainApp" style="display:none">
+
+<header class="header">
+
+<div class="brand">
+
+<svg class="logo" viewBox="0 0 100 100">
+<rect width="100" height="100" rx="12" fill="white"/>
+<path d="M18 75V52l10-7v30H18z" fill="#123c70"/>
+<path d="M34 75V32l10-7v50H34z" fill="#123c70"/>
+<path d="M50 75V18l10-8v65H50z" fill="#123c70"/>
+<path d="M55 49l20-20h15L68 50l22 25H75L55 56z" fill="#123c70"/>
+<path d="M79 29c11 1 18 9 18 20 0 10-7 19-17 21 7-3 11-9 11-17 0-10-7-18-18-19z" fill="#7b8188"/>
+</svg>
+
+<div>
+<strong>SalesPro</strong>
+<small id="businessHeader">
+KC Integrated Global Services
+</small>
+</div>
+
+<div class="userbar">
+
+<span class="user-name" id="currentUserName"></span>
+
+<button class="logout red" onclick="logoutUser()">
+Logout
+</button>
+
+</div>
+
+</div>
+
+<nav class="nav" id="nav"></nav>
+
+</header>
+
+<main class="container" id="app"></main>
+
+</div>
+
+
+<!-- =====================================================
+     GENERAL MODAL
+===================================================== -->
+
+<div class="modal" id="modal">
+
+<div class="sheet" id="sheet"></div>
+
+</div>
+
+
+<!-- =====================================================
+     BARCODE SCANNER
+===================================================== -->
+
+<div id="scannerModal">
+
+<div class="scanner-box">
+
+<h2>📷 Scan Product Barcode</h2>
+
+<p>
+Point the camera at the product barcode.
+</p>
+
+<div id="reader"></div>
+
+<div id="scanResult" class="scan-result">
+Camera starting...
+</div>
+
+<button style="width:100%"
+onclick="closeScanner()">
+Close Scanner
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   APPLICATION STATE
+===================================================== */
+
+let currentUser=null;
+let currentProfile=null;
+let currentBusiness=null;
+
+let page="dashboard";
+
+let scanner=null;
+
+let saleRows=[];
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function esc(value){
+
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function money(value){
+
+return "₦"+Number(value||0).toLocaleString(
+"en-NG",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+);
+
+}
+
+
+function today(){
+
+return new Date().toISOString().slice(0,10);
+
+}
+
+
+function uuid(){
+
+return crypto.randomUUID();
+
+}
+
+
+function showAuthMessage(message,type="error"){
+
+const box=document.getElementById("authMessage");
+
+box.textContent=message;
+
+box.className="auth-message "+type;
+
+}
+
+
+function clearAuthMessage(){
+
+const box=document.getElementById("authMessage");
+
+box.textContent="";
+
+box.className="auth-message";
+
+}
+
+
+/* =====================================================
+   AUTH FORM
+===================================================== */
+
+function showSignup(){
+
+document.getElementById("loginForm").style.display="none";
+
+document.getElementById("signupForm").style.display="block";
+
+clearAuthMessage();
+
+}
+
+
+function showLogin(){
+
+document.getElementById("loginForm").style.display="block";
+
+document.getElementById("signupForm").style.display="none";
+
+clearAuthMessage();
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function loginUser(){
+
+clearAuthMessage();
+
+const email=
+document.getElementById("loginEmail").value.trim();
+
+const password=
+document.getElementById("loginPassword").value;
+
+if(!email||!password){
+
+showAuthMessage(
+"Please enter your email and password."
+);
+
+return;
+
+}
+
+try{
+
+const {data,error}=
+await supabaseClient.auth.signInWithPassword({
+email,
+password
+});
+
+if(error)throw error;
+
+if(!data.session){
+
+throw new Error(
+"Login succeeded but no session was created."
+);
+
+}
+
+await loadApplication();
+
+}catch(error){
+
+console.error(error);
+
+showAuthMessage(
+error.message || "Login failed."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   CREATE OWNER ACCOUNT
+===================================================== */
+
+async function createOwnerAccount(){
+
+clearAuthMessage();
+
+const fullName=
+document.getElementById("signupName").value.trim();
+
+const businessName=
+document.getElementById("signupBusiness").value.trim();
+
+const phone=
+document.getElementById("signupPhone").value.trim();
+
+const email=
+document.getElementById("signupEmail").value.trim();
+
+const password=
+document.getElementById("signupPassword").value;
+
+const confirm=
+document.getElementById("signupConfirm").value;
+
+
+if(!fullName){
+
+showAuthMessage("Enter your full name.");
+
+return;
+
+}
+
+if(!businessName){
+
+showAuthMessage("Enter your business name.");
+
+return;
+
+}
+
+if(!email){
+
+showAuthMessage("Enter your email address.");
+
+return;
+
+}
+
+if(password.length<6){
+
+showAuthMessage(
+"Password must be at least 6 characters."
+);
+
+return;
+
+}
+
+if(password!==confirm){
+
+showAuthMessage(
+"Passwords do not match."
+);
+
+return;
+
+}
+
+
+try{
+
+showAuthMessage(
+"Creating your account...",
+"success"
 );
 
 
--- BUSINESS: authenticated users can update their own business
-create policy "Users can update their business"
-on public.businesses
-for update
-to authenticated
-using (
-    id in (
-        select business_id
-        from public.profiles
-        where id = auth.uid()
-    )
+/* -----------------------------------------------------
+   STEP 1: CREATE AUTH ACCOUNT
+----------------------------------------------------- */
+
+const {data,error}=
+await supabaseClient.auth.signUp({
+
+email:email,
+
+password:password,
+
+options:{
+data:{
+full_name:fullName
+}
+}
+
+});
+
+if(error)throw error;
+
+let user=data.user;
+
+
+/* -----------------------------------------------------
+   IMPORTANT:
+   SUPABASE MAY RETURN USER WITHOUT SESSION
+   WHEN EMAIL CONFIRMATION IS ENABLED.
+----------------------------------------------------- */
+
+if(!data.session){
+
+showAuthMessage(
+"Your account was created. Please check your email and confirm your email address, then return to SalesPro and login.",
+"success"
+);
+
+return;
+
+}
+
+
+/* -----------------------------------------------------
+   STEP 2: GET THE REAL SESSION
+----------------------------------------------------- */
+
+const sessionResult=
+await supabaseClient.auth.getSession();
+
+if(sessionResult.error)
+throw sessionResult.error;
+
+const session=
+sessionResult.data.session;
+
+if(!session){
+
+throw new Error(
+"Supabase session was not available after registration."
+);
+
+}
+
+user=session.user;
+
+
+/* -----------------------------------------------------
+   STEP 3: CREATE BUSINESS
+----------------------------------------------------- */
+
+const businessId=uuid();
+
+const {
+data:business,
+error:businessError
+}=await supabaseClient
+.from("businesses")
+.insert({
+
+id:businessId,
+
+name:businessName,
+
+phone:phone,
+
+email:email
+
+})
+.select()
+.single();
+
+if(businessError){
+
+console.error(
+"BUSINESS ERROR:",
+businessError
+);
+
+throw new Error(
+"Account created, but the business profile could not be created. "+
+businessError.message
+);
+
+}
+
+
+/* -----------------------------------------------------
+   STEP 4: CREATE OWNER PROFILE
+   IMPORTANT:
+   id = AUTH USER UUID
+----------------------------------------------------- */
+
+const {
+data:profile,
+error:profileError
+}=await supabaseClient
+.from("profiles")
+.insert({
+
+id:user.id,
+
+full_name:fullName,
+
+role:"owner",
+
+business_id:business.id,
+
+active:true
+
+})
+.select()
+.single();
+
+
+if(profileError){
+
+console.error(
+"PROFILE ERROR:",
+profileError
+);
+
+
+/*
+If profile failed, do not pretend registration succeeded.
+*/
+
+throw new Error(
+"Account created, but the owner profile could not be created. "+
+profileError.message
+);
+
+}
+
+
+/* -----------------------------------------------------
+   SUCCESS
+----------------------------------------------------- */
+
+showAuthMessage(
+"Owner account created successfully. Loading SalesPro...",
+"success"
+);
+
+await loadApplication();
+
+}catch(error){
+
+console.error(
+"OWNER REGISTRATION ERROR:",
+error
+);
+
+showAuthMessage(
+error.message || "Account creation failed."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   LOAD APPLICATION
+===================================================== */
+
+async function loadApplication(){
+
+try{
+
+const {
+data:{user},
+error
+}=await supabaseClient.auth.getUser();
+
+if(error)throw error;
+
+if(!user){
+
+showLogin();
+
+return;
+
+}
+
+currentUser=user;
+
+
+/* -----------------------------------------------------
+   GET PROFILE
+----------------------------------------------------- */
+
+let {
+data:profile,
+error:profileError
+}=await supabaseClient
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
+
+if(profileError)
+throw profileError;
+
+
+if(!profile){
+
+document.getElementById("mainApp").style.display="none";
+
+document.getElementById("authScreen").style.display="flex";
+
+showAuthMessage(
+"Your login exists, but your SalesPro owner profile is missing. Please contact the system administrator."
+);
+
+return;
+
+}
+
+currentProfile=profile;
+
+
+/* -----------------------------------------------------
+   GET BUSINESS
+----------------------------------------------------- */
+
+const {
+data:business,
+error:businessError
+}=await supabaseClient
+.from("businesses")
+.select("*")
+.eq("id",profile.business_id)
+.maybeSingle();
+
+if(businessError)
+throw businessError;
+
+if(!business){
+
+throw new Error(
+"Business profile could not be found."
+);
+
+}
+
+currentBusiness=business;
+
+
+/* -----------------------------------------------------
+   SHOW APP
+----------------------------------------------------- */
+
+document.getElementById("authScreen").style.display="none";
+
+document.getElementById("mainApp").style.display="block";
+
+document.getElementById("businessHeader").textContent=
+business.name;
+
+document.getElementById("currentUserName").textContent=
+profile.full_name+" • "+profile.role;
+
+renderNav();
+
+render();
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById("authScreen").style.display="flex";
+
+document.getElementById("mainApp").style.display="none";
+
+showAuthMessage(
+error.message || "Unable to load SalesPro."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
+
+currentUser=null;
+currentProfile=null;
+currentBusiness=null;
+
+document.getElementById("mainApp").style.display="none";
+
+document.getElementById("authScreen").style.display="flex";
+
+showLogin();
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+const navItems=[
+
+["dashboard","Dashboard"],
+
+["sales","Sales"],
+
+["products","Products"],
+
+["customers","Customers"],
+
+["reports","Reports"],
+
+["backup","Backup"],
+
+["users","Users"],
+
+["settings","Settings"]
+
+];
+
+
+function hasRole(roles){
+
+if(!currentProfile)return false;
+
+return roles.includes(currentProfile.role);
+
+}
+
+
+function renderNav(){
+
+let allowed=navItems.filter(item=>{
+
+if(item[0]==="users")
+return hasRole(["owner"]);
+
+if(item[0]==="settings")
+return hasRole(["owner"]);
+
+return true;
+
+});
+
+document.getElementById("nav").innerHTML=
+
+allowed.map(item=>`
+
+<button
+class="${page===item[0]?"active":""}"
+onclick="go('${item[0]}')">
+
+${item[1]}
+
+</button>
+
+`).join("");
+
+}
+
+
+function go(p){
+
+page=p;
+
+renderNav();
+
+render();
+
+window.scrollTo(0,0);
+
+}
+
+
+function render(){
+
+const app=document.getElementById("app");
+
+if(!app)return;
+
+app.innerHTML=
+`<div class="loading">Loading...</div>`;
+
+if(page==="dashboard")dashboard();
+
+else if(page==="sales")salesPage();
+
+else if(page==="products")productsPage();
+
+else if(page==="customers")customersPage();
+
+else if(page==="reports")reportsPage();
+
+else if(page==="backup")backupPage();
+
+else if(page==="users")usersPage();
+
+else if(page==="settings")settingsPage();
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+async function dashboard(){
+
+const sales=await getSales();
+
+const products=await getProducts();
+
+const customers=await getCustomers();
+
+
+const revenue=sales.reduce(
+(a,b)=>a+Number(b.total||0),0
+);
+
+
+const stockValue=products.reduce(
+(a,b)=>a+
+Number(b.stock||0)*Number(b.cost_price||0),
+0
+);
+
+
+const lowStock=products.filter(
+p=>Number(p.stock||0)<=
+Number(p.low_stock_level||0)
+).length;
+
+
+document.getElementById("app").innerHTML=`
+
+<h1>Dashboard</h1>
+
+<div class="grid">
+
+<div class="card stat">
+
+Total Sales
+
+<strong>
+${money(revenue)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Transactions
+
+<strong>
+${sales.length}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Products
+
+<strong>
+${products.length}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Stock Value
+
+<strong>
+${money(stockValue)}
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="toolbar">
+
+<button onclick="newSale()">
++ New Sale
+</button>
+
+<button
+class="secondary"
+onclick="newProduct()">
+
++ Add Product
+
+</button>
+
+<button
+class="secondary"
+onclick="newCustomer()">
+
++ Customer
+
+</button>
+
+</div>
+
+
+<div class="grid">
+
+<div class="card">
+
+<h2>Low Stock</h2>
+
+<strong class="${lowStock?"bad":"good"}">
+${lowStock}
+</strong>
+
+<p>
+Products at or below their low-stock level.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Customers</h2>
+
+<strong>
+${customers.length}
+</strong>
+
+<p>
+Registered customers.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Recent Sales</h2>
+
+${recentSalesTable(sales)}
+
+</div>
+
+
+<div class="footer">
+
+SalesPro • ${esc(currentBusiness?.name||"")}
+
+</div>
+`;
+
+}
+
+
+function recentSalesTable(sales){
+
+let rows=sales.slice(0,10);
+
+if(!rows.length){
+
+return `<div class="empty">
+No sales recorded yet.
+</div>`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Invoice</th>
+<th>Customer</th>
+<th>Total</th>
+</tr>
+
+${rows.map(s=>`
+
+<tr>
+
+<td>${s.sale_date||""}</td>
+
+<td>${esc(s.invoice_number||"")}</td>
+
+<td>${esc(s.customer_name||"Walk-in")}</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   DATABASE HELPERS
+===================================================== */
+
+async function getProducts(){
+
+const {data,error}=
+await supabaseClient
+.from("products")
+.select("*")
+.eq("business_id",currentBusiness.id)
+.eq("active",true)
+.order("name");
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+return data||[];
+
+}
+
+
+async function getCustomers(){
+
+const {data,error}=
+await supabaseClient
+.from("customers")
+.select("*")
+.eq("business_id",currentBusiness.id)
+.order("name");
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+return data||[];
+
+}
+
+
+async function getSales(){
+
+const {data,error}=
+await supabaseClient
+.from("sales")
+.select("*")
+.eq("business_id",currentBusiness.id)
+.order("created_at",{ascending:false});
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+return data||[];
+
+}
+
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+async function productsPage(){
+
+const products=await getProducts();
+
+document.getElementById("app").innerHTML=`
+
+<h1>Products & Inventory</h1>
+
+<div class="toolbar">
+
+<button onclick="newProduct()">
++ Add Product
+</button>
+
+<input
+style="max-width:320px"
+id="productSearch"
+placeholder="Search product..."
+oninput="filterProductTable()">
+
+</div>
+
+<div
+class="table"
+id="productTable">
+
+${productTable(products)}
+
+</div>
+
+`;
+
+}
+
+
+function productTable(products){
+
+if(!products.length){
+
+return `
+<div class="empty">
+No products yet.<br><br>
+Add your first product.
+</div>
+`;
+
+}
+
+return`
+
+<table>
+
+<tr>
+
+<th>Product</th>
+<th>Barcode</th>
+<th>Category</th>
+<th>Retail</th>
+<th>Wholesale</th>
+<th>Stock</th>
+<th>Action</th>
+
+</tr>
+
+${products.map(p=>`
+
+<tr>
+
+<td>
+<strong>${esc(p.name)}</strong>
+<br>
+<small>${esc(p.brand||"")}</small>
+</td>
+
+<td>${esc(p.barcode||"-")}</td>
+
+<td>${esc(p.category||"-")}</td>
+
+<td>${money(p.retail_price)}</td>
+
+<td>${money(p.wholesale_price)}</td>
+
+<td class="${
+Number(p.stock)<=Number(p.low_stock_level)
+?"bad":""
+}">
+
+${p.stock}
+
+</td>
+
+<td>
+
+<button
+class="secondary"
+onclick="editProduct('${p.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+`;
+
+}
+
+
+async function filterProductTable(){
+
+const search=
+document.getElementById("productSearch")
+.value
+.toLowerCase();
+
+const products=await getProducts();
+
+const filtered=products.filter(p=>
+
+String(p.name||"")
+.toLowerCase()
+.includes(search)
+
+||
+
+String(p.barcode||"")
+.toLowerCase()
+.includes(search)
+
+||
+
+String(p.brand||"")
+.toLowerCase()
+.includes(search)
+
+);
+
+document.getElementById("productTable").innerHTML=
+productTable(filtered);
+
+}
+
+
+/* =====================================================
+   PRODUCT FORM
+===================================================== */
+
+async function newProduct(product=null){
+
+openModal(`
+
+<h2>
+${product?"Edit":"Add"} Product
+</h2>
+
+<div class="formgrid">
+
+<div class="full">
+
+<label>Product Name</label>
+
+<input
+id="pname"
+value="${esc(product?.name||"")}">
+
+</div>
+
+
+<div>
+
+<label>Barcode</label>
+
+<div class="scan-row">
+
+<input
+id="pbarcode"
+value="${esc(product?.barcode||"")}"
+placeholder="Enter or scan barcode">
+
+<button
+type="button"
+onclick="openScanner('pbarcode')">
+
+📷 Scan
+
+</button>
+
+</div>
+
+</div>
+
+
+<div>
+
+<label>Category</label>
+
+<input
+id="pcategory"
+value="${esc(product?.category||"")}">
+
+</div>
+
+
+<div>
+
+<label>Brand</label>
+
+<input
+id="pbrand"
+value="${esc(product?.brand||"")}">
+
+</div>
+
+
+<div>
+
+<label>Unit</label>
+
+<input
+id="punit"
+value="${esc(product?.unit||"piece")}"
+placeholder="piece / carton / pack">
+
+</div>
+
+
+<div>
+
+<label>Cost Price</label>
+
+<input
+id="pcost"
+type="number"
+value="${product?.cost_price||0}">
+
+</div>
+
+
+<div>
+
+<label>Retail Price</label>
+
+<input
+id="pretail"
+type="number"
+value="${product?.retail_price||0}">
+
+</div>
+
+
+<div>
+
+<label>Wholesale Price</label>
+
+<input
+id="pwholesale"
+type="number"
+value="${product?.wholesale_price||0}">
+
+</div>
+
+
+<div>
+
+<label>Stock</label>
+
+<input
+id="pstock"
+type="number"
+value="${product?.stock||0}">
+
+</div>
+
+
+<div>
+
+<label>Low Stock Alert</label>
+
+<input
+id="plow"
+type="number"
+value="${product?.low_stock_level||5}">
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+onclick="saveProduct('${product?.id||""}')">
+
+Save Product
+
+</button>
+
+${product?`
+
+<button
+class="red"
+onclick="deleteProduct('${product.id}')">
+
+Delete
+
+</button>
+
+`:""}
+
+</div>
+
+`);
+
+}
+
+
+async function saveProduct(existing){
+
+if(!hasRole(["owner","manager","inventory"])){
+
+alert("You do not have permission to manage products.");
+
+return;
+
+}
+
+const product={
+
+business_id:currentBusiness.id,
+
+name:document.getElementById("pname").value.trim(),
+
+barcode:document.getElementById("pbarcode").value.trim(),
+
+category:document.getElementById("pcategory").value.trim(),
+
+brand:document.getElementById("pbrand").value.trim(),
+
+unit:document.getElementById("punit").value.trim()||"piece",
+
+cost_price:Number(
+document.getElementById("pcost").value||0
+),
+
+retail_price:Number(
+document.getElementById("pretail").value||0
+),
+
+wholesale_price:Number(
+document.getElementById("pwholesale").value||0
+),
+
+stock:Number(
+document.getElementById("pstock").value||0
+),
+
+low_stock_level:Number(
+document.getElementById("plow").value||0
+),
+
+active:true
+
+};
+
+
+if(!product.name){
+
+alert("Enter product name.");
+
+return;
+
+}
+
+
+let result;
+
+if(existing){
+
+result=await supabaseClient
+.from("products")
+.update(product)
+.eq("id",existing)
+.eq("business_id",currentBusiness.id);
+
+}else{
+
+result=await supabaseClient
+.from("products")
+.insert(product);
+
+}
+
+
+if(result.error){
+
+alert(result.error.message);
+
+console.error(result.error);
+
+return;
+
+}
+
+
+closeModal();
+
+productsPage();
+
+}
+
+
+/* =====================================================
+   EDIT PRODUCT
+===================================================== */
+
+async function editProduct(id){
+
+const {data,error}=
+await supabaseClient
+.from("products")
+.select("*")
+.eq("id",id)
+.eq("business_id",currentBusiness.id)
+.single();
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+newProduct(data);
+
+}
+
+
+/* =====================================================
+   DELETE PRODUCT
+===================================================== */
+
+async function deleteProduct(id){
+
+if(!hasRole(["owner","manager","inventory"])){
+
+alert("You do not have permission.");
+
+return;
+
+}
+
+if(!confirm("Delete this product?"))return;
+
+
+const {error}=
+await supabaseClient
+.from("products")
+.update({active:false})
+.eq("id",id)
+.eq("business_id",currentBusiness.id);
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+closeModal();
+
+productsPage();
+
+}
+
+
+/* =====================================================
+   BARCODE SCANNER
+===================================================== */
+
+let scannerTarget=null;
+
+
+function openScanner(targetId){
+
+scannerTarget=targetId;
+
+document.getElementById("scannerModal").style.display="flex";
+
+document.getElementById("scanResult").textContent=
+"Starting camera...";
+
+
+setTimeout(()=>{
+
+scanner=
+new Html5Qrcode("reader");
+
+
+scanner.start(
+
+{
+facingMode:"environment"
+},
+
+{
+fps:10,
+
+qrbox:{
+width:280,
+height:120
+}
+
+},
+
+(decodedText)=>{
+
+document.getElementById("scanResult").textContent=
+"✅ Barcode: "+decodedText;
+
+
+const input=
+document.getElementById(scannerTarget);
+
+if(input){
+
+input.value=decodedText;
+
+}
+
+
+setTimeout(closeScanner,700);
+
+},
+
+(error)=>{
+
+}
+
 )
-with check (
-    id in (
-        select business_id
-        from public.profiles
-        where id = auth.uid()
-    )
+
+.then(()=>{
+
+document.getElementById("scanResult").textContent=
+"📷 Camera ready — scan a barcode.";
+
+})
+
+.catch(error=>{
+
+console.error(error);
+
+document.getElementById("scanResult").textContent=
+"❌ Camera could not start. Please allow camera access.";
+
+});
+
+},300);
+
+}
+
+
+async function closeScanner(){
+
+if(scanner){
+
+try{
+
+await scanner.stop();
+
+}catch(e){}
+
+try{
+
+scanner.clear();
+
+}catch(e){}
+
+scanner=null;
+
+}
+
+document.getElementById("scannerModal").style.display="none";
+
+document.getElementById("reader").innerHTML="";
+
+scannerTarget=null;
+
+}
+
+
+/* =====================================================
+   SALES
+===================================================== */
+
+async function salesPage(){
+
+const sales=await getSales();
+
+document.getElementById("app").innerHTML=`
+
+<h1>Sales</h1>
+
+<div class="toolbar">
+
+<button onclick="newSale()">
++ New Sale
+</button>
+
+</div>
+
+${salesTable(sales)}
+
+`;
+
+}
+
+
+function salesTable(sales){
+
+if(!sales.length){
+
+return`
+<div class="card empty">
+No sales recorded yet.
+</div>
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Date</th>
+<th>Invoice</th>
+<th>Customer</th>
+<th>Sale Type</th>
+<th>Payment</th>
+<th>Total</th>
+
+</tr>
+
+${sales.map(s=>`
+
+<tr>
+
+<td>${s.sale_date||""}</td>
+
+<td>${esc(s.invoice_number||"")}</td>
+
+<td>${esc(s.customer_name||"Walk-in")}</td>
+
+<td>
+<span class="badge">
+${esc(s.sale_type||"Retail")}
+</span>
+</td>
+
+<td>${esc(s.payment_method||"")}</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   NEW SALE
+===================================================== */
+
+async function newSale(){
+
+const products=await getProducts();
+
+const customers=await getCustomers();
+
+
+if(!products.length){
+
+alert("Please add products first.");
+
+go("products");
+
+return;
+
+}
+
+
+saleRows=[];
+
+
+openModal(`
+
+<h2>New Sale</h2>
+
+<div class="formgrid">
+
+<div>
+
+<label>Customer</label>
+
+<select id="saleCustomer">
+
+<option value="">
+Walk-in Customer
+</option>
+
+${customers.map(c=>`
+
+<option value="${c.id}">
+
+${esc(c.name)}
+
+</option>
+
+`).join("")}
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>Sale Type</label>
+
+<select
+id="saleType"
+onchange="refreshSalePrices()">
+
+<option value="Retail">
+Retail
+</option>
+
+<option value="Wholesale">
+Wholesale
+</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>Payment Method</label>
+
+<select id="salePayment">
+
+<option>Cash</option>
+
+<option>Transfer</option>
+
+<option>POS</option>
+
+<option>Credit</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>Date</label>
+
+<input
+id="saleDate"
+type="date"
+value="${today()}">
+
+</div>
+
+
+</div>
+
+
+<hr>
+
+
+<div id="saleItems"></div>
+
+
+<button
+class="secondary"
+onclick="addSaleRow()">
+
++ Add Item
+
+</button>
+
+
+<div class="card" style="margin-top:15px">
+
+<strong>
+
+Total:
+
+<span id="saleTotal">
+
+${money(0)}
+
+</span>
+
+</strong>
+
+</div>
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+class="green"
+onclick="completeSale()">
+
+Complete Sale
+
+</button>
+
+</div>
+
+`);
+
+
+addSaleRow();
+
+}
+
+
+/* =====================================================
+   ADD SALE ROW
+===================================================== */
+
+async function addSaleRow(){
+
+const products=await getProducts();
+
+const box=
+document.getElementById("saleItems");
+
+if(!box)return;
+
+
+const row=document.createElement("div");
+
+row.className="card";
+
+row.style.marginBottom="10px";
+
+
+row.innerHTML=`
+
+<div class="formgrid">
+
+<div>
+
+<label>Product</label>
+
+<div class="scan-row">
+
+<select
+class="sproduct"
+onchange="updateSaleTotal()">
+
+<option value="">
+Select product
+</option>
+
+${products.map(p=>`
+
+<option value="${p.id}">
+
+${esc(p.name)}
+ — Stock ${p.stock}
+
+</option>
+
+`).join("")}
+
+</select>
+
+<button
+type="button"
+onclick="scanSaleBarcode(this)">
+
+📷
+
+</button>
+
+</div>
+
+</div>
+
+
+<div>
+
+<label>Quantity</label>
+
+<input
+class="sqty"
+type="number"
+min="1"
+value="1"
+oninput="updateSaleTotal()">
+
+</div>
+
+</div>
+
+
+<div style="margin-top:8px">
+
+Price:
+
+<strong class="sprice">
+${money(0)}
+</strong>
+
+</div>
+
+`;
+
+
+box.appendChild(row);
+
+}
+
+
+/* =====================================================
+   SALE BARCODE SCAN
+===================================================== */
+
+function scanSaleBarcode(button){
+
+const row=
+button.closest(".card");
+
+const select=
+row.querySelector(".sproduct");
+
+
+const temporaryId=
+"saleBarcodeTarget_"+Date.now();
+
+
+const hidden=
+document.createElement("input");
+
+hidden.id=temporaryId;
+
+hidden.style.display="none";
+
+document.body.appendChild(hidden);
+
+
+openScanner(temporaryId);
+
+
+const observer=setInterval(async()=>{
+
+if(hidden.value){
+
+clearInterval(observer);
+
+
+const barcode=hidden.value;
+
+const products=await getProducts();
+
+const product=products.find(
+p=>String(p.barcode||"")===String(barcode)
 );
 
 
--- PROFILE: user can view own profile
-create policy "Users can view their own profile"
-on public.profiles
-for select
-to authenticated
-using (
-    id = auth.uid()
+if(product){
+
+select.value=product.id;
+
+updateSaleTotal();
+
+}else{
+
+alert(
+"No product found with barcode: "+
+barcode
+);
+
+}
+
+hidden.remove();
+
+}
+
+},300);
+
+
+setTimeout(()=>{
+
+clearInterval(observer);
+
+if(hidden.parentNode)
+hidden.remove();
+
+},30000);
+
+}
+
+
+/* =====================================================
+   SALE TOTAL
+===================================================== */
+
+function refreshSalePrices(){
+
+updateSaleTotal();
+
+}
+
+
+async function updateSaleTotal(){
+
+const rows=
+document.querySelectorAll(
+"#saleItems .card"
+);
+
+const products=await getProducts();
+
+const type=
+document.getElementById("saleType")?.value||
+"Retail";
+
+
+let total=0;
+
+
+rows.forEach(row=>{
+
+const pid=
+row.querySelector(".sproduct").value;
+
+const qty=
+Number(
+row.querySelector(".sqty").value||0
 );
 
 
--- PROFILE: user can update own profile
-create policy "Users can update their own profile"
-on public.profiles
-for update
-to authenticated
-using (
-    id = auth.uid()
+const p=
+products.find(x=>x.id===pid);
+
+
+let price=0;
+
+if(p){
+
+price=
+type==="Wholesale"
+?Number(p.wholesale_price||0)
+:Number(p.retail_price||0);
+
+}
+
+
+row.querySelector(".sprice").textContent=
+money(price);
+
+
+total+=price*qty;
+
+});
+
+
+const totalBox=
+document.getElementById("saleTotal");
+
+if(totalBox)
+totalBox.textContent=money(total);
+
+}
+
+
+/* =====================================================
+   COMPLETE SALE
+===================================================== */
+
+async function completeSale(){
+
+if(!hasRole(["owner","manager","cashier"])){
+
+alert("You do not have permission to make sales.");
+
+return;
+
+}
+
+
+const products=await getProducts();
+
+const rows=
+document.querySelectorAll(
+"#saleItems .card"
+);
+
+
+const type=
+document.getElementById("saleType").value;
+
+
+const items=[];
+
+let subtotal=0;
+
+
+for(const row of rows){
+
+const pid=
+row.querySelector(".sproduct").value;
+
+const qty=
+Number(row.querySelector(".sqty").value||0);
+
+
+if(!pid||qty<=0)continue;
+
+
+const p=
+products.find(x=>x.id===pid);
+
+
+if(!p){
+
+continue;
+
+}
+
+
+if(qty>Number(p.stock||0)){
+
+alert(
+"Not enough stock for "+p.name+
+". Available: "+p.stock
+);
+
+return;
+
+}
+
+
+const unitPrice=
+type==="Wholesale"
+?Number(p.wholesale_price||0)
+:Number(p.retail_price||0);
+
+
+const total=
+qty*unitPrice;
+
+
+items.push({
+
+product_id:p.id,
+
+product_name:p.name,
+
+barcode:p.barcode||null,
+
+quantity:qty,
+
+unit_price:unitPrice,
+
+cost_price:Number(p.cost_price||0),
+
+total:total
+
+});
+
+
+subtotal+=total;
+
+}
+
+
+if(!items.length){
+
+alert("Add at least one product.");
+
+return;
+
+}
+
+
+const customerId=
+document.getElementById("saleCustomer").value||null;
+
+
+let customerName="Walk-in Customer";
+
+
+if(customerId){
+
+const customers=await getCustomers();
+
+const customer=
+customers.find(c=>c.id===customerId);
+
+if(customer)
+customerName=customer.name;
+
+}
+
+
+const invoice=
+"INV-"+Date.now();
+
+
+const payment=
+document.getElementById("salePayment").value;
+
+
+const saleData={
+
+business_id:currentBusiness.id,
+
+invoice_number:invoice,
+
+customer_id:customerId,
+
+user_id:currentUser.id,
+
+sale_type:type,
+
+subtotal:subtotal,
+
+discount:0,
+
+total:subtotal,
+
+amount_paid:
+payment==="Credit"?0:subtotal,
+
+balance:
+payment==="Credit"?subtotal:0,
+
+payment_method:payment,
+
+status:
+payment==="Credit"?"credit":"completed",
+
+sale_date:
+document.getElementById("saleDate").value,
+
+customer_name:customerName,
+
+created_by:currentUser.id
+
+};
+
+
+const {
+data:sale,
+error:saleError
+}=
+await supabaseClient
+.from("sales")
+.insert(saleData)
+.select()
+.single();
+
+
+if(saleError){
+
+alert(saleError.message);
+
+console.error(saleError);
+
+return;
+
+}
+
+
+/* -----------------------------------------------------
+   SALE ITEMS
+----------------------------------------------------- */
+
+const itemRows=
+items.map(item=>({
+
+sale_id:sale.id,
+
+product_id:item.product_id,
+
+product_name:item.product_name,
+
+barcode:item.barcode,
+
+quantity:item.quantity,
+
+unit_price:item.unit_price,
+
+cost_price:item.cost_price,
+
+total:item.total
+
+}));
+
+
+const {
+error:itemError
+}=
+await supabaseClient
+.from("sale_items")
+.insert(itemRows);
+
+
+if(itemError){
+
+console.error(itemError);
+
+alert(
+"Sale was created but sale items could not be saved: "+
+itemError.message
+);
+
+return;
+
+}
+
+
+/* -----------------------------------------------------
+   UPDATE STOCK
+----------------------------------------------------- */
+
+for(const item of items){
+
+const product=
+products.find(
+p=>p.id===item.product_id
+);
+
+
+if(!product)continue;
+
+
+const newStock=
+Number(product.stock||0)-
+Number(item.quantity);
+
+
+const {
+error:stockError
+}=
+await supabaseClient
+.from("products")
+.update({
+stock:newStock
+})
+.eq("id",product.id)
+.eq("business_id",currentBusiness.id);
+
+
+if(stockError){
+
+console.error(stockError);
+
+}
+
+}
+
+
+closeModal();
+
+alert(
+"Sale completed successfully.\n\nInvoice: "+
+invoice+
+"\nTotal: "+
+money(subtotal)
+);
+
+go("sales");
+
+}
+
+
+/* =====================================================
+   CUSTOMERS
+===================================================== */
+
+async function customersPage(){
+
+const customers=await getCustomers();
+
+
+document.getElementById("app").innerHTML=`
+
+<h1>Customers</h1>
+
+<div class="toolbar">
+
+<button onclick="newCustomer()">
++ Add Customer
+</button>
+
+</div>
+
+
+${customers.length?
+
+`
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Name</th>
+<th>Phone</th>
+<th>Email</th>
+<th>Type</th>
+<th>Balance</th>
+<th>Action</th>
+
+</tr>
+
+${customers.map(c=>`
+
+<tr>
+
+<td>${esc(c.name)}</td>
+
+<td>${esc(c.phone||"-")}</td>
+
+<td>${esc(c.email||"-")}</td>
+
+<td>
+${esc(c.customer_type||"Regular")}
+</td>
+
+<td>
+${money(c.balance)}
+</td>
+
+<td>
+
+<button
+class="secondary"
+onclick="editCustomer('${c.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`
+
+:
+
+`
+
+<div class="card empty">
+
+No customers yet.
+
+</div>
+
+`
+
+}
+
+`;
+
+
+}
+
+
+async function newCustomer(customer=null){
+
+openModal(`
+
+<h2>
+${customer?"Edit":"Add"} Customer
+</h2>
+
+
+<label>Name</label>
+
+<input
+id="cname"
+value="${esc(customer?.name||"")}">
+
+
+<label>Phone</label>
+
+<input
+id="cphone"
+value="${esc(customer?.phone||"")}">
+
+
+<label>Email</label>
+
+<input
+id="cemail"
+type="email"
+value="${esc(customer?.email||"")}">
+
+
+<label>Address</label>
+
+<textarea id="caddress">${esc(customer?.address||"")}</textarea>
+
+
+<label>Customer Type</label>
+
+<select id="ctype">
+
+<option ${
+customer?.customer_type==="Regular"?"selected":""
+}>
+Regular
+</option>
+
+<option ${
+customer?.customer_type==="Wholesale"?"selected":""
+}>
+Wholesale
+</option>
+
+<option ${
+customer?.customer_type==="Corporate"?"selected":""
+}>
+Corporate
+</option>
+
+</select>
+
+
+<label>Balance</label>
+
+<input
+id="cbalance"
+type="number"
+value="${customer?.balance||0}">
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+onclick="saveCustomer('${customer?.id||""}')">
+
+Save Customer
+
+</button>
+
+${customer?`
+
+<button
+class="red"
+onclick="deleteCustomer('${customer.id}')">
+
+Delete
+
+</button>
+
+`:""}
+
+</div>
+
+`);
+
+}
+
+
+async function saveCustomer(existing){
+
+const customer={
+
+business_id:currentBusiness.id,
+
+name:
+document.getElementById("cname").value.trim(),
+
+phone:
+document.getElementById("cphone").value.trim(),
+
+email:
+document.getElementById("cemail").value.trim(),
+
+address:
+document.getElementById("caddress").value.trim(),
+
+customer_type:
+document.getElementById("ctype").value,
+
+balance:
+Number(
+document.getElementById("cbalance").value||0
 )
-with check (
-    id = auth.uid()
+
+};
+
+
+if(!customer.name){
+
+alert("Enter customer name.");
+
+return;
+
+}
+
+
+let result;
+
+
+if(existing){
+
+result=
+await supabaseClient
+.from("customers")
+.update(customer)
+.eq("id",existing)
+.eq("business_id",currentBusiness.id);
+
+}else{
+
+result=
+await supabaseClient
+.from("customers")
+.insert(customer);
+
+}
+
+
+if(result.error){
+
+alert(result.error.message);
+
+return;
+
+}
+
+
+closeModal();
+
+customersPage();
+
+}
+
+
+async function editCustomer(id){
+
+const {data,error}=
+await supabaseClient
+.from("customers")
+.select("*")
+.eq("id",id)
+.eq("business_id",currentBusiness.id)
+.single();
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+newCustomer(data);
+
+}
+
+
+async function deleteCustomer(id){
+
+if(!confirm("Delete this customer?"))
+return;
+
+
+const {error}=
+await supabaseClient
+.from("customers")
+.delete()
+.eq("id",id)
+.eq("business_id",currentBusiness.id);
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+closeModal();
+
+customersPage();
+
+}
+
+
+/* =====================================================
+   REPORTS
+===================================================== */
+
+async function reportsPage(){
+
+const sales=await getSales();
+
+
+let revenue=0;
+
+let cost=0;
+
+
+for(const sale of sales){
+
+revenue+=Number(sale.total||0);
+
+}
+
+
+const {
+data:items
+}=await supabaseClient
+.from("sale_items")
+.select("*")
+.eq(
+"sale_id",
+sales.map(s=>s.id)
 );
 
 
--- ============================================================
--- FINISHED
--- ============================================================
+if(items){
 
-select 'SalesPro authentication setup completed successfully.' as message;
+for(const item of items){
+
+cost+=
+Number(item.quantity||0)*
+Number(item.cost_price||0);
+
+}
+
+}
+
+
+const gross=revenue-cost;
+
+
+document.getElementById("app").innerHTML=`
+
+<h1>Reports</h1>
+
+
+<div class="grid">
+
+<div class="card stat">
+
+Sales Revenue
+
+<strong>
+${money(revenue)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Cost of Goods
+
+<strong>
+${money(cost)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Gross Profit
+
+<strong class="${gross>=0?"good":"bad"}">
+
+${money(gross)}
+
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Transactions
+
+<strong>
+${sales.length}
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="toolbar noPrint">
+
+<button onclick="window.print()">
+🖨 Print Report
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>Payment Breakdown</h2>
+
+${paymentBreakdown(sales)}
+
+</div>
+
+`;
+
+}
+
+
+function paymentBreakdown(sales){
+
+const methods=[
+"Cash",
+"Transfer",
+"POS",
+"Credit"
+];
+
+
+return methods.map(method=>{
+
+const total=sales
+.filter(s=>s.payment_method===method)
+.reduce(
+(a,b)=>a+Number(b.total||0),
+0
+);
+
+
+return`
+
+<p>
+
+${method}:
+
+<strong>
+${money(total)}
+</strong>
+
+</p>
+
+`;
+
+}).join("");
+
+}
+
+
+/* =====================================================
+   BACKUP
+===================================================== */
+
+async function backupPage(){
+
+document.getElementById("app").innerHTML=`
+
+<h1>Backup & Data Protection</h1>
+
+<div class="card">
+
+<h2>📱 Phone Memory Backup</h2>
+
+<p>
+
+Your SalesPro records are stored in Supabase.
+You can also save a backup directly to your phone.
+
+</p>
+
+
+<div class="toolbar">
+
+<button
+onclick="createPhoneBackup()">
+
+⬇️ Backup to Phone
+
+</button>
+
+
+<button
+class="secondary"
+onclick="document.getElementById('backupFile').click()">
+
+⬆️ Restore from Phone
+
+</button>
+
+
+<input
+id="backupFile"
+type="file"
+accept=".json"
+style="display:none"
+onchange="restorePhoneBackup(event)">
+
+</div>
+
+
+<p class="sync">
+
+☁️ Cloud database connected
+
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Important</h2>
+
+<p>
+
+Before installing a major SalesPro upgrade,
+use <strong>Backup to Phone</strong>.
+
+After the upgrade, use
+<strong>Restore from Phone</strong>
+if necessary.
+
+</p>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   PHONE BACKUP
+===================================================== */
+
+async function createPhoneBackup(){
+
+const products=await getProducts();
+
+const customers=await getCustomers();
+
+const sales=await getSales();
+
+
+const backup={
+
+version:"SalesPro Cloud Backup V1",
+
+created_at:new Date().toISOString(),
+
+business:currentBusiness,
+
+profile:currentProfile,
+
+products:products,
+
+customers:customers,
+
+sales:sales
+
+};
+
+
+const blob=
+new Blob(
+[
+JSON.stringify(backup,null,2)
+],
+{
+type:"application/json"
+}
+);
+
+
+const url=
+URL.createObjectURL(blob);
+
+
+const link=
+document.createElement("a");
+
+
+link.href=url;
+
+link.download=
+"SalesPro_Backup_"+
+today()+
+".json";
+
+
+document.body.appendChild(link);
+
+link.click();
+
+link.remove();
+
+URL.revokeObjectURL(url);
+
+
+alert(
+"Backup created successfully. Save the file somewhere safe on your phone."
+);
+
+}
+
+
+/* =====================================================
+   RESTORE PHONE BACKUP
+===================================================== */
+
+async function restorePhoneBackup(event){
+
+const file=
+event.target.files[0];
+
+
+if(!file)return;
+
+
+if(!confirm(
+"Restore this backup? Existing matching records may be replaced."
+)){
+
+event.target.value="";
+
+return;
+
+}
+
+
+const reader=
+new FileReader();
+
+
+reader.onload=async function(){
+
+try{
+
+const backup=
+JSON.parse(reader.result);
+
+
+if(!backup.products||
+!backup.customers||
+!backup.sales){
+
+throw new Error(
+"Invalid SalesPro backup."
+);
+
+}
+
+
+/* Restore products */
+
+for(const product of backup.products){
+
+const copy={...product};
+
+delete copy.id;
+
+delete copy.created_at;
+
+delete copy.updated_at;
+
+copy.business_id=currentBusiness.id;
+
+const {error}=
+await supabaseClient
+.from("products")
+.upsert(
+copy,
+{
+onConflict:"business_id,barcode"
+}
+);
+
+if(error){
+
+console.error(error);
+
+}
+
+}
+
+
+/* Restore customers */
+
+for(const customer of backup.customers){
+
+const copy={...customer};
+
+delete copy.id;
+
+delete copy.created_at;
+
+copy.business_id=currentBusiness.id;
+
+const {error}=
+await supabaseClient
+.from("customers")
+.insert(copy);
+
+if(error){
+
+console.error(error);
+
+}
+
+}
+
+
+alert(
+"Backup restoration completed. Please check your Products and Customers."
+);
+
+
+go("dashboard");
+
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Invalid SalesPro backup file."
+);
+
+}
+
+};
+
+
+reader.readAsText(file);
+
+event.target.value="";
+
+}
+
+
+/* =====================================================
+   USERS
+===================================================== */
+
+async function usersPage(){
+
+if(!hasRole(["owner"])){
+
+document.getElementById("app").innerHTML=
+`
+<div class="card empty">
+You do not have permission to manage users.
+</div>
+`;
+
+return;
+
+}
+
+
+const {data:profiles,error}=
+await supabaseClient
+.from("profiles")
+.select("*")
+.eq("business_id",currentBusiness.id)
+.order("created_at");
+
+
+if(error){
+
+document.getElementById("app").innerHTML=`
+
+<div class="card">
+
+<h2>User Access</h2>
+
+<p class="bad">
+${esc(error.message)}
+</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+document.getElementById("app").innerHTML=`
+
+<h1>Users & Access</h1>
+
+<div class="card">
+
+<h2>Access Levels</h2>
+
+<p>
+👑 <strong>Owner</strong> — Full access
+</p>
+
+<p>
+👨‍💼 <strong>Manager</strong> — Sales, products and reports
+</p>
+
+<p>
+🧑‍💻 <strong>Cashier</strong> — Sales
+</p>
+
+<p>
+📦 <strong>Inventory</strong> — Products and stock
+</p>
+
+</div>
+
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Name</th>
+<th>Role</th>
+<th>Status</th>
+<th>Created</th>
+
+</tr>
+
+${(profiles||[]).map(p=>`
+
+<tr>
+
+<td>
+${esc(p.full_name||"")}
+</td>
+
+<td>
+
+<span class="badge">
+${esc(p.role||"")}
+</span>
+
+</td>
+
+<td>
+
+${p.active
+?"<span class='good'>Active</span>"
+:"<span class='bad'>Inactive</span>"
+}
+
+</td>
+
+<td>
+${p.created_at
+?new Date(p.created_at).toLocaleDateString()
+:""
+}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+
+<div class="card">
+
+<h2>Add New User</h2>
+
+<p>
+
+New staff members should create their own account
+using the SalesPro registration screen.
+
+Their access role can then be assigned by the owner.
+
+</p>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+function settingsPage(){
+
+if(!hasRole(["owner"])){
+
+document.getElementById("app").innerHTML=`
+
+<div class="card empty">
+
+You do not have permission to access settings.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+document.getElementById("app").innerHTML=`
+
+<h1>Business Settings</h1>
+
+
+<div class="card">
+
+<h2>Business Information</h2>
+
+
+<label>Business Name</label>
+
+<input
+id="businessName"
+value="${esc(currentBusiness?.name||"")}">
+
+
+<label>Phone</label>
+
+<input
+id="businessPhone"
+value="${esc(currentBusiness?.phone||"")}">
+
+
+<label>Email</label>
+
+<input
+id="businessEmail"
+value="${esc(currentBusiness?.email||"")}">
+
+
+<label>Address</label>
+
+<textarea
+id="businessAddress">${esc(currentBusiness?.address||"")}</textarea>
+
+
+<div class="actions">
+
+<button
+onclick="saveBusinessSettings()">
+
+Save Business Information
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Account</h2>
+
+<p>
+Logged in as:
+<strong>
+${esc(currentProfile?.full_name||"")}
+</strong>
+</p>
+
+<p>
+Role:
+<span class="badge">
+${esc(currentProfile?.role||"")}
+</span>
+</p>
+
+</div>
+
+`;
+
+}
+
+
+async function saveBusinessSettings(){
+
+const update={
+
+name:
+document.getElementById("businessName").value.trim(),
+
+phone:
+document.getElementById("businessPhone").value.trim(),
+
+email:
+document.getElementById("businessEmail").value.trim(),
+
+address:
+document.getElementById("businessAddress").value.trim()
+
+};
+
+
+const {data,error}=
+await supabaseClient
+.from("businesses")
+.update(update)
+.eq("id",currentBusiness.id)
+.select()
+.single();
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+currentBusiness=data;
+
+document.getElementById("businessHeader").textContent=
+data.name;
+
+
+alert("Business information saved.");
+
+}
+
+
+/* =====================================================
+   GENERAL MODAL
+===================================================== */
+
+function openModal(html){
+
+document.getElementById("sheet").innerHTML=html;
+
+document.getElementById("modal")
+.classList.add("show");
+
+}
+
+
+function closeModal(){
+
+document.getElementById("modal")
+.classList.remove("show");
+
+}
+
+
+document.getElementById("modal")
+.addEventListener(
+"click",
+function(event){
+
+if(event.target===this){
+
+closeModal();
+
+}
+
+}
+);
+
+
+/* =====================================================
+   AUTH SESSION CHECK
+===================================================== */
+
+async function checkExistingSession(){
+
+try{
+
+const {
+data:{session}
+}=
+await supabaseClient.auth.getSession();
+
+
+if(session){
+
+await loadApplication();
+
+}else{
+
+document.getElementById("authScreen")
+.style.display="flex";
+
+document.getElementById("mainApp")
+.style.display="none";
+
+}
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
+
+
+/* =====================================================
+   AUTH STATE LISTENER
+===================================================== */
+
+supabaseClient.auth.onAuthStateChange(
+async(event,session)=>{
+
+if(event==="SIGNED_OUT"){
+
+document.getElementById("authScreen")
+.style.display="flex";
+
+document.getElementById("mainApp")
+.style.display="none";
+
+}
+
+}
+);
+
+
+/* =====================================================
+   START SALESPro
+===================================================== */
+
+checkExistingSession();
+
+</script>
+
+</body>
+</html>
