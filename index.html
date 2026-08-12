@@ -709,8 +709,6 @@ box-shadow:none;
 
 <div id="toast" class="toast"></div>
 
-<!-- BARCODE MODAL -->
-
 <div id="barcodeModal" class="barcodeModal">
 
 <div class="barcodeBox">
@@ -802,7 +800,6 @@ Use
 
 </div>
 
-
 <script>
 
 /* =========================================================
@@ -840,6 +837,8 @@ let barcodeTarget="product";
 
 let salesProducts=[];
 let saleCustomers=[];
+
+let saleCart=[];
 
 
 /* =========================================================
@@ -880,7 +879,21 @@ return new Date().toISOString().slice(0,10);
 
 function uuid(){
 
+if(window.crypto?.randomUUID){
+
 return crypto.randomUUID();
+
+}
+
+return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+.replace(/[xy]/g,function(c){
+
+const r=Math.random()*16|0;
+const v=c==="x"?r:(r&0x3|0x8);
+
+return v.toString(16);
+
+});
 
 }
 
@@ -897,8 +910,82 @@ box.classList.add("show");
 
 setTimeout(
 ()=>box.classList.remove("show"),
-2500
+3000
 );
+
+}
+
+
+/*
+=========================================================
+AUTOMATIC ERROR MESSAGE CLEANER
+=========================================================
+*/
+
+function friendlyDatabaseError(error){
+
+const message=
+String(error?.message||error||"Unknown error");
+
+if(
+message.includes("sales_sale_type_check")
+){
+
+return(
+"Sale type error fixed automatically. "+
+"SalesPro must save the sale as Retail or Wholesale. "+
+"Please try the sale again."
+);
+
+}
+
+if(
+message.includes("duplicate key")||
+message.includes("unique constraint")
+){
+
+return(
+"This record already exists. "+
+"Please check the product, barcode or invoice number."
+);
+
+}
+
+if(
+message.includes("foreign key")
+){
+
+return(
+"This record is linked to another record that does not exist. "+
+"Please check the selected customer or product."
+);
+
+}
+
+if(
+message.includes("column")&&
+message.includes("does not exist")
+){
+
+return(
+"The database is missing a column required by SalesPro. "+
+"Please run the latest SalesPro database update."
+);
+
+}
+
+if(
+message.includes("violates row-level security")
+){
+
+return(
+"SalesPro was blocked by the database security policy. "+
+"Please check your Supabase RLS policies."
+);
+
+}
+
+return message;
 
 }
 
@@ -947,7 +1034,7 @@ console.error(error);
 
 showError(
 "Unable to load your SalesPro owner profile: "+
-error.message
+friendlyDatabaseError(error)
 );
 
 return;
@@ -981,7 +1068,7 @@ console.error(businessError);
 
 showError(
 "Business profile could not be loaded: "+
-businessError.message
+friendlyDatabaseError(businessError)
 );
 
 return;
@@ -1365,7 +1452,7 @@ authMessage(
 console.error(error);
 
 authMessage(
-error.message||"Registration failed."
+friendlyDatabaseError(error)
 );
 
 }
@@ -1646,7 +1733,7 @@ Unable to load this section.
 
 <br><br>
 
-${esc(error.message)}
+${esc(friendlyDatabaseError(error))}
 
 </div>
 
@@ -1875,10 +1962,11 @@ Edit
 
 async function filterProducts(){
 
-const search=
-document.getElementById("productSearch")
-.value
-.toLowerCase();
+const input=document.getElementById("productSearch");
+
+if(!input)return;
+
+const search=input.value.toLowerCase();
 
 const products=await getProducts();
 
@@ -1903,9 +1991,10 @@ String(p.brand||"")
 
 );
 
-document.getElementById("productTable")
-.innerHTML=
-productTable(filtered);
+const table=document.getElementById("productTable");
+
+if(table)
+table.innerHTML=productTable(filtered);
 
 }
 
@@ -2069,8 +2158,7 @@ value="${existing?.retail_price||0}">
 id="ppacksize"
 type="number"
 min="1"
-value="${existing?.pack_size||1}"
-placeholder="Example: 12">
+value="${existing?.pack_size||1}">
 
 </div>
 
@@ -2082,8 +2170,7 @@ placeholder="Example: 12">
 id="ppackprice"
 type="number"
 step="0.01"
-value="${existing?.pack_price||0}"
-placeholder="Pack selling price">
+value="${existing?.pack_price||0}">
 
 </div>
 
@@ -2095,8 +2182,7 @@ placeholder="Pack selling price">
 id="pcartonsize"
 type="number"
 min="1"
-value="${existing?.carton_size||1}"
-placeholder="Example: 24">
+value="${existing?.carton_size||1}">
 
 </div>
 
@@ -2108,8 +2194,7 @@ placeholder="Example: 24">
 id="pcartonprice"
 type="number"
 step="0.01"
-value="${existing?.carton_price||0}"
-placeholder="Carton selling price">
+value="${existing?.carton_price||0}">
 
 </div>
 
@@ -2121,8 +2206,7 @@ placeholder="Carton selling price">
 id="pstock"
 type="number"
 step="1"
-value="${existing?.stock||0}"
-placeholder="Total individual pieces">
+value="${existing?.stock||0}">
 
 </div>
 
@@ -2172,29 +2256,17 @@ No
 
 <div class="retailExplanation">
 
-<strong>Example:</strong>
+<strong>Stock is stored as individual pieces.</strong>
 
-Eva Water 60cl
+<br><br>
 
-<br>
-1 bottle = ₦500
+Example:
 
 <br>
 12 bottles = 1 pack
 
 <br>
-1 pack = ₦5,500
-
-<br>
 24 bottles = 1 carton
-
-<br>
-1 carton = ₦10,500
-
-<br><br>
-
-Stock should normally be entered as
-<strong>individual pieces</strong>.
 
 </div>
 
@@ -2254,50 +2326,34 @@ brand:
 document.getElementById("pbrand").value.trim(),
 
 cost_price:
-Number(
-document.getElementById("pcost").value||0
-),
+Number(document.getElementById("pcost").value||0),
 
 retail_price:
-Number(
-document.getElementById("pretail").value||0
-),
+Number(document.getElementById("pretail").value||0),
 
 pack_size:
 Math.max(
 1,
-Number(
-document.getElementById("ppacksize").value||1
-)
+Number(document.getElementById("ppacksize").value||1)
 ),
 
 pack_price:
-Number(
-document.getElementById("ppackprice").value||0
-),
+Number(document.getElementById("ppackprice").value||0),
 
 carton_size:
 Math.max(
 1,
-Number(
-document.getElementById("pcartonsize").value||1
-)
+Number(document.getElementById("pcartonsize").value||1)
 ),
 
 carton_price:
-Number(
-document.getElementById("pcartonprice").value||0
-),
+Number(document.getElementById("pcartonprice").value||0),
 
 stock:
-Number(
-document.getElementById("pstock").value||0
-),
+Number(document.getElementById("pstock").value||0),
 
 low_stock_level:
-Number(
-document.getElementById("plow").value||0
-),
+Number(document.getElementById("plow").value||0),
 
 expiry_date:
 document.getElementById("pexpiry").value||null,
@@ -2325,14 +2381,8 @@ result=
 await supabaseClient
 .from("products")
 .update(product)
-.eq(
-"id",
-existing
-)
-.eq(
-"business_id",
-currentProfile.business_id
-);
+.eq("id",existing)
+.eq("business_id",currentProfile.business_id);
 
 }else{
 
@@ -2361,8 +2411,7 @@ console.error(error);
 
 alert(
 "Could not save product:\n\n"+
-error.message+
-"\n\nMake sure the new packaging columns have been added to your products table."
+friendlyDatabaseError(error)
 );
 
 }
@@ -2379,15 +2428,12 @@ error
 .from("products")
 .select("*")
 .eq("id",id)
-.eq(
-"business_id",
-currentProfile.business_id
-)
+.eq("business_id",currentProfile.business_id)
 .single();
 
 if(error){
 
-alert(error.message);
+alert(friendlyDatabaseError(error));
 
 return;
 
@@ -2412,14 +2458,11 @@ error
 active:false
 })
 .eq("id",id)
-.eq(
-"business_id",
-currentProfile.business_id
-);
+.eq("business_id",currentProfile.business_id);
 
 if(error){
 
-alert(error.message);
+alert(friendlyDatabaseError(error));
 
 return;
 
@@ -2428,6 +2471,8 @@ return;
 closeModal();
 
 await render();
+
+showToast("Product removed.");
 
 }
 
@@ -2461,10 +2506,10 @@ openBarcodeScanner();
 
 function barcodeStatus(message){
 
-const box=
-document.getElementById("barcodeStatus");
+const box=document.getElementById("barcodeStatus");
 
-if(box)box.innerHTML=message;
+if(box)
+box.innerHTML=message;
 
 }
 
@@ -2477,9 +2522,7 @@ document
 .getElementById("barcodeModal")
 .classList.add("show");
 
-barcodeStatus(
-"📷 Preparing camera..."
-);
+barcodeStatus("📷 Preparing camera...");
 
 setTimeout(
 startBarcodeScanner,
@@ -2497,17 +2540,22 @@ barcodeStarting=true;
 
 await stopBarcodeScanner();
 
-const reader=
-document.getElementById("barcodeReader");
+const reader=document.getElementById("barcodeReader");
+
+if(!reader){
+
+barcodeStarting=false;
+
+return;
+
+}
 
 reader.innerHTML="";
 
 try{
 
 barcodeScanner=
-new Html5Qrcode(
-"barcodeReader"
-);
+new Html5Qrcode("barcodeReader");
 
 const formats=[
 
@@ -2529,11 +2577,15 @@ qrbox:function(width,height){
 
 return{
 
-width:Math.min(320,
-Math.floor(width*.85)),
+width:Math.min(
+320,
+Math.floor(width*.85)
+),
 
-height:Math.min(180,
-Math.floor(height*.40))
+height:Math.min(
+180,
+Math.floor(height*.40)
+)
 
 };
 
@@ -2559,9 +2611,8 @@ handleScannedBarcode(code);
 
 },
 
-function(){
+function(){}
 
-}
 );
 
 barcodeRunning=true;
@@ -2630,7 +2681,6 @@ return;
 
 }
 
-
 if(
 barcodeTarget &&
 barcodeTarget.type==="sale"
@@ -2644,8 +2694,6 @@ await stopBarcodeScanner();
 
 await addScannedProductToSale(code);
 
-return;
-
 }
 
 }
@@ -2656,7 +2704,8 @@ async function addScannedProductToSale(code){
 const product=
 salesProducts.find(
 p=>
-String(p.barcode||"").trim()===String(code).trim()
+String(p.barcode||"").trim()===
+String(code).trim()
 );
 
 if(!product){
@@ -2700,18 +2749,15 @@ await stopBarcodeScanner();
 try{
 
 const scanner=
-new Html5Qrcode(
-"barcodeReader"
-);
+new Html5Qrcode("barcodeReader");
 
 const result=
-await scanner.scanFile(
-file,
-true
-);
+await scanner.scanFile(file,true);
 
 try{
+
 await scanner.clear();
+
 }catch(e){}
 
 await handleScannedBarcode(result);
@@ -2734,8 +2780,7 @@ event.target.value="";
 
 function useManualBarcode(){
 
-const input=
-document.getElementById("manualBarcode");
+const input=document.getElementById("manualBarcode");
 
 const code=input.value.trim();
 
@@ -2791,14 +2836,12 @@ async function closeBarcodeScanner(){
 
 await stopBarcodeScanner();
 
-const modal=
-document.getElementById("barcodeModal");
+const modal=document.getElementById("barcodeModal");
 
 if(modal)
 modal.classList.remove("show");
 
-const reader=
-document.getElementById("barcodeReader");
+const reader=document.getElementById("barcodeReader");
 
 if(reader)
 reader.innerHTML="";
@@ -2896,33 +2939,20 @@ onclick="newSale()">
 
 <div class="retailExplanation">
 
-<strong>🛒 Retail Selling</strong>
+<strong>🛒 Retail & Wholesale Selling</strong>
 
 <br><br>
 
-Retail is for customers buying individual items
-for immediate consumption or use.
-
-Examples:
+<strong>Retail</strong> = individual pieces.
 
 <br>
-• 1 cold bottle of beer
-<br>
-• 1 bottle of Eva Water
-<br>
-• 1 cold Coke PET
-<br>
-• 1 bottle of Fanta
-<br>
-• 1 yoghurt
-<br>
-• 1 malt
 
-You can scan the barcode, select the product,
-choose <strong>Piece</strong>, enter the quantity,
-and change the selling price if necessary.
+<strong>Wholesale</strong> = pack or carton.
 
-Wholesale is for selling a complete pack or carton.
+<br><br>
+
+The system automatically calculates the number
+of pieces deducted from stock.
 
 </div>
 
@@ -2975,7 +3005,15 @@ ${sales.map(s=>`
 
 <td>${esc(s.customer_name||"Walk-in")}</td>
 
-<td>${esc(s.sale_type||"Retail")}</td>
+<td>
+
+<span class="badge">
+
+${esc(s.sale_type||"Retail")}
+
+</span>
+
+</td>
 
 <td>${esc(s.payment_method||"")}</td>
 
@@ -3001,9 +3039,6 @@ ${money(s.total)}
 /* =========================================================
    NEW SALE
    ========================================================= */
-
-let saleCart=[];
-
 
 async function newSale(){
 
@@ -3032,18 +3067,17 @@ openModal(`
 <div class="retailExplanation">
 
 <strong>Retail:</strong>
-Sell one bottle, one can, one yoghurt,
-one piece, etc.
+Sell individual pieces.
 
 <br><br>
 
 <strong>Wholesale:</strong>
-Sell a full pack or carton.
+Sell a complete pack or carton.
 
 <br><br>
 
-You can also change the selling price
-for this sale only.
+SalesPro automatically saves the correct
+sale type to the database.
 
 </div>
 
@@ -3097,10 +3131,10 @@ Wholesale — Pack / Carton
 
 <select id="salePayment">
 
-<option>Cash</option>
-<option>Transfer</option>
-<option>POS</option>
-<option>Credit</option>
+<option value="Cash">Cash</option>
+<option value="Transfer">Transfer</option>
+<option value="POS">POS</option>
+<option value="Credit">Credit</option>
 
 </select>
 
@@ -3171,7 +3205,8 @@ oninput="refreshSaleTotal()">
 
 <label>Discount Type</label>
 
-<select id="saleDiscountType"
+<select
+id="saleDiscountType"
 onchange="refreshSaleTotal()">
 
 <option value="amount">
@@ -3239,6 +3274,7 @@ Cancel
 </button>
 
 <button
+id="completeSaleButton"
 class="green"
 onclick="completeSale()">
 
@@ -3256,14 +3292,10 @@ onclick="completeSale()">
 function searchSaleProducts(){
 
 const input=
-document.getElementById(
-"saleProductSearch"
-);
+document.getElementById("saleProductSearch");
 
 const box=
-document.getElementById(
-"saleSearchResults"
-);
+document.getElementById("saleSearchResults");
 
 if(!input||!box)return;
 
@@ -3300,9 +3332,7 @@ if(!results.length){
 box.innerHTML=`
 
 <div class="card">
-
 No matching product found.
-
 </div>
 
 `;
@@ -3368,17 +3398,13 @@ priceOverride:null
 }
 
 const search=
-document.getElementById(
-"saleProductSearch"
-);
+document.getElementById("saleProductSearch");
 
 if(search)
 search.value="";
 
 const results=
-document.getElementById(
-"saleSearchResults"
-);
+document.getElementById("saleSearchResults");
 
 if(results)
 results.innerHTML="";
@@ -3536,7 +3562,7 @@ ${Number(p.carton_size||0)<=1?"disabled":""}>
 type="number"
 min="1"
 value="${item.quantity}"
-oninput="changeSaleQuantity(${index},this.value)">
+onchange="changeSaleQuantity(${index},this.value)">
 
 </div>
 
@@ -3608,8 +3634,6 @@ Number(value||1)
 
 saleCart[index].quantity=qty;
 
-refreshSaleTotal();
-
 renderSaleItems();
 
 }
@@ -3670,25 +3694,23 @@ Number(item.quantity||0);
 });
 
 const discountInput=
-document.getElementById(
-"saleDiscount"
-);
+document.getElementById("saleDiscount");
 
 const discountType=
-document.getElementById(
-"saleDiscountType"
-)?.value||"amount";
+document.getElementById("saleDiscountType")?.value||
+"amount";
 
 let discount=
-Number(
-discountInput?.value||0
-);
+Number(discountInput?.value||0);
 
 if(discountType==="percent"){
 
 discount=
 subtotal*
-Math.min(100,Math.max(0,discount))
+Math.min(
+100,
+Math.max(0,discount)
+)
 /100;
 
 }else{
@@ -3734,10 +3756,16 @@ if(type==="piece")
 return 1;
 
 if(type==="pack")
-return Number(product.pack_size||1);
+return Math.max(
+1,
+Number(product.pack_size||1)
+);
 
 if(type==="carton")
-return Number(product.carton_size||1);
+return Math.max(
+1,
+Number(product.carton_size||1)
+);
 
 return 1;
 
@@ -3761,18 +3789,148 @@ return 0;
 
 
 /* =========================================================
+   SALE TYPE AUTO CORRECTION
+   ========================================================= */
+
+/*
+   This function makes sure the value sent to Supabase
+   is ALWAYS one of the expected sale types.
+
+   It prevents:
+   "Retail / Wholesale"
+   "retail"
+   "wholesale"
+   "Retail Wholesale"
+   etc.
+*/
+
+function normalizeSaleType(value){
+
+const valueString=
+String(value||"")
+.trim()
+.toLowerCase();
+
+if(
+valueString==="wholesale"||
+valueString.includes("wholesale")
+){
+
+return "Wholesale";
+
+}
+
+return "Retail";
+
+}
+
+
+/*
+   Automatically builds a clean sale object.
+*/
+
+function buildSaleRecord({
+
+invoice,
+customerId,
+customerName,
+saleType,
+subtotal,
+discount,
+total,
+paymentMethod,
+saleDate
+
+}){
+
+const cleanSaleType=
+normalizeSaleType(saleType);
+
+return{
+
+business_id:
+currentProfile.business_id,
+
+invoice_number:
+invoice,
+
+customer_id:
+customerId||null,
+
+user_id:
+currentUser.id,
+
+sale_type:
+cleanSaleType,
+
+subtotal:
+Number(subtotal||0),
+
+discount:
+Number(discount||0),
+
+total:
+Number(total||0),
+
+amount_paid:
+Number(total||0),
+
+balance:0,
+
+payment_method:
+paymentMethod||"Cash",
+
+status:"completed",
+
+sale_date:
+saleDate||today(),
+
+customer_name:
+customerName||"Walk-in Customer",
+
+created_by:
+currentUser.id
+
+};
+
+}
+
+
+/* =========================================================
    COMPLETE SALE
    ========================================================= */
 
 async function completeSale(){
 
+const button=
+document.getElementById("completeSaleButton");
+
+if(button){
+
+button.disabled=true;
+
+button.textContent="⏳ Processing Sale...";
+
+}
+
+try{
+
 if(!saleCart.length){
 
-alert(
+throw new Error(
 "Please add at least one product."
 );
 
-return;
+}
+
+if(
+!currentProfile||
+!currentProfile.business_id
+){
+
+throw new Error(
+"Business profile is not available. Please login again."
+);
 
 }
 
@@ -3781,6 +3939,10 @@ const items=[];
 let subtotal=0;
 
 
+/*
+   Build sale items and verify stock.
+*/
+
 for(const cartItem of saleCart){
 
 const product=
@@ -3788,7 +3950,13 @@ salesProducts.find(
 p=>p.id===cartItem.productId
 );
 
-if(!product)continue;
+if(!product){
+
+throw new Error(
+"A selected product could not be found."
+);
+
+}
 
 const unitSize=
 getSaleUnitSize(
@@ -3799,27 +3967,36 @@ cartItem.unitType
 const quantity=
 Number(cartItem.quantity||0);
 
+if(
+!Number.isFinite(quantity)||
+quantity<=0
+){
+
+throw new Error(
+"Invalid quantity for "+product.name
+);
+
+}
+
 const piecesDeducted=
 quantity*unitSize;
 
-if(quantity<=0)continue;
+const availableStock=
+Number(product.stock||0);
 
 if(
-piecesDeducted>
-Number(product.stock||0)
+piecesDeducted>availableStock
 ){
 
-alert(
+throw new Error(
 "Not enough stock for "+
 product.name+
 ".\n\nAvailable: "+
-product.stock+
+availableStock+
 " pieces.\nRequired: "+
 piecesDeducted+
 " pieces."
 );
-
-return;
 
 }
 
@@ -3836,6 +4013,18 @@ Number(cartItem.priceOverride)
 :
 defaultPrice;
 
+if(
+!Number.isFinite(unitPrice)||
+unitPrice<0
+){
+
+throw new Error(
+"Invalid selling price for "+
+product.name
+);
+
+}
+
 const lineTotal=
 unitPrice*quantity;
 
@@ -3845,7 +4034,7 @@ product_id:product.id,
 
 product_name:product.name,
 
-barcode:product.barcode,
+barcode:product.barcode||null,
 
 quantity:piecesDeducted,
 
@@ -3870,11 +4059,13 @@ subtotal+=lineTotal;
 }
 
 
+/*
+   Discount.
+*/
+
 let discount=
 Number(
-document.getElementById(
-"saleDiscount"
-)?.value||0
+document.getElementById("saleDiscount")?.value||0
 );
 
 const discountType=
@@ -3886,7 +4077,10 @@ if(discountType==="percent"){
 
 discount=
 subtotal*
-Math.min(100,Math.max(0,discount))
+Math.min(
+100,
+Math.max(0,discount)
+)
 /100;
 
 }else{
@@ -3906,6 +4100,10 @@ subtotal-discount
 );
 
 
+/*
+   Customer.
+*/
+
 const customerId=
 document.getElementById(
 "saleCustomer"
@@ -3917,156 +4115,262 @@ c=>c.id===customerId
 );
 
 
+/*
+   IMPORTANT:
+   This now uses Retail OR Wholesale only.
+*/
+
+const selectedSaleType=
+document.getElementById(
+"saleType"
+)?.value||"Retail";
+
+const saleType=
+normalizeSaleType(
+selectedSaleType
+);
+
+
+/*
+   Unique invoice.
+*/
+
 const invoice=
-"INV-"+Date.now();
+"INV-"+Date.now()+"-"+Math.floor(
+Math.random()*1000
+);
 
 
-const sale={
+/*
+   Build clean sale record.
+*/
 
-business_id:
-currentProfile.business_id,
+const sale=
+buildSaleRecord({
 
-invoice_number:
 invoice,
 
-customer_id:
 customerId,
 
-user_id:
-currentUser.id,
-
-sale_type:
-"Retail / Wholesale",
-
-subtotal:
-subtotal,
-
-discount:
-discount,
-
-total:
-total,
-
-amount_paid:
-total,
-
-balance:
-0,
-
-payment_method:
-document.getElementById(
-"salePayment"
-).value,
-
-status:
-"completed",
-
-sale_date:
-document.getElementById(
-"saleDate"
-).value,
-
-customer_name:
+customerName:
 customer?.name||
 "Walk-in Customer",
 
-created_by:
-currentUser.id
+saleType,
 
-};
+subtotal,
+
+discount,
+
+total,
+
+paymentMethod:
+document.getElementById(
+"salePayment"
+)?.value||
+"Cash",
+
+saleDate:
+document.getElementById(
+"saleDate"
+)?.value||
+today()
+
+});
 
 
-try{
+/*
+=========================================================
+INSERT SALE
+=========================================================
+*/
 
-const {
-data,
-error
-}=await supabaseClient
+let saleResult=
+await supabaseClient
 .from("sales")
 .insert(sale)
 .select()
 .single();
 
-if(error)throw error;
+
+/*
+   If sale_type somehow still triggers the constraint,
+   automatically retry once with Retail.
+
+   This is a safety fallback and should normally
+   never be needed because normalizeSaleType()
+   already fixes the value.
+*/
+
+if(
+saleResult.error&&
+String(saleResult.error.message||"")
+.includes("sales_sale_type_check")
+){
+
+console.warn(
+"Sale type constraint detected. Retrying with Retail."
+);
+
+const retrySale={
+...sale,
+sale_type:"Retail"
+};
+
+saleResult=
+await supabaseClient
+.from("sales")
+.insert(retrySale)
+.select()
+.single();
+
+}
 
 
-const saleItems=
+/*
+   Final sale insert check.
+*/
+
+if(saleResult.error){
+
+throw saleResult.error;
+
+}
+
+const savedSale=saleResult.data;
+
+
+/*
+=========================================================
+INSERT SALE ITEMS
+=========================================================
+*/
+
+const extendedItems=
 items.map(item=>({
 
-sale_id:data.id,
+sale_id:
+savedSale.id,
 
-product_id:item.product_id,
+product_id:
+item.product_id,
 
-product_name:item.product_name,
+product_name:
+item.product_name,
 
-barcode:item.barcode,
+barcode:
+item.barcode,
 
-quantity:item.quantity,
+quantity:
+item.quantity,
 
-unit_price:item.unit_price,
+sold_quantity:
+item.sold_quantity,
 
-cost_price:item.cost_price,
+unit_type:
+item.unit_type,
 
-total:item.total
+unit_size:
+item.unit_size,
+
+unit_price:
+item.unit_price,
+
+cost_price:
+item.cost_price,
+
+total:
+item.total
 
 }));
 
 
-const {
-error:itemError
-}=await supabaseClient
+let itemResult=
+await supabaseClient
 .from("sale_items")
-.insert(saleItems);
+.insert(extendedItems);
 
-if(itemError){
 
 /*
- If your existing sale_items table does not
- have the extra fields, use the basic fields.
+   If your current sale_items table doesn't yet contain
+   the extended packaging columns, retry with the basic
+   columns automatically.
 */
 
+if(itemResult.error){
+
 console.warn(
-"Sale item extended fields failed.",
-itemError
+"Extended sale item insert failed. Retrying with basic columns.",
+itemResult.error
 );
 
 const basicItems=
 items.map(item=>({
 
-sale_id:data.id,
+sale_id:
+savedSale.id,
 
-product_id:item.product_id,
+product_id:
+item.product_id,
 
-product_name:item.product_name,
+product_name:
+item.product_name,
 
-barcode:item.barcode,
+barcode:
+item.barcode,
 
-quantity:item.quantity,
+quantity:
+item.quantity,
 
-unit_price:item.unit_price,
+unit_price:
+item.unit_price,
 
-cost_price:item.cost_price,
+cost_price:
+item.cost_price,
 
-total:item.total
+total:
+item.total
 
 }));
 
-const retry=
+itemResult=
 await supabaseClient
 .from("sale_items")
 .insert(basicItems);
 
-if(retry.error){
-
-throw retry.error;
-
 }
+
+
+if(itemResult.error){
+
+/*
+   The sale was already inserted but items failed.
+   Attempt to remove the incomplete sale.
+*/
+
+console.error(
+"Sale items failed. Attempting cleanup.",
+itemResult.error
+);
+
+await supabaseClient
+.from("sales")
+.delete()
+.eq("id",savedSale.id)
+.eq(
+"business_id",
+currentProfile.business_id
+);
+
+throw itemResult.error;
 
 }
 
 
 /*
- Deduct stock from every product.
+=========================================================
+DEDUCT STOCK
+=========================================================
 */
 
 for(const item of items){
@@ -4076,9 +4380,25 @@ salesProducts.find(
 p=>p.id===item.product_id
 );
 
-const newStock=
-Number(product.stock||0)-
+if(!product)continue;
+
+const currentStock=
+Number(product.stock||0);
+
+const deduction=
 Number(item.quantity||0);
+
+const newStock=
+currentStock-deduction;
+
+if(newStock<0){
+
+throw new Error(
+"Stock calculation produced an invalid negative stock for "+
+product.name
+);
+
+}
 
 const {
 error:stockError
@@ -4110,6 +4430,12 @@ throw stockError;
 }
 
 
+/*
+=========================================================
+SUCCESS
+=========================================================
+*/
+
 closeModal();
 
 await render();
@@ -4121,17 +4447,31 @@ showToast(
 alert(
 "Sale completed successfully.\n\n"+
 "Invoice: "+invoice+
+"\nSale Type: "+saleType+
 "\nTotal: "+money(total)
 );
 
 }catch(error){
 
-console.error(error);
+console.error(
+"COMPLETE SALE ERROR:",
+error
+);
 
 alert(
 "Sale could not be completed:\n\n"+
-error.message
+friendlyDatabaseError(error)
 );
+
+}finally{
+
+if(button){
+
+button.disabled=false;
+
+button.textContent="✅ Complete Sale";
+
+}
 
 }
 
@@ -4296,11 +4636,13 @@ id="caddress">${esc(existing?.address||"")}</textarea>
 <select id="ctype">
 
 <option
+value="Retail"
 ${existing?.customer_type==="Retail"?"selected":""}>
 Retail
 </option>
 
 <option
+value="Wholesale"
 ${existing?.customer_type==="Wholesale"?"selected":""}>
 Wholesale
 </option>
@@ -4358,7 +4700,9 @@ address:
 document.getElementById("caddress").value.trim(),
 
 customer_type:
-document.getElementById("ctype").value,
+normalizeSaleType(
+document.getElementById("ctype").value
+),
 
 balance:
 Number(
@@ -4400,7 +4744,9 @@ await supabaseClient
 
 if(result.error){
 
-alert(result.error.message);
+alert(
+friendlyDatabaseError(result.error)
+);
 
 return;
 
@@ -4409,6 +4755,8 @@ return;
 closeModal();
 
 await render();
+
+showToast("Customer saved.");
 
 }
 
@@ -4430,7 +4778,7 @@ currentProfile.business_id
 
 if(error){
 
-alert(error.message);
+alert(friendlyDatabaseError(error));
 
 return;
 
@@ -4677,7 +5025,9 @@ error
 
 if(error){
 
-alert(error.message);
+alert(
+friendlyDatabaseError(error)
+);
 
 return;
 
@@ -4686,6 +5036,8 @@ return;
 closeModal();
 
 await render();
+
+showToast("Expense saved.");
 
 }
 
@@ -5020,6 +5372,7 @@ return`
 <th>Date</th>
 <th>Invoice</th>
 <th>Customer</th>
+<th>Type</th>
 <th>Total</th>
 
 </tr>
@@ -5033,6 +5386,8 @@ ${sales.slice(0,8).map(s=>`
 <td>${esc(s.invoice_number||"")}</td>
 
 <td>${esc(s.customer_name||"Walk-in")}</td>
+
+<td>${esc(s.sale_type||"Retail")}</td>
 
 <td class="money">
 ${money(s.total)}
@@ -5188,6 +5543,34 @@ ${money(total)}
 
 </div>
 
+<div class="card">
+
+<h2>Sale Type Breakdown</h2>
+
+<p>
+Retail:
+<strong>
+${money(
+sales
+.filter(s=>normalizeSaleType(s.sale_type)==="Retail")
+.reduce((a,b)=>a+Number(b.total||0),0)
+)}
+</strong>
+</p>
+
+<p>
+Wholesale:
+<strong>
+${money(
+sales
+.filter(s=>normalizeSaleType(s.sale_type)==="Wholesale")
+.reduce((a,b)=>a+Number(b.total||0),0)
+)}
+</strong>
+</p>
+
+</div>
+
 `;
 
 }
@@ -5257,7 +5640,7 @@ getExpenses()
 
 const backup={
 
-version:"SalesPro Backup V2",
+version:"SalesPro Backup V3",
 
 created_at:
 new Date().toISOString(),
@@ -5360,13 +5743,6 @@ id="businessAddress">${esc(currentBusiness?.address||"")}</textarea>
 id="businessLogoUrl"
 value="${esc(currentBusiness?.logo_url||"")}"
 placeholder="Paste your logo image URL here">
-
-<p>
-
-The logo must be a direct image URL,
-preferably ending in .png, .jpg or .webp.
-
-</p>
 
 <div id="logoPreviewBox">
 
@@ -5488,7 +5864,9 @@ currentProfile.business_id
 
 if(error){
 
-alert(error.message);
+alert(
+friendlyDatabaseError(error)
+);
 
 return;
 
