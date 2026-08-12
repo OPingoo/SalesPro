@@ -1,5984 +1,5040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover">
-
-<meta name="apple-mobile-web-app-capable"
-content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style"
-content="default">
-
-<meta name="apple-mobile-web-app-title"
-content="SalesPro">
-
-<meta name="theme-color"
-content="#0b2a52">
-
-<title>SalesPro - KC Integrated Global Services</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SalesPro — Sales & Inventory</title>
 
 <style>
-
-:root{
---navy:#0b2a52;
---blue:#155fa0;
---gold:#c6a15b;
---bg:#f4f6f9;
---white:#fff;
---text:#172033;
---muted:#667085;
---green:#087443;
---red:#b42318;
---orange:#b54708;
---border:#e2e6ec;
-}
-
-*{
-box-sizing:border-box;
-}
-
-html{
-scroll-behavior:smooth;
-}
+*{box-sizing:border-box}
 
 body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    color:#172033
 }
 
-button,
-input,
-select,
-textarea{
-font:inherit;
+button,input,select,textarea{
+    font:inherit
 }
 
 button{
-border:0;
-border-radius:11px;
-padding:11px 15px;
-font-weight:700;
-background:var(--navy);
-color:white;
-cursor:pointer;
+    cursor:pointer;
+    border:0;
+    border-radius:8px;
+    padding:10px 14px
 }
 
-button.secondary{
-background:#e8edf3;
-color:var(--navy);
+.app{
+    display:flex;
+    min-height:100vh
 }
 
-button.green{
-background:var(--green);
+.side{
+    width:245px;
+    background:#102a43;
+    color:#fff;
+    padding:18px;
+    position:fixed;
+    inset:0 auto 0 0;
+    overflow-y:auto
 }
 
-button.red{
-background:#fee4e2;
-color:var(--red);
+.logo{
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:22px
 }
 
-button.orange{
-background:#fff4e5;
-color:var(--orange);
+.logo small{
+    display:block;
+    font-size:11px;
+    font-weight:400;
+    opacity:.7;
+    margin-top:4px
 }
 
-button:disabled{
-opacity:.55;
-cursor:not-allowed;
+.nav button{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    color:#dbeafe;
+    margin:4px 0
+}
+
+.nav button.active,
+.nav button:hover{
+    background:#1f4f78;
+    color:#fff
+}
+
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+    padding:22px
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    align-items:center;
+    margin-bottom:20px
+}
+
+.top h1{
+    margin:0;
+    font-size:25px
+}
+
+.top p{
+    margin:5px 0 0;
+    color:#667085
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold
+}
+
+.badge.green{
+    background:#dcfce7;
+    color:#166534
+}
+
+.badge.orange{
+    background:#ffedd5;
+    color:#9a3412
+}
+
+.badge.red{
+    background:#fee2e2;
+    color:#991b1b
+}
+
+.cardgrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px
+}
+
+.card{
+    background:#fff;
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05)
+}
+
+.card h3{
+    margin:0 0 8px;
+    font-size:13px;
+    color:#667085
+}
+
+.card .big{
+    font-size:25px;
+    font-weight:800
+}
+
+.section{
+    display:none
+}
+
+.section.active{
+    display:block
+}
+
+.panel{
+    background:#fff;
+    padding:18px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    margin-top:18px
+}
+
+.panel h2{
+    margin:0 0 15px
+}
+
+.grid2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px
+}
+
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px
+}
+
+.grid4{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px
+}
+
+label{
+    display:block;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:6px
 }
 
 input,
 select,
 textarea{
-width:100%;
-border:1px solid #d0d5dd;
-border-radius:10px;
-padding:11px;
-background:white;
-outline:none;
+    width:100%;
+    border:1px solid #d0d5dd;
+    border-radius:8px;
+    padding:10px;
+    outline:none;
+    background:#fff
 }
 
 input:focus,
 select:focus,
 textarea:focus{
-border-color:var(--blue);
-box-shadow:0 0 0 3px rgba(21,95,160,.08);
+    border-color:#1f4f78;
+    box-shadow:0 0 0 3px rgba(31,79,120,.1)
 }
 
-textarea{
-min-height:90px;
-resize:vertical;
+.form-group{
+    margin-bottom:12px
 }
 
-label{
-font-size:12px;
-font-weight:700;
-color:var(--muted);
-display:block;
-margin:8px 0 5px;
+.btn{
+    background:#1f4f78;
+    color:#fff
 }
 
-.header{
-position:sticky;
-top:0;
-z-index:20;
-background:white;
-border-bottom:1px solid var(--border);
+.btn:hover{
+    background:#173d5d
 }
 
-.brand{
-display:flex;
-align-items:center;
-gap:12px;
-padding:10px 14px;
+.btn.green{
+    background:#15803d
 }
 
-.logo{
-width:52px;
-height:52px;
-border-radius:12px;
-object-fit:contain;
-background:white;
-border:1px solid #eee;
+.btn.red{
+    background:#b91c1c
 }
 
-.logoFallback{
-width:52px;
-height:52px;
-border-radius:12px;
-background:var(--navy);
-color:white;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:18px;
-font-weight:900;
+.btn.orange{
+    background:#c2410c
 }
 
-.brand strong{
-font-size:18px;
-display:block;
+.btn.gray{
+    background:#667085
 }
 
-.brand small{
-color:var(--muted);
+.btn.light{
+    background:#eaf0f6;
+    color:#172033
 }
 
-.nav{
-display:flex;
-overflow-x:auto;
-gap:7px;
-padding:0 12px 10px;
--webkit-overflow-scrolling:touch;
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px
 }
 
-.nav button{
-white-space:nowrap;
-background:#edf2f7;
-color:var(--navy);
-}
-
-.nav button.active{
-background:var(--navy);
-color:white;
-}
-
-.container{
-max-width:1200px;
-margin:auto;
-padding:15px 12px 100px;
-}
-
-h1{
-font-size:25px;
-margin:18px 0 13px;
-}
-
-h2{
-font-size:20px;
-margin-top:8px;
-}
-
-h3{
-margin-bottom:6px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-}
-
-.card{
-background:white;
-border:1px solid var(--border);
-border-radius:16px;
-padding:15px;
-box-shadow:0 2px 8px rgba(0,0,0,.04);
-margin-bottom:12px;
-}
-
-.stat{
-font-size:13px;
-color:var(--muted);
-}
-
-.stat strong{
-display:block;
-font-size:23px;
-color:var(--text);
-margin-top:5px;
-}
-
-.toolbar{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-margin:12px 0;
-}
-
-.formgrid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
-
-.full{
-grid-column:1/-1;
-}
-
-.table{
-overflow-x:auto;
-background:white;
-border:1px solid var(--border);
-border-radius:14px;
+.table-wrap{
+    overflow-x:auto
 }
 
 table{
-width:100%;
-border-collapse:collapse;
-min-width:800px;
+    width:100%;
+    border-collapse:collapse
 }
 
 th,
 td{
-padding:11px;
-border-bottom:1px solid #edf0f3;
-text-align:left;
+    padding:11px 10px;
+    border-bottom:1px solid #eaecf0;
+    text-align:left;
+    white-space:nowrap
 }
 
 th{
-font-size:12px;
-background:#f8fafc;
+    background:#f8fafc;
+    font-size:12px;
+    color:#475467
 }
 
-.money{
-font-weight:800;
+td{
+    font-size:13px
+}
+
+.low{
+    color:#b42318;
+    font-weight:bold
 }
 
 .good{
-color:var(--green);
+    color:#027a48;
+    font-weight:bold
 }
 
-.bad{
-color:var(--red);
+.search{
+    margin-bottom:12px
+}
+
+.notice{
+    padding:12px;
+    border-radius:8px;
+    background:#eff8ff;
+    color:#175cd3;
+    margin-bottom:12px
 }
 
 .warning{
-color:var(--orange);
-}
-
-.empty{
-padding:35px;
-text-align:center;
-color:var(--muted);
-}
-
-.badge{
-display:inline-block;
-padding:4px 8px;
-border-radius:20px;
-background:#edf2f7;
-font-size:12px;
-}
-
-.badge.green{
-background:#dcfae6;
-color:var(--green);
-}
-
-.badge.red{
-background:#fee4e2;
-color:var(--red);
-}
-
-.badge.orange{
-background:#fff4e5;
-color:var(--orange);
-}
-
-.actions{
-display:flex;
-gap:8px;
-justify-content:flex-end;
-flex-wrap:wrap;
-margin-top:15px;
-}
-
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.55);
-z-index:100;
-align-items:flex-end;
-}
-
-.modal.show{
-display:flex;
-}
-
-.sheet{
-background:white;
-width:100%;
-max-height:95vh;
-overflow:auto;
-border-radius:22px 22px 0 0;
-padding:18px;
-}
-
-.auth{
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
-background:linear-gradient(135deg,#0b2a52,#155fa0);
-}
-
-.authCard{
-background:white;
-width:100%;
-max-width:440px;
-border-radius:22px;
-padding:25px;
-box-shadow:0 20px 60px rgba(0,0,0,.25);
-}
-
-.authLogo{
-width:85px;
-height:85px;
-display:block;
-margin:0 auto 12px;
-object-fit:contain;
-border-radius:15px;
-}
-
-.authCard h1{
-text-align:center;
-margin:5px 0;
-}
-
-.authBusiness{
-text-align:center;
-color:var(--muted);
-margin-bottom:20px;
-}
-
-.authLinks{
-text-align:center;
-margin-top:15px;
-}
-
-.authLinks button{
-background:none;
-color:var(--blue);
-padding:5px;
+    padding:12px;
+    border-radius:8px;
+    background:#fffaeb;
+    color:#b54708;
+    margin-bottom:12px
 }
 
 .error{
-background:#fee4e2;
-color:var(--red);
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-font-size:13px;
+    padding:12px;
+    border-radius:8px;
+    background:#fef3f2;
+    color:#b42318;
+    margin-bottom:12px
 }
 
 .success{
-background:#dcfae6;
-color:var(--green);
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-font-size:13px;
+    padding:12px;
+    border-radius:8px;
+    background:#ecfdf3;
+    color:#027a48;
+    margin-bottom:12px
 }
 
-.barcodeModal{
-display:none;
-position:fixed;
-inset:0;
-z-index:999999;
-background:rgba(0,0,0,.94);
-padding:12px;
-align-items:center;
-justify-content:center;
+.hidden{
+    display:none!important
 }
 
-.barcodeModal.show{
-display:flex;
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:1000
 }
 
-.barcodeBox{
-width:100%;
-max-width:540px;
-max-height:96vh;
-overflow:auto;
-background:white;
-border-radius:22px;
-padding:18px;
+.modal.show{
+    display:flex
 }
 
-.barcodeHeader{
-display:flex;
-align-items:center;
-justify-content:space-between;
+.modal-box{
+    background:#fff;
+    border-radius:14px;
+    width:min(650px,100%);
+    max-height:90vh;
+    overflow:auto;
+    padding:20px
 }
 
-.barcodeHeader h2{
-margin:0;
-color:var(--navy);
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px
 }
 
-.barcodeInfo{
-background:#f4f6f9;
-border-radius:12px;
-padding:12px;
-font-size:13px;
-line-height:1.5;
-margin:12px 0;
+.modal-head h2{
+    margin:0
 }
 
-#barcodeReader{
-width:100%;
-min-height:250px;
-background:#111;
-border-radius:15px;
-overflow:hidden;
+.close{
+    background:#f2f4f7;
+    font-size:20px
 }
 
-#barcodeReader video{
-width:100%!important;
-height:auto!important;
-display:block;
-border-radius:15px;
+.role-box{
+    background:#f8fafc;
+    border:1px solid #eaecf0;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:15px
 }
 
-.barcodeStatus{
-margin-top:12px;
-padding:12px;
-background:#f4f6f9;
-border-radius:10px;
-text-align:center;
-font-size:14px;
+.role-box strong{
+    display:block;
+    margin-bottom:5px
 }
 
-.barcodeButtons{
-display:grid;
-grid-template-columns:1fr;
-gap:9px;
-margin-top:12px;
+.stat{
+    font-size:12px;
+    color:#667085;
+    margin-top:5px
 }
 
-.barcodeButtons button{
-width:100%;
+.product-search-results{
+    max-height:250px;
+    overflow-y:auto;
+    border:1px solid #eaecf0;
+    border-radius:8px;
+    margin-top:5px
 }
 
-.barcodePhoto{
-background:var(--green);
+.product-result{
+    padding:10px;
+    border-bottom:1px solid #eaecf0;
+    cursor:pointer
 }
 
-.manualBarcode{
-display:flex;
-gap:8px;
-margin-top:10px;
+.product-result:hover{
+    background:#f2f4f7
 }
 
-.manualBarcode input{
-flex:1;
+.sale-item{
+    border:1px solid #eaecf0;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:8px
 }
 
-.saleItem{
-border:1px solid var(--border);
-border-radius:14px;
-padding:12px;
-margin-bottom:10px;
-background:#fff;
+.sale-item-head{
+    display:flex;
+    justify-content:space-between;
+    gap:10px
 }
 
-.saleItemHeader{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
+.qty-control{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin-top:8px
 }
 
-.saleItemPrice{
-font-weight:800;
-margin-top:8px;
+.qty-control button{
+    padding:5px 9px
 }
 
-.saleItemControls{
-display:grid;
-grid-template-columns:1fr 120px 140px;
-gap:8px;
-align-items:end;
+.qty-control input{
+    width:70px;
+    text-align:center
 }
 
-.saleSearch{
-display:flex;
-gap:8px;
+.total-box{
+    background:#102a43;
+    color:#fff;
+    padding:18px;
+    border-radius:10px;
+    margin-top:15px
 }
 
-.saleSearch input{
-flex:1;
+.total-line{
+    display:flex;
+    justify-content:space-between;
+    margin:6px 0
 }
 
-.saleSearch button{
-white-space:nowrap;
+.total-final{
+    font-size:24px;
+    font-weight:800;
+    border-top:1px solid rgba(255,255,255,.2);
+    padding-top:10px;
+    margin-top:10px
 }
 
-.saleSummary{
-background:#f8fafc;
-border:1px solid var(--border);
-border-radius:14px;
-padding:15px;
-margin-top:12px;
+.login{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:#102a43
 }
 
-.saleSummaryRow{
-display:flex;
-justify-content:space-between;
-gap:10px;
-padding:5px 0;
+.login-box{
+    width:min(420px,100%);
+    background:#fff;
+    border-radius:15px;
+    padding:28px;
+    box-shadow:0 20px 50px rgba(0,0,0,.2)
 }
 
-.saleTotal{
-font-size:22px;
-font-weight:900;
-color:var(--navy);
+.login-box h1{
+    margin-top:0
 }
 
-.retailExplanation{
-background:#eef7ff;
-border-left:4px solid var(--blue);
-padding:12px;
-border-radius:10px;
-font-size:13px;
-line-height:1.6;
-margin-bottom:12px;
+.user-pill{
+    background:#fff;
+    padding:8px 12px;
+    border-radius:30px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px
 }
 
-.lowStock{
-background:#fff1f0;
+.mobile-menu{
+    display:none
 }
 
-.expired{
-background:#fff1f0;
+.kpi{
+    display:flex;
+    justify-content:space-between;
+    align-items:center
 }
 
-.expiring{
-background:#fff8e7;
+.empty{
+    padding:30px;
+    text-align:center;
+    color:#667085
 }
 
-.logoPreview{
-width:100px;
-height:100px;
-border:1px solid var(--border);
-border-radius:15px;
-object-fit:contain;
-display:block;
-margin-top:10px;
+footer{
+    margin-top:30px;
+    padding:15px 0;
+    color:#667085;
+    font-size:12px;
+    text-align:center
 }
 
-.footer{
-text-align:center;
-color:var(--muted);
-padding:30px 10px;
-font-size:12px;
+@media(max-width:1000px){
+    .cardgrid{
+        grid-template-columns:repeat(2,1fr)
+    }
+
+    .grid4{
+        grid-template-columns:repeat(2,1fr)
+    }
 }
 
-.toast{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-z-index:9999999;
-background:#172033;
-color:white;
-padding:12px 18px;
-border-radius:12px;
-display:none;
-max-width:90%;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,.25);
+@media(max-width:750px){
+    .side{
+        width:0;
+        padding:0;
+        overflow:hidden;
+        transition:.2s;
+        z-index:900
+    }
+
+    .side.open{
+        width:245px;
+        padding:18px
+    }
+
+    .main{
+        margin-left:0;
+        width:100%;
+        padding:14px
+    }
+
+    .mobile-menu{
+        display:block
+    }
+
+    .top{
+        align-items:flex-start
+    }
+
+    .top h1{
+        font-size:20px
+    }
+
+    .cardgrid,
+    .grid2,
+    .grid3,
+    .grid4{
+        grid-template-columns:1fr
+    }
+
+    .user-pill{
+        font-size:11px
+    }
 }
-
-.toast.show{
-display:block;
-}
-
-@media(max-width:800px){
-
-.grid{
-grid-template-columns:repeat(2,1fr);
-}
-
-.saleItemControls{
-grid-template-columns:1fr;
-}
-
-}
-
-@media(max-width:600px){
-
-.grid{
-grid-template-columns:repeat(2,1fr);
-gap:8px;
-}
-
-.formgrid{
-grid-template-columns:1fr;
-}
-
-.full{
-grid-column:auto;
-}
-
-.container{
-padding-left:10px;
-padding-right:10px;
-}
-
-.card{
-padding:12px;
-}
-
-button{
-padding:10px 12px;
-}
-
-}
-
-@media print{
-
-.header,
-.toolbar,
-.noPrint,
-button{
-display:none!important;
-}
-
-.container{
-padding:0;
-}
-
-.card{
-box-shadow:none;
-}
-
-}
-
 </style>
-
 </head>
 
 <body>
 
-<div id="root"></div>
+<!-- LOGIN -->
+<div id="loginScreen" class="login">
+    <div class="login-box">
+        <h1>SalesPro</h1>
+        <p>Sales & Inventory Management</p>
 
-<div id="toast" class="toast"></div>
+        <div class="notice">
+            Demo accounts are available below. Change passwords from the Users section.
+        </div>
 
-<div id="barcodeModal" class="barcodeModal">
+        <div class="form-group">
+            <label>Username</label>
+            <input id="loginUsername" autocomplete="username" placeholder="Enter username">
+        </div>
 
-<div class="barcodeBox">
+        <div class="form-group">
+            <label>Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter password">
+        </div>
 
-<div class="barcodeHeader">
+        <button class="btn" style="width:100%" onclick="login()">Login</button>
 
-<h2>📷 Scan Barcode</h2>
+        <div style="margin-top:15px;font-size:12px;color:#667085">
+            <strong>Demo:</strong><br>
+            Owner: owner / owner123<br>
+            Manager: manager / manager123<br>
+            Cashier: cashier / cashier123
+        </div>
+    </div>
+</div>
 
-<button
-type="button"
-class="secondary"
-onclick="closeBarcodeScanner()">
 
-✕
+<!-- APPLICATION -->
+<div id="app" class="app hidden">
 
-</button>
+    <aside id="sidebar" class="side">
+        <div class="logo">
+            SalesPro
+            <small>Sales & Inventory System</small>
+        </div>
+
+        <div class="nav">
+            <button onclick="showSection('dashboard',this)" class="active">📊 Dashboard</button>
+            <button onclick="showSection('sales',this)">🛒 New Sale</button>
+            <button onclick="showSection('inventory',this)">📦 Inventory</button>
+            <button onclick="showSection('products',this)">🏷️ Products</button>
+            <button onclick="showSection('customers',this)">👥 Customers</button>
+            <button onclick="showSection('reports',this)">📈 Reports</button>
+            <button onclick="showSection('users',this)" id="usersNav">🔐 Users & Access</button>
+            <button onclick="showSection('backup',this)" id="backupNav">💾 Backup & System</button>
+        </div>
+
+        <div style="margin-top:25px;border-top:1px solid rgba(255,255,255,.15);padding-top:15px">
+            <button onclick="logout()" style="width:100%;background:#7f1d1d;color:#fff">
+                Logout
+            </button>
+        </div>
+    </aside>
+
+
+    <main class="main">
+
+        <div class="top">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+                <button class="mobile-menu light" onclick="toggleSidebar()">☰</button>
+                <div>
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="todayText"></p>
+                </div>
+            </div>
+
+            <div class="user-pill">
+                <span id="currentUserName">User</span>
+                <span id="currentUserRole" class="badge green">Owner</span>
+            </div>
+        </div>
+
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="section active">
+
+            <div id="dashboardAlerts"></div>
+
+            <div class="cardgrid">
+
+                <div class="card">
+                    <h3>Today's Sales</h3>
+                    <div class="big" id="dashTodaySales">₦0</div>
+                    <div class="stat" id="dashTodayTransactions">0 transactions</div>
+                </div>
+
+                <div class="card">
+                    <h3>Total Products</h3>
+                    <div class="big" id="dashProducts">0</div>
+                    <div class="stat" id="dashStockPieces">0 pieces in stock</div>
+                </div>
+
+                <div class="card">
+                    <h3>Low Stock</h3>
+                    <div class="big" id="dashLowStock">0</div>
+                    <div class="stat">Products needing attention</div>
+                </div>
+
+                <div class="card">
+                    <h3>Inventory Value</h3>
+                    <div class="big" id="dashInventoryValue">₦0</div>
+                    <div class="stat">Based on selling price</div>
+                </div>
+
+            </div>
+
+
+            <div class="grid2">
+
+                <div class="panel">
+                    <h2>Quick Actions</h2>
+
+                    <div class="actions">
+                        <button class="btn" onclick="goTo('sales')">
+                            + New Sale
+                        </button>
+
+                        <button class="btn green" onclick="goTo('products')">
+                            + Add Product
+                        </button>
+
+                        <button class="btn orange" onclick="goTo('inventory')">
+                            Stock Management
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="panel">
+                    <h2>System Status</h2>
+
+                    <div class="kpi">
+                        <span>Application</span>
+                        <span class="badge green">Running</span>
+                    </div>
+
+                    <div class="kpi" style="margin-top:10px">
+                        <span>Data Storage</span>
+                        <span class="badge green">Local</span>
+                    </div>
+
+                    <div class="kpi" style="margin-top:10px">
+                        <span>Auto Backup</span>
+                        <span id="backupStatus" class="badge orange">Checking...</span>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+                <h2>Recent Sales</h2>
+                <div id="recentSales"></div>
+            </div>
+
+        </section>
+
+
+        <!-- SALES -->
+        <section id="sales" class="section">
+
+            <div class="panel">
+
+                <div class="grid2">
+
+                    <div>
+                        <label>Customer</label>
+                        <input id="saleCustomer" placeholder="Walk-in customer">
+                    </div>
+
+                    <div>
+                        <label>Payment Method</label>
+                        <select id="salePayment">
+                            <option>Cash</option>
+                            <option>Transfer</option>
+                            <option>POS</option>
+                            <option>Credit</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div style="margin-top:18px">
+
+                    <label>Search Product</label>
+
+                    <input
+                        id="saleSearch"
+                        class="search"
+                        placeholder="Type product name or SKU..."
+                        oninput="searchSaleProducts()"
+                    >
+
+                    <div id="saleSearchResults" class="product-search-results hidden"></div>
+
+                </div>
+
+
+                <div id="saleItems" style="margin-top:15px">
+                    <div class="empty">
+                        No products added to this sale.
+                    </div>
+                </div>
+
+
+                <div class="total-box">
+
+                    <div class="total-line">
+                        <span>Subtotal</span>
+                        <strong id="saleSubtotal">₦0</strong>
+                    </div>
+
+                    <div class="total-line">
+                        <span>Discount</span>
+                        <strong id="saleDiscount">₦0</strong>
+                    </div>
+
+                    <div class="total-line total-final">
+                        <span>Total</span>
+                        <strong id="saleTotal">₦0</strong>
+                    </div>
+
+                    <div id="discountArea" class="hidden" style="margin-top:12px">
+
+                        <label style="color:#fff">
+                            Discount Amount
+                        </label>
+
+                        <input
+                            id="saleDiscountInput"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                            oninput="updateSaleTotals()"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        id="discountButton"
+                        class="btn orange hidden"
+                        onclick="toggleDiscount()"
+                    >
+                        Apply Discount
+                    </button>
+
+                    <button class="btn gray" onclick="clearSale()">
+                        Clear
+                    </button>
+
+                    <button class="btn green" onclick="completeSale()">
+                        Complete Sale
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INVENTORY -->
+        <section id="inventory" class="section">
+
+            <div class="panel">
+
+                <div class="grid2">
+
+                    <div>
+                        <label>Search Inventory</label>
+                        <input
+                            id="inventorySearch"
+                            placeholder="Search product..."
+                            oninput="renderInventory()"
+                        >
+                    </div>
+
+                    <div>
+                        <label>Filter</label>
+                        <select id="inventoryFilter" onchange="renderInventory()">
+                            <option value="all">All Products</option>
+                            <option value="low">Low Stock</option>
+                            <option value="out">Out of Stock</option>
+                        </select>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Inventory</h2>
+
+                <div class="notice">
+                    Stock is managed in <strong>pieces</strong> and <strong>packs</strong>.
+                    Cartons have been removed from the system.
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Pack Size</th>
+                                <th>Pieces</th>
+                                <th>Packs</th>
+                                <th>Price / Piece</th>
+                                <th>Price / Pack</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="inventoryTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRODUCTS -->
+        <section id="products" class="section">
+
+            <div class="panel">
+
+                <h2>Add Product</h2>
+
+                <div class="grid3">
+
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input id="productName" placeholder="e.g. Fanta 60cl">
+                    </div>
+
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input id="productSKU" placeholder="Optional SKU">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input id="productCategory" placeholder="Drinks">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pieces Per Pack</label>
+                        <input id="productPackSize" type="number" min="1" value="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Selling Price / Piece</label>
+                        <input id="productPiecePrice" type="number" min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Selling Price / Pack</label>
+                        <input id="productPackPrice" type="number" min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Opening Stock — Pieces</label>
+                        <input id="productStockPieces" type="number" min="0" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Low Stock Alert Level</label>
+                        <input id="productLowStock" type="number" min="0" value="5">
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button class="btn green" onclick="addProduct()">
+                        Add Product
+                    </button>
+
+                    <button class="btn gray" onclick="clearProductForm()">
+                        Clear
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Product List</h2>
+
+                <input
+                    id="productSearch"
+                    class="search"
+                    placeholder="Search products..."
+                    oninput="renderProducts()"
+                >
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>SKU</th>
+                                <th>Pack Size</th>
+                                <th>Piece Price</th>
+                                <th>Pack Price</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="productsTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CUSTOMERS -->
+        <section id="customers" class="section">
+
+            <div class="panel">
+
+                <h2>Add Customer</h2>
+
+                <div class="grid3">
+
+                    <div>
+                        <label>Name</label>
+                        <input id="customerName">
+                    </div>
+
+                    <div>
+                        <label>Phone</label>
+                        <input id="customerPhone">
+                    </div>
+
+                    <div>
+                        <label>Address</label>
+                        <input id="customerAddress">
+                    </div>
+
+                </div>
+
+                <div class="actions">
+                    <button class="btn green" onclick="addCustomer()">
+                        Add Customer
+                    </button>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Customers</h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Address</th>
+                                <th>Total Purchases</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="customersTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- REPORTS -->
+        <section id="reports" class="section">
+
+            <div class="panel">
+
+                <h2>Sales Reports</h2>
+
+                <div class="grid3">
+
+                    <div>
+                        <label>From</label>
+                        <input id="reportFrom" type="date">
+                    </div>
+
+                    <div>
+                        <label>To</label>
+                        <input id="reportTo" type="date">
+                    </div>
+
+                    <div style="display:flex;align-items:end">
+                        <button class="btn" onclick="generateReport()" style="width:100%">
+                            Generate Report
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="cardgrid">
+
+                <div class="card">
+                    <h3>Revenue</h3>
+                    <div class="big" id="reportRevenue">₦0</div>
+                </div>
+
+                <div class="card">
+                    <h3>Transactions</h3>
+                    <div class="big" id="reportTransactions">0</div>
+                </div>
+
+                <div class="card">
+                    <h3>Discounts</h3>
+                    <div class="big" id="reportDiscounts">₦0</div>
+                </div>
+
+                <div class="card">
+                    <h3>Units Sold</h3>
+                    <div class="big" id="reportUnits">0</div>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Sales Details</h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Invoice</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Subtotal</th>
+                                <th>Discount</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="reportsTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- USERS -->
+        <section id="users" class="section">
+
+            <div class="panel">
+
+                <h2>Users & Access Control</h2>
+
+                <div class="warning">
+                    Only the <strong>Owner</strong> and <strong>Manager</strong>
+                    can change prices or apply sales discounts.
+                </div>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Price Access</th>
+                                <th>Discount Access</th>
+                                <th>Active</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="usersTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Add User</h2>
+
+                <div class="grid3">
+
+                    <div>
+                        <label>Name</label>
+                        <input id="newUserName">
+                    </div>
+
+                    <div>
+                        <label>Username</label>
+                        <input id="newUsername">
+                    </div>
+
+                    <div>
+                        <label>Password</label>
+                        <input id="newUserPassword" type="password">
+                    </div>
+
+                    <div>
+                        <label>Role</label>
+                        <select id="newUserRole">
+                            <option value="cashier">Cashier</option>
+                            <option value="manager">Manager</option>
+                            <option value="owner">Owner</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="actions">
+                    <button class="btn green" onclick="addUser()">
+                        Create User
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- BACKUP -->
+        <section id="backup" class="section">
+
+            <div class="panel">
+
+                <h2>Backup & System</h2>
+
+                <div class="notice">
+                    Create regular backups so your sales and inventory data can be
+                    restored if the browser is cleared or the device is changed.
+                </div>
+
+                <div class="actions">
+
+                    <button class="btn green" onclick="downloadBackup()">
+                        Download Backup
+                    </button>
+
+                    <button class="btn" onclick="document.getElementById('restoreFile').click()">
+                        Restore Backup
+                    </button>
+
+                    <button class="btn orange" onclick="runSystemRepair()">
+                        Auto Repair / Fix Data
+                    </button>
+
+                    <input
+                        id="restoreFile"
+                        type="file"
+                        accept=".json"
+                        class="hidden"
+                        onchange="restoreBackup(event)"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>System Information</h2>
+
+                <div class="grid3">
+
+                    <div class="role-box">
+                        <strong>Application Version</strong>
+                        <span id="systemVersion">1.0.0</span>
+                    </div>
+
+                    <div class="role-box">
+                        <strong>Products</strong>
+                        <span id="systemProducts">0</span>
+                    </div>
+
+                    <div class="role-box">
+                        <strong>Sales Records</strong>
+                        <span id="systemSales">0</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>Audit Log</h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="auditTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+            SalesPro — Local Sales & Inventory Management System
+            <br>
+            Data is stored locally in this browser.
+        </footer>
+
+    </main>
 
 </div>
 
-<div class="barcodeInfo">
 
-<strong>Point the rear camera at the barcode.</strong>
+<!-- EDIT PRODUCT MODAL -->
+<div id="editProductModal" class="modal">
 
-<br><br>
+    <div class="modal-box">
 
-If the live scanner does not recognize it,
-use <strong>Take Barcode Photo</strong> or enter
-the barcode manually.
+        <div class="modal-head">
+            <h2>Edit Product</h2>
+            <button class="close" onclick="closeModal('editProductModal')">×</button>
+        </div>
+
+        <input id="editProductId" type="hidden">
+
+        <div class="grid2">
+
+            <div>
+                <label>Product Name</label>
+                <input id="editProductName">
+            </div>
+
+            <div>
+                <label>SKU</label>
+                <input id="editProductSKU">
+            </div>
+
+            <div>
+                <label>Category</label>
+                <input id="editProductCategory">
+            </div>
+
+            <div>
+                <label>Pieces Per Pack</label>
+                <input id="editProductPackSize" type="number" min="1">
+            </div>
+
+            <div>
+                <label>Selling Price / Piece</label>
+                <input id="editProductPiecePrice" type="number" min="0">
+            </div>
+
+            <div>
+                <label>Selling Price / Pack</label>
+                <input id="editProductPackPrice" type="number" min="0">
+            </div>
+
+            <div>
+                <label>Low Stock Alert</label>
+                <input id="editProductLowStock" type="number" min="0">
+            </div>
+
+        </div>
+
+        <div id="pricePermissionNotice"></div>
+
+        <div class="actions">
+
+            <button class="btn green" onclick="saveProductEdit()">
+                Save Changes
+            </button>
+
+            <button class="btn gray" onclick="closeModal('editProductModal')">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- STOCK MODAL -->
+<div id="stockModal" class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-head">
+            <h2>Adjust Stock</h2>
+            <button class="close" onclick="closeModal('stockModal')">×</button>
+        </div>
+
+        <input id="stockProductId" type="hidden">
+
+        <div id="stockProductName" class="notice"></div>
+
+        <div class="grid2">
+
+            <div>
+                <label>Adjustment</label>
+                <input id="stockAdjustment" type="number" step="1">
+            </div>
+
+            <div>
+                <label>Reason</label>
+                <select id="stockReason">
+                    <option>Stock Received</option>
+                    <option>Stock Correction</option>
+                    <option>Damaged Stock</option>
+                    <option>Returned Stock</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="warning">
+            Positive number = add stock.
+            Negative number = remove stock.
+        </div>
+
+        <div class="actions">
+
+            <button class="btn green" onclick="saveStockAdjustment()">
+                Save Adjustment
+            </button>
+
+            <button class="btn gray" onclick="closeModal('stockModal')">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
-<div id="barcodeReader"></div>
-
-<div id="barcodeStatus"
-class="barcodeStatus">
-
-Preparing scanner...
-
-</div>
-
-<div class="barcodeButtons">
-
-<button
-type="button"
-onclick="startBarcodeScanner()">
-
-📷 Start Live Camera
-
-</button>
-
-<button
-type="button"
-class="barcodePhoto"
-onclick="document.getElementById('barcodePhotoInput').click()">
-
-📸 Take Barcode Photo
-
-</button>
-
-</div>
-
-<input
-id="barcodePhotoInput"
-type="file"
-accept="image/*"
-capture="environment"
-style="display:none"
-onchange="scanBarcodePhoto(event)">
-
-<div class="manualBarcode">
-
-<input
-id="manualBarcode"
-type="text"
-inputmode="numeric"
-placeholder="Enter barcode manually">
-
-<button
-type="button"
-onclick="useManualBarcode()">
-
-Use
-
-</button>
-
-</div>
-
-</div>
-
-</div>
 
 <script>
+/*
+==========================================================
+ SALES PRO
+ COMPLETE LOCAL SALES & INVENTORY SYSTEM
+ VERSION 1.0.0
+==========================================================
 
-/* =========================================================
-   SUPABASE
-   ========================================================= */
-
-const SUPABASE_URL =
-"https://olkugewqersskavvcrhm.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_35hM0m_Gy7HVDmgs-CoEvA_QcJMv3te";
-
-const supabaseClient =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-let currentUser=null;
-let currentProfile=null;
-let currentBusiness=null;
-
-let page="dashboard";
-
-let barcodeScanner=null;
-let barcodeRunning=false;
-let barcodeStarting=false;
-
-let barcodeTarget="product";
-
-let salesProducts=[];
-let saleCustomers=[];
-
-let saleCart=[];
+IMPORTANT:
+- Stock is stored in PIECES.
+- PACKS are calculated automatically.
+- CARTONS ARE NOT USED.
+- Owner and Manager can edit prices.
+- Owner and Manager can apply discounts.
+- Cashiers cannot change prices or discounts.
+- Automatic data validation and repair are included.
+- Backup and restore are included.
+==========================================================
+*/
 
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
+const APP_VERSION = "1.0.0";
+const DB_KEY = "salespro_database_v1";
 
-function esc(value){
 
-return String(value??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+let db = null;
+let currentUser = null;
+let currentSection = "dashboard";
+
+let currentSaleItems = [];
+
+
+
+/* ======================================================
+   DATABASE
+====================================================== */
+
+function defaultDatabase(){
+
+    return {
+
+        version: APP_VERSION,
+
+        users:[
+            {
+                id:"u_owner",
+                name:"Owner",
+                username:"owner",
+                password:"owner123",
+                role:"owner",
+                active:true
+            },
+            {
+                id:"u_manager",
+                name:"Manager",
+                username:"manager",
+                password:"manager123",
+                role:"manager",
+                active:true
+            },
+            {
+                id:"u_cashier",
+                name:"Cashier",
+                username:"cashier",
+                password:"cashier123",
+                role:"cashier",
+                active:true
+            }
+        ],
+
+        products:[],
+
+        customers:[],
+
+        sales:[],
+
+        audit:[],
+
+        settings:{
+            currency:"₦",
+            lastBackup:null
+        }
+
+    };
 
 }
+
+
+
+function loadDatabase(){
+
+    try{
+
+        const saved = localStorage.getItem(DB_KEY);
+
+        if(!saved){
+
+            db = defaultDatabase();
+
+            saveDatabase();
+
+        }else{
+
+            db = JSON.parse(saved);
+
+            repairDatabase();
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        db = defaultDatabase();
+
+        saveDatabase();
+
+        alert("The database had an error and was safely recreated.");
+
+    }
+
+}
+
+
+
+function saveDatabase(){
+
+    try{
+
+        localStorage.setItem(DB_KEY,JSON.stringify(db));
+
+    }catch(error){
+
+        console.error(error);
+
+        alert("Unable to save data. Your browser storage may be full.");
+
+    }
+
+}
+
+
+
+/* ======================================================
+   AUTOMATIC DATA REPAIR
+====================================================== */
+
+function repairDatabase(){
+
+    let changed = false;
+
+
+    if(!db || typeof db !== "object"){
+
+        db = defaultDatabase();
+
+        changed = true;
+
+    }
+
+
+    if(!Array.isArray(db.users)){
+
+        db.users = defaultDatabase().users;
+
+        changed = true;
+
+    }
+
+
+    if(!Array.isArray(db.products)){
+
+        db.products = [];
+
+        changed = true;
+
+    }
+
+
+    if(!Array.isArray(db.customers)){
+
+        db.customers = [];
+
+        changed = true;
+
+    }
+
+
+    if(!Array.isArray(db.sales)){
+
+        db.sales = [];
+
+        changed = true;
+
+    }
+
+
+    if(!Array.isArray(db.audit)){
+
+        db.audit = [];
+
+        changed = true;
+
+    }
+
+
+    db.products.forEach(product=>{
+
+        if(!product.id){
+
+            product.id = uid("p");
+
+            changed = true;
+
+        }
+
+        if(!product.name){
+
+            product.name = "Unnamed Product";
+
+            changed = true;
+
+        }
+
+        if(!Number.isFinite(Number(product.packSize)) || Number(product.packSize)<1){
+
+            product.packSize = 1;
+
+            changed = true;
+
+        }
+
+        if(!Number.isFinite(Number(product.stockPieces)) || Number(product.stockPieces)<0){
+
+            product.stockPieces = 0;
+
+            changed = true;
+
+        }
+
+        if(!Number.isFinite(Number(product.piecePrice)) || Number(product.piecePrice)<0){
+
+            product.piecePrice = 0;
+
+            changed = true;
+
+        }
+
+        if(!Number.isFinite(Number(product.packPrice)) || Number(product.packPrice)<0){
+
+            product.packPrice =
+                Number(product.piecePrice || 0) *
+                Number(product.packSize || 1);
+
+            changed = true;
+
+        }
+
+        if(!Number.isFinite(Number(product.lowStock)) || Number(product.lowStock)<0){
+
+            product.lowStock = 5;
+
+            changed = true;
+
+        }
+
+    });
+
+
+    db.users.forEach(user=>{
+
+        if(!user.id){
+
+            user.id = uid("u");
+
+            changed = true;
+
+        }
+
+        if(!user.role){
+
+            user.role = "cashier";
+
+            changed = true;
+
+        }
+
+        if(typeof user.active !== "boolean"){
+
+            user.active = true;
+
+            changed = true;
+
+        }
+
+    });
+
+
+    if(!db.version){
+
+        db.version = APP_VERSION;
+
+        changed = true;
+
+    }
+
+
+    if(!db.settings){
+
+        db.settings = {
+            currency:"₦",
+            lastBackup:null
+        };
+
+        changed = true;
+
+    }
+
+
+    if(changed){
+
+        saveDatabase();
+
+        addAudit("SYSTEM","Automatic database repair completed.");
+
+    }
+
+}
+
+
+
+/* ======================================================
+   UTILITIES
+====================================================== */
+
+function uid(prefix){
+
+    return prefix + "_" +
+        Date.now().toString(36) +
+        "_" +
+        Math.random().toString(36).slice(2,8);
+
+}
+
 
 
 function money(value){
 
-return "₦"+Number(value||0).toLocaleString(
-"en-NG",
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
-}
-);
+    const number = Number(value) || 0;
+
+    return "₦" + number.toLocaleString("en-NG",{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    });
 
 }
 
 
-function today(){
 
-return new Date().toISOString().slice(0,10);
+function number(value){
 
-}
-
-
-function uuid(){
-
-if(window.crypto?.randomUUID){
-
-return crypto.randomUUID();
-
-}
-
-return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-.replace(/[xy]/g,function(c){
-
-const r=Math.random()*16|0;
-const v=c==="x"?r:(r&0x3|0x8);
-
-return v.toString(16);
-
-});
+    return Number(value) || 0;
 
 }
 
 
-function showToast(message){
 
-const box=document.getElementById("toast");
+function todayISO(){
 
-if(!box)return;
+    const d = new Date();
 
-box.textContent=message;
+    const month = String(d.getMonth()+1).padStart(2,"0");
 
-box.classList.add("show");
+    const day = String(d.getDate()).padStart(2,"0");
 
-setTimeout(
-()=>box.classList.remove("show"),
-3000
-);
+    return `${d.getFullYear()}-${month}-${day}`;
 
 }
 
 
-/*
-=========================================================
-AUTOMATIC ERROR MESSAGE CLEANER
-=========================================================
-*/
 
-function friendlyDatabaseError(error){
+function formatDate(date){
 
-const message=
-String(error?.message||error||"Unknown error");
+    if(!date) return "";
 
-if(
-message.includes("sales_sale_type_check")
-){
-
-return(
-"Sale type error fixed automatically. "+
-"SalesPro must save the sale as Retail or Wholesale. "+
-"Please try the sale again."
-);
-
-}
-
-if(
-message.includes("duplicate key")||
-message.includes("unique constraint")
-){
-
-return(
-"This record already exists. "+
-"Please check the product, barcode or invoice number."
-);
-
-}
-
-if(
-message.includes("foreign key")
-){
-
-return(
-"This record is linked to another record that does not exist. "+
-"Please check the selected customer or product."
-);
-
-}
-
-if(
-message.includes("column")&&
-message.includes("does not exist")
-){
-
-return(
-"The database is missing a column required by SalesPro. "+
-"Please run the latest SalesPro database update."
-);
-
-}
-
-if(
-message.includes("violates row-level security")
-){
-
-return(
-"SalesPro was blocked by the database security policy. "+
-"Please check your Supabase RLS policies."
-);
-
-}
-
-return message;
+    return new Date(date).toLocaleString("en-NG",{
+        dateStyle:"medium",
+        timeStyle:"short"
+    });
 
 }
 
 
-/* =========================================================
-   AUTH
-   ========================================================= */
 
-async function checkAuth(){
+function escapeHTML(value){
 
-const {
-data:{
-session
-}
-}=await supabaseClient.auth.getSession();
-
-if(!session){
-
-showLogin();
-
-return;
-
-}
-
-currentUser=session.user;
-
-await loadUserProfile();
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 
 }
 
 
-async function loadUserProfile(){
 
-const {
-data:profile,
-error
-}=await supabaseClient
-.from("profiles")
-.select("*")
-.eq("id",currentUser.id)
-.maybeSingle();
+function addAudit(action,details){
 
-if(error){
+    if(!db) return;
 
-console.error(error);
+    db.audit.unshift({
 
-showError(
-"Unable to load your SalesPro owner profile: "+
-friendlyDatabaseError(error)
-);
+        id:uid("a"),
 
-return;
+        date:new Date().toISOString(),
 
-}
+        user:currentUser
+            ? currentUser.username
+            : "SYSTEM",
 
-if(!profile){
+        action,
 
-showError(
-"Your login exists, but your SalesPro owner profile is missing. Please contact the system administrator."
-);
+        details
 
-return;
+    });
 
-}
 
-currentProfile=profile;
+    if(db.audit.length > 500){
 
-const {
-data:business,
-error:businessError
-}=await supabaseClient
-.from("businesses")
-.select("*")
-.eq("id",profile.business_id)
-.maybeSingle();
+        db.audit = db.audit.slice(0,500);
 
-if(businessError){
+    }
 
-console.error(businessError);
 
-showError(
-"Business profile could not be loaded: "+
-friendlyDatabaseError(businessError)
-);
-
-return;
-
-}
-
-currentBusiness=business;
-
-showApp();
+    saveDatabase();
 
 }
 
 
-/* =========================================================
-   AUTH SCREENS
-   ========================================================= */
 
-function showError(message){
+function hasPermission(permission){
 
-document.getElementById("root").innerHTML=`
+    if(!currentUser) return false;
 
-<div class="auth">
+    if(currentUser.role === "owner") return true;
 
-<div class="authCard">
+    if(currentUser.role === "manager"){
 
-<div class="error">
-${esc(message)}
-</div>
+        return [
+            "edit_price",
+            "discount",
+            "stock",
+            "reports",
+            "products"
+        ].includes(permission);
 
-<h1>SalesPro</h1>
+    }
 
-<div class="authBusiness">
-KC Integrated Global Services
-</div>
-
-<button
-style="width:100%"
-onclick="showLogin()">
-
-Return to Login
-
-</button>
-
-</div>
-
-</div>
-
-`;
+    return [
+        "reports",
+        "products"
+    ].includes(permission);
 
 }
 
 
-function showLogin(){
 
-document.getElementById("root").innerHTML=`
+function requirePermission(permission,message){
 
-<div class="auth">
+    if(hasPermission(permission)) return true;
 
-<div class="authCard">
+    alert(
+        message ||
+        "You do not have permission to perform this action."
+    );
 
-<div id="authMessage"></div>
-
-<img
-class="authLogo"
-src="https://olkugewqersskavvcrhm.supabase.co/storage/v1/object/public/logos/kc-logo.png"
-onerror="this.style.display='none'"
-alt="KC Integrated Global Services">
-
-<h1>SalesPro</h1>
-
-<div class="authBusiness">
-KC Integrated Global Services
-</div>
-
-<label>Email Address</label>
-
-<input
-id="loginEmail"
-type="email"
-autocomplete="email"
-placeholder="Email Address">
-
-<label>Password</label>
-
-<input
-id="loginPassword"
-type="password"
-autocomplete="current-password"
-placeholder="Password">
-
-<button
-style="width:100%;margin-top:15px"
-onclick="loginUser()">
-
-🔐 Login
-
-</button>
-
-<div class="authLinks">
-
-New to SalesPro?
-
-<button onclick="showRegister()">
-
-Create Owner Account
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
+    return false;
 
 }
 
 
-function showRegister(){
 
-document.getElementById("root").innerHTML=`
-
-<div class="auth">
-
-<div class="authCard">
-
-<div id="authMessage"></div>
-
-<h1>Create Owner Account</h1>
-
-<div class="authBusiness">
-KC Integrated Global Services
-</div>
-
-<label>Full Name</label>
-
-<input
-id="regName"
-type="text"
-placeholder="Your full name">
-
-<label>Email Address</label>
-
-<input
-id="regEmail"
-type="email"
-placeholder="Email address">
-
-<label>Password</label>
-
-<input
-id="regPassword"
-type="password"
-placeholder="Minimum 6 characters">
-
-<hr>
-
-<h2>Business Information</h2>
-
-<label>Business Name</label>
-
-<input
-id="regBusiness"
-value="KC Integrated Global Services">
-
-<label>Phone</label>
-
-<input
-id="regPhone"
-placeholder="Business phone">
-
-<label>Email</label>
-
-<input
-id="regBusinessEmail"
-placeholder="Business email">
-
-<label>Address</label>
-
-<textarea
-id="regAddress"
-placeholder="Business address"></textarea>
-
-<div class="actions">
-
-<button
-class="secondary"
-onclick="showLogin()">
-
-Back
-
-</button>
-
-<button
-onclick="registerOwner()">
-
-Create Account
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-
-function authMessage(text,type="error"){
-
-const box=document.getElementById("authMessage");
-
-if(!box)return;
-
-box.innerHTML=
-`<div class="${type}">${esc(text)}</div>`;
-
-}
-
-
-/* =========================================================
-   REGISTER
-   ========================================================= */
-
-async function registerOwner(){
-
-const name=
-document.getElementById("regName").value.trim();
-
-const email=
-document.getElementById("regEmail").value.trim();
-
-const password=
-document.getElementById("regPassword").value;
-
-const businessName=
-document.getElementById("regBusiness").value.trim();
-
-const phone=
-document.getElementById("regPhone").value.trim();
-
-const businessEmail=
-document.getElementById("regBusinessEmail").value.trim();
-
-const address=
-document.getElementById("regAddress").value.trim();
-
-if(!name||!email||!password||!businessName){
-
-authMessage(
-"Please complete all required fields."
-);
-
-return;
-
-}
-
-if(password.length<6){
-
-authMessage(
-"Password must contain at least 6 characters."
-);
-
-return;
-
-}
-
-try{
-
-authMessage(
-"Creating your account...",
-"success"
-);
-
-const {
-data,
-error
-}=await supabaseClient.auth.signUp({
-
-email,
-password,
-
-options:{
-data:{
-full_name:name
-}
-}
-
-});
-
-if(error)throw error;
-
-const user=data.user;
-
-if(!user){
-
-throw new Error(
-"Account could not be created."
-);
-
-}
-
-if(data.session){
-
-const businessId=uuid();
-
-const {
-error:businessError
-}=await supabaseClient
-.from("businesses")
-.insert({
-
-id:businessId,
-
-name:businessName,
-
-phone:phone,
-
-email:businessEmail||email,
-
-address:address,
-
-logo_url:""
-
-});
-
-if(businessError){
-
-throw businessError;
-
-}
-
-const {
-error:profileError
-}=await supabaseClient
-.from("profiles")
-.upsert({
-
-id:user.id,
-
-full_name:name,
-
-role:"owner",
-
-business_id:businessId,
-
-active:true
-
-},{
-onConflict:"id"
-});
-
-if(profileError){
-
-throw profileError;
-
-}
-
-authMessage(
-"Account created successfully. You can now login.",
-"success"
-);
-
-setTimeout(showLogin,1800);
-
-return;
-
-}
-
-authMessage(
-"Account created successfully. Please verify your email, then return here and login.",
-"success"
-);
-
-}catch(error){
-
-console.error(error);
-
-authMessage(
-friendlyDatabaseError(error)
-);
-
-}
-
-}
-
-
-/* =========================================================
+/* ======================================================
    LOGIN
-   ========================================================= */
+====================================================== */
 
-async function loginUser(){
+function login(){
 
-const email=
-document.getElementById("loginEmail").value.trim();
+    const username =
+        document.getElementById("loginUsername").value.trim();
 
-const password=
-document.getElementById("loginPassword").value;
-
-if(!email||!password){
-
-authMessage(
-"Enter your email and password."
-);
-
-return;
-
-}
-
-try{
-
-authMessage(
-"Signing in...",
-"success"
-);
-
-const {
-error
-}=await supabaseClient.auth.signInWithPassword({
-email,
-password
-});
-
-if(error)throw error;
-
-await checkAuth();
-
-}catch(error){
-
-console.error(error);
-
-authMessage(
-error.message||"Login failed."
-);
-
-}
-
-}
+    const password =
+        document.getElementById("loginPassword").value;
 
 
-/* =========================================================
-   LOGOUT
-   ========================================================= */
-
-async function logout(){
-
-await supabaseClient.auth.signOut();
-
-currentUser=null;
-currentProfile=null;
-currentBusiness=null;
-
-showLogin();
-
-}
+    const user = db.users.find(u=>
+        u.username.toLowerCase() === username.toLowerCase() &&
+        u.password === password &&
+        u.active
+    );
 
 
-/* =========================================================
-   APP
-   ========================================================= */
+    if(!user){
 
-function showApp(){
+        alert("Invalid username, password, or inactive account.");
 
-document.getElementById("root").innerHTML=`
+        return;
 
-<header class="header">
+    }
 
-<div class="brand">
 
-<div id="businessLogo"></div>
+    currentUser = {...user};
 
-<div>
 
-<strong>SalesPro</strong>
+    sessionStorage.setItem(
+        "salespro_current_user",
+        JSON.stringify(currentUser)
+    );
 
-<small>
-${esc(
-currentBusiness?.name||
-"KC Integrated Global Services"
-)}
-</small>
 
-</div>
+    document.getElementById("loginScreen")
+        .classList.add("hidden");
 
-</div>
+    document.getElementById("app")
+        .classList.remove("hidden");
 
-<nav
-class="nav"
-id="nav">
-</nav>
 
-</header>
+    document.getElementById("currentUserName")
+        .textContent = currentUser.name;
 
-<main
-class="container"
-id="app">
-</main>
+    document.getElementById("currentUserRole")
+        .textContent =
+            currentUser.role.toUpperCase();
 
-<div
-class="modal"
-id="modal">
 
-<div
-class="sheet"
-id="sheet">
-</div>
+    document.getElementById("usersNav")
+        .style.display =
+            hasPermission("users") ? "block" : "none";
 
-</div>
 
-`;
+    document.getElementById("backupNav")
+        .style.display =
+            hasPermission("users") ? "block" : "none";
 
-renderNav();
 
-render();
+    document.getElementById("todayText")
+        .textContent =
+            new Date().toLocaleDateString("en-NG",{
+                weekday:"long",
+                year:"numeric",
+                month:"long",
+                day:"numeric"
+            });
 
-loadBusinessLogo();
+
+    addAudit(
+        "LOGIN",
+        `User ${currentUser.username} logged into the system.`
+    );
+
+
+    refreshAll();
 
 }
 
 
-function loadBusinessLogo(){
 
-const box=document.getElementById("businessLogo");
+function logout(){
 
-if(!box)return;
+    if(currentUser){
 
-const logo=currentBusiness?.logo_url;
+        addAudit(
+            "LOGOUT",
+            `User ${currentUser.username} logged out.`
+        );
 
-if(logo){
+    }
 
-box.innerHTML=`
 
-<img
-class="logo"
-src="${esc(logo)}"
-alt="Business Logo"
-onerror="this.style.display='none';this.parentElement.innerHTML='<div class=&quot;logoFallback&quot;>KC</div>'">
+    currentUser = null;
 
-`;
+    sessionStorage.removeItem("salespro_current_user");
 
-}else{
 
-box.innerHTML=`
+    document.getElementById("app")
+        .classList.add("hidden");
 
-<div class="logoFallback">
-KC
-</div>
-
-`;
-
-}
+    document.getElementById("loginScreen")
+        .classList.remove("hidden");
 
 }
 
 
-/* =========================================================
+
+/* ======================================================
+   SESSION RESTORE
+====================================================== */
+
+function restoreSession(){
+
+    const saved =
+        sessionStorage.getItem("salespro_current_user");
+
+
+    if(!saved) return;
+
+
+    try{
+
+        const sessionUser = JSON.parse(saved);
+
+        const freshUser = db.users.find(
+            u=>u.id === sessionUser.id && u.active
+        );
+
+
+        if(freshUser){
+
+            currentUser = {...freshUser};
+
+            document.getElementById("loginScreen")
+                .classList.add("hidden");
+
+            document.getElementById("app")
+                .classList.remove("hidden");
+
+            document.getElementById("currentUserName")
+                .textContent = currentUser.name;
+
+            document.getElementById("currentUserRole")
+                .textContent =
+                    currentUser.role.toUpperCase();
+
+            refreshAll();
+
+        }
+
+    }catch(e){
+
+        sessionStorage.removeItem("salespro_current_user");
+
+    }
+
+}
+
+
+
+/* ======================================================
    NAVIGATION
-   ========================================================= */
+====================================================== */
 
-const navItems=[
+function showSection(section,button){
 
-["dashboard","Dashboard"],
-["sales","Sales"],
-["products","Products"],
-["customers","Customers"],
-["expenses","Expenses"],
-["reports","Reports"],
-["backup","Backup"],
-["settings","Settings"]
-
-];
+    currentSection = section;
 
 
-function renderNav(){
-
-const nav=document.getElementById("nav");
-
-if(!nav)return;
-
-nav.innerHTML=
-navItems.map(item=>`
-
-<button
-class="${page===item[0]?"active":""}"
-onclick="go('${item[0]}')">
-
-${item[1]}
-
-</button>
-
-`).join("");
-
-}
+    document.querySelectorAll(".section")
+        .forEach(s=>s.classList.remove("active"));
 
 
-function go(p){
+    const target =
+        document.getElementById(section);
 
-page=p;
+    if(target){
 
-renderNav();
+        target.classList.add("active");
 
-render();
-
-window.scrollTo(0,0);
-
-}
+    }
 
 
-async function render(){
+    document.querySelectorAll(".nav button")
+        .forEach(b=>b.classList.remove("active"));
 
-const app=document.getElementById("app");
 
-if(!app)return;
+    if(button){
 
-app.innerHTML=`
-<div class="card">
-Loading...
-</div>
-`;
+        button.classList.add("active");
 
-try{
+    }
 
-if(page==="dashboard")
-app.innerHTML=await dashboard();
 
-else if(page==="sales")
-app.innerHTML=await salesPage();
+    const titles = {
 
-else if(page==="products")
-app.innerHTML=await productsPage();
+        dashboard:"Dashboard",
 
-else if(page==="customers")
-app.innerHTML=await customersPage();
+        sales:"New Sale",
 
-else if(page==="expenses")
-app.innerHTML=await expensesPage();
+        inventory:"Inventory",
 
-else if(page==="reports")
-app.innerHTML=await reportsPage();
+        products:"Products",
 
-else if(page==="backup")
-app.innerHTML=backupPage();
+        customers:"Customers",
 
-else if(page==="settings")
-app.innerHTML=settingsPage();
+        reports:"Reports",
 
-}catch(error){
+        users:"Users & Access",
 
-console.error(error);
+        backup:"Backup & System"
 
-app.innerHTML=`
+    };
 
-<div class="card">
 
-<div class="error">
+    document.getElementById("pageTitle")
+        .textContent =
+            titles[section] || "SalesPro";
 
-Unable to load this section.
 
-<br><br>
+    if(window.innerWidth < 750){
 
-${esc(friendlyDatabaseError(error))}
+        document.getElementById("sidebar")
+            .classList.remove("open");
 
-</div>
+    }
 
-</div>
 
-`;
-
-}
+    refreshSection(section);
 
 }
 
 
-/* =========================================================
+
+function goTo(section){
+
+    const button =
+        [...document.querySelectorAll(".nav button")]
+        .find(b=>b.getAttribute("onclick")?.includes(`'${section}'`));
+
+    showSection(section,button);
+
+}
+
+
+
+function toggleSidebar(){
+
+    document.getElementById("sidebar")
+        .classList.toggle("open");
+
+}
+
+
+
+/* ======================================================
+   REFRESH
+====================================================== */
+
+function refreshAll(){
+
+    updateDashboard();
+
+    renderInventory();
+
+    renderProducts();
+
+    renderCustomers();
+
+    renderUsers();
+
+    renderAudit();
+
+    renderRecentSales();
+
+    updateSystemInfo();
+
+    updateBackupStatus();
+
+    refreshSection(currentSection);
+
+}
+
+
+
+function refreshSection(section){
+
+    if(section === "dashboard"){
+
+        updateDashboard();
+
+        renderRecentSales();
+
+    }
+
+    if(section === "inventory"){
+
+        renderInventory();
+
+    }
+
+    if(section === "products"){
+
+        renderProducts();
+
+    }
+
+    if(section === "customers"){
+
+        renderCustomers();
+
+    }
+
+    if(section === "users"){
+
+        renderUsers();
+
+    }
+
+    if(section === "backup"){
+
+        renderAudit();
+
+        updateSystemInfo();
+
+    }
+
+    if(section === "reports"){
+
+        generateReport();
+
+    }
+
+}
+
+
+
+/* ======================================================
+   DASHBOARD
+====================================================== */
+
+function updateDashboard(){
+
+    const today = todayISO();
+
+
+    const todaySales =
+        db.sales.filter(s=>
+            String(s.date).slice(0,10) === today
+        );
+
+
+    const revenue =
+        todaySales.reduce(
+            (sum,s)=>sum+number(s.total),
+            0
+        );
+
+
+    const units =
+        db.products.reduce(
+            (sum,p)=>sum+number(p.stockPieces),
+            0
+        );
+
+
+    const low =
+        db.products.filter(p=>
+            number(p.stockPieces) <= number(p.lowStock)
+        ).length;
+
+
+    const inventoryValue =
+        db.products.reduce(
+            (sum,p)=>
+                sum +
+                number(p.stockPieces) *
+                number(p.piecePrice),
+            0
+        );
+
+
+    document.getElementById("dashTodaySales")
+        .textContent = money(revenue);
+
+
+    document.getElementById("dashTodayTransactions")
+        .textContent =
+            `${todaySales.length} transaction${todaySales.length===1?"":"s"}`;
+
+
+    document.getElementById("dashProducts")
+        .textContent =
+            db.products.length;
+
+
+    document.getElementById("dashStockPieces")
+        .textContent =
+            `${units.toLocaleString()} pieces in stock`;
+
+
+    document.getElementById("dashLowStock")
+        .textContent = low;
+
+
+    document.getElementById("dashInventoryValue")
+        .textContent = money(inventoryValue);
+
+
+    const alerts =
+        document.getElementById("dashboardAlerts");
+
+
+    if(low > 0){
+
+        alerts.innerHTML =
+            `<div class="warning">
+                ⚠️ ${low} product${low===1?"":"s"} ${
+                    low===1?"is":"are"
+                } at or below the low-stock level.
+             </div>`;
+
+    }else{
+
+        alerts.innerHTML = "";
+
+    }
+
+}
+
+
+
+/* ======================================================
+   INVENTORY
+====================================================== */
+
+function renderInventory(){
+
+    const tbody =
+        document.getElementById("inventoryTable");
+
+
+    const search =
+        (document.getElementById("inventorySearch")?.value || "")
+        .toLowerCase();
+
+
+    const filter =
+        document.getElementById("inventoryFilter")?.value || "all";
+
+
+    let products = [...db.products];
+
+
+    products = products.filter(p=>{
+
+        const matchesSearch =
+            p.name.toLowerCase().includes(search) ||
+            String(p.sku || "").toLowerCase().includes(search);
+
+
+        const stock = number(p.stockPieces);
+
+        const matchesFilter =
+            filter === "all" ||
+            (filter === "low" && stock <= number(p.lowStock)) ||
+            (filter === "out" && stock <= 0);
+
+
+        return matchesSearch && matchesFilter;
+
+    });
+
+
+    if(!products.length){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="9" class="empty">
+                    No products found.
+                </td>
+             </tr>`;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        products.map(p=>{
+
+            const pieces =
+                number(p.stockPieces);
+
+            const packs =
+                Math.floor(
+                    pieces / number(p.packSize || 1)
+                );
+
+
+            const status =
+                pieces <= 0
+                    ? `<span class="badge red">Out</span>`
+                    : pieces <= number(p.lowStock)
+                        ? `<span class="badge orange">Low</span>`
+                        : `<span class="badge green">Good</span>`;
+
+
+            return `
+            <tr>
+
+                <td><strong>${escapeHTML(p.name)}</strong></td>
+
+                <td>${escapeHTML(p.sku || "-")}</td>
+
+                <td>${number(p.packSize)}</td>
+
+                <td>${pieces.toLocaleString()}</td>
+
+                <td>${packs.toLocaleString()}</td>
+
+                <td>${money(p.piecePrice)}</td>
+
+                <td>${money(p.packPrice)}</td>
+
+                <td>${status}</td>
+
+                <td>
+
+                    <button
+                        class="btn light"
+                        onclick="openStockModal('${p.id}')"
+                    >
+                        Adjust
+                    </button>
+
+                </td>
+
+            </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+
+/* ======================================================
    PRODUCTS
-   ========================================================= */
+====================================================== */
 
-async function getProducts(){
+function addProduct(){
 
-const {
-data,
-error
-}=await supabaseClient
-.from("products")
-.select("*")
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.eq("active",true)
-.order("name");
-
-if(error){
-
-console.error(error);
-
-return [];
-
-}
-
-return data||[];
-
-}
+    const name =
+        document.getElementById("productName")
+        .value.trim();
 
 
-async function productsPage(){
+    if(!name){
 
-const products=await getProducts();
+        alert("Product name is required.");
 
-return`
+        return;
 
-<h1>Products & Inventory</h1>
-
-<div class="card">
-
-<div class="retailExplanation">
-
-<strong>📦 Product Packaging & Retail Selling</strong>
-
-<br><br>
-
-SalesPro allows you to store the number of pieces
-inside each pack or carton.
-
-<br><br>
-
-Example:
-
-<br>
-<strong>Eva Water 60cl</strong> = 12 bottles in 1 pack.
-
-<br>
-<strong>Coke PET</strong> = 12 bottles in 1 pack.
-
-<br>
-<strong>V-Smartic</strong> = 10 pieces in 1 pack.
-
-<br><br>
-
-When selling, you can choose:
-
-<strong>1 Piece</strong>,
-<strong>1 Pack</strong>,
-or
-<strong>1 Carton</strong>.
-
-SalesPro automatically deducts the correct number
-of pieces from your stock.
-
-</div>
-
-</div>
-
-<div class="toolbar">
-
-<button onclick="newProduct()">
-
-+ Add Product
-
-</button>
-
-<input
-style="max-width:360px"
-id="productSearch"
-placeholder="Search product or barcode..."
-oninput="filterProducts()">
-
-</div>
-
-<div
-class="table"
-id="productTable">
-
-${productTable(products)}
-
-</div>
-
-`;
-
-}
+    }
 
 
-function productTable(products){
+    const packSize =
+        Math.max(
+            1,
+            number(document.getElementById("productPackSize").value)
+        );
 
-if(!products.length){
 
-return`
-<div class="empty">
-No products yet.
-</div>
-`;
+    const piecePrice =
+        Math.max(
+            0,
+            number(document.getElementById("productPiecePrice").value)
+        );
+
+
+    let packPrice =
+        number(document.getElementById("productPackPrice").value);
+
+
+    if(packPrice <= 0){
+
+        packPrice =
+            piecePrice * packSize;
+
+    }
+
+
+    const stockPieces =
+        Math.max(
+            0,
+            number(document.getElementById("productStockPieces").value)
+        );
+
+
+    const lowStock =
+        Math.max(
+            0,
+            number(document.getElementById("productLowStock").value)
+        );
+
+
+    const product = {
+
+        id:uid("p"),
+
+        name,
+
+        sku:
+            document.getElementById("productSKU").value.trim(),
+
+        category:
+            document.getElementById("productCategory").value.trim()
+            || "General",
+
+        packSize,
+
+        piecePrice,
+
+        packPrice,
+
+        stockPieces,
+
+        lowStock,
+
+        createdAt:new Date().toISOString()
+
+    };
+
+
+    db.products.push(product);
+
+    saveDatabase();
+
+
+    addAudit(
+        "PRODUCT_CREATED",
+        `Created product: ${name}`
+    );
+
+
+    clearProductForm();
+
+    refreshAll();
+
+
+    alert("Product added successfully.");
 
 }
 
-return`
 
-<table>
 
-<tr>
+function clearProductForm(){
 
-<th>Product</th>
-<th>Barcode</th>
-<th>Piece</th>
-<th>Pack</th>
-<th>Carton</th>
-<th>Pack Size</th>
-<th>Carton Size</th>
-<th>Stock</th>
-<th>Expiry</th>
-<th>Action</th>
+    document.getElementById("productName").value = "";
 
-</tr>
+    document.getElementById("productSKU").value = "";
 
-${products.map(p=>`
+    document.getElementById("productCategory").value = "";
 
-<tr
-class="${expiryClass(p.expiry_date)}">
+    document.getElementById("productPackSize").value = "1";
 
-<td>
-<strong>${esc(p.name)}</strong>
+    document.getElementById("productPiecePrice").value = "";
 
-<br>
+    document.getElementById("productPackPrice").value = "";
 
-<small>
-${esc(p.category||"")}
-</small>
+    document.getElementById("productStockPieces").value = "0";
 
-</td>
-
-<td>
-${esc(p.barcode||"-")}
-</td>
-
-<td>
-${money(p.retail_price)}
-</td>
-
-<td>
-${money(p.pack_price)}
-</td>
-
-<td>
-${money(p.carton_price)}
-</td>
-
-<td>
-${p.pack_size||"-"}
-</td>
-
-<td>
-${p.carton_size||"-"}
-</td>
-
-<td
-class="${Number(p.stock||0)<=Number(p.low_stock_level||0)?"bad":""}">
-
-${p.stock||0}
-
-</td>
-
-<td>
-${expiryLabel(p.expiry_date)}
-</td>
-
-<td>
-
-<button
-class="secondary"
-onclick="editProduct('${p.id}')">
-
-Edit
-
-</button>
-
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-`;
+    document.getElementById("productLowStock").value = "5";
 
 }
 
 
-async function filterProducts(){
 
-const input=document.getElementById("productSearch");
+function renderProducts(){
 
-if(!input)return;
+    const tbody =
+        document.getElementById("productsTable");
 
-const search=input.value.toLowerCase();
 
-const products=await getProducts();
+    const search =
+        (document.getElementById("productSearch")?.value || "")
+        .toLowerCase();
 
-const filtered=
-products.filter(p=>
 
-String(p.name||"")
-.toLowerCase()
-.includes(search)
+    const products =
+        db.products.filter(p=>
+            p.name.toLowerCase().includes(search) ||
+            String(p.sku || "").toLowerCase().includes(search)
+        );
 
-||
 
-String(p.barcode||"")
-.toLowerCase()
-.includes(search)
+    if(!products.length){
 
-||
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="8" class="empty">
+                    No products found.
+                </td>
+             </tr>`;
 
-String(p.brand||"")
-.toLowerCase()
-.includes(search)
+        return;
 
-);
+    }
 
-const table=document.getElementById("productTable");
 
-if(table)
-table.innerHTML=productTable(filtered);
+    tbody.innerHTML =
+        products.map(p=>{
+
+            const canPrice =
+                hasPermission("edit_price");
+
+
+            return `
+            <tr>
+
+                <td>${escapeHTML(p.name)}</td>
+
+                <td>${escapeHTML(p.category)}</td>
+
+                <td>${escapeHTML(p.sku || "-")}</td>
+
+                <td>${number(p.packSize)}</td>
+
+                <td>${money(p.piecePrice)}</td>
+
+                <td>${money(p.packPrice)}</td>
+
+                <td>
+                    ${number(p.stockPieces).toLocaleString()} pieces
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn light"
+                        onclick="editProduct('${p.id}')"
+                    >
+                        Edit
+                    </button>
+
+                    ${
+                        canPrice
+                        ?
+                        `<button
+                            class="btn orange"
+                            onclick="changePrice('${p.id}')"
+                        >
+                            Price
+                        </button>`
+                        :
+                        ""
+                    }
+
+                    ${
+                        currentUser?.role === "owner"
+                        ?
+                        `<button
+                            class="btn red"
+                            onclick="deleteProduct('${p.id}')"
+                        >
+                            Delete
+                        </button>`
+                        :
+                        ""
+                    }
+
+                </td>
+
+            </tr>
+            `;
+
+        }).join("");
 
 }
 
 
-/* =========================================================
-   EXPIRY
-   ========================================================= */
 
-function expiryClass(date){
+/* ======================================================
+   EDIT PRODUCT
+====================================================== */
 
-if(!date)return"";
+function editProduct(id){
 
-const now=new Date();
-const expiry=new Date(date);
+    const product =
+        db.products.find(p=>p.id===id);
 
-const diff=
-Math.ceil(
-(expiry-now)/(1000*60*60*24)
-);
 
-if(diff<0)return"expired";
+    if(!product) return;
 
-if(diff<=30)return"expiring";
 
-return"";
+    document.getElementById("editProductId").value =
+        product.id;
+
+    document.getElementById("editProductName").value =
+        product.name;
+
+    document.getElementById("editProductSKU").value =
+        product.sku || "";
+
+    document.getElementById("editProductCategory").value =
+        product.category || "";
+
+    document.getElementById("editProductPackSize").value =
+        product.packSize;
+
+    document.getElementById("editProductPiecePrice").value =
+        product.piecePrice;
+
+    document.getElementById("editProductPackPrice").value =
+        product.packPrice;
+
+    document.getElementById("editProductLowStock").value =
+        product.lowStock;
+
+
+    const priceInputs = [
+
+        document.getElementById("editProductPiecePrice"),
+
+        document.getElementById("editProductPackPrice")
+
+    ];
+
+
+    const canPrice =
+        hasPermission("edit_price");
+
+
+    priceInputs.forEach(input=>{
+
+        input.disabled = !canPrice;
+
+    });
+
+
+    document.getElementById("pricePermissionNotice")
+        .innerHTML =
+            canPrice
+            ?
+            `<div class="success">
+                You have permission to change selling prices.
+             </div>`
+            :
+            `<div class="warning">
+                Only Owner or Manager can change selling prices.
+             </div>`;
+
+
+    openModal("editProductModal");
 
 }
 
 
-function expiryLabel(date){
 
-if(!date)return"-";
+function saveProductEdit(){
 
-const now=new Date();
-const expiry=new Date(date);
+    const id =
+        document.getElementById("editProductId").value;
 
-const diff=
-Math.ceil(
-(expiry-now)/(1000*60*60*24)
-);
 
-if(diff<0){
+    const product =
+        db.products.find(p=>p.id===id);
 
-return`
-<span class="badge red">
-Expired
-</span>
-`;
 
-}
+    if(!product) return;
 
-if(diff<=30){
 
-return`
-<span class="badge orange">
-${diff} days
-</span>
-`;
+    const oldName = product.name;
 
-}
 
-return esc(date);
+    product.name =
+        document.getElementById("editProductName").value.trim()
+        || product.name;
 
-}
 
+    product.sku =
+        document.getElementById("editProductSKU").value.trim();
 
-/* =========================================================
-   PRODUCT FORM
-   ========================================================= */
 
-async function newProduct(existing=null){
+    product.category =
+        document.getElementById("editProductCategory").value.trim()
+        || "General";
 
-openModal(`
 
-<h2>
-${existing?"Edit":"Add"} Product
-</h2>
+    product.packSize =
+        Math.max(
+            1,
+            number(document.getElementById("editProductPackSize").value)
+        );
 
-<div class="formgrid">
 
-<div class="full">
+    if(hasPermission("edit_price")){
 
-<label>Product Name</label>
+        product.piecePrice =
+            Math.max(
+                0,
+                number(
+                    document.getElementById("editProductPiecePrice").value
+                )
+            );
 
-<input
-id="pname"
-value="${esc(existing?.name||"")}"
-placeholder="e.g. Eva Water 60cl">
 
-</div>
+        product.packPrice =
+            Math.max(
+                0,
+                number(
+                    document.getElementById("editProductPackPrice").value
+                )
+            );
 
-<div>
+    }
 
-<label>Barcode</label>
 
-<input
-id="pbarcode"
-value="${esc(existing?.barcode||"")}"
-placeholder="Scan or enter barcode">
+    product.lowStock =
+        Math.max(
+            0,
+            number(
+                document.getElementById("editProductLowStock").value
+            )
+        );
 
-<button
-style="width:100%;margin-top:7px"
-onclick="openBarcodeForField('pbarcode')">
 
-📷 Scan Barcode
+    if(
+        !Number.isFinite(product.packPrice) ||
+        product.packPrice <= 0
+    ){
 
-</button>
+        product.packPrice =
+            product.piecePrice * product.packSize;
 
-</div>
+    }
 
-<div>
 
-<label>Category</label>
+    saveDatabase();
 
-<input
-id="pcategory"
-value="${esc(existing?.category||"")}"
-placeholder="Drinks, Water, Malt...">
 
-</div>
+    addAudit(
+        "PRODUCT_EDITED",
+        `Edited product: ${oldName}`
+    );
 
-<div>
 
-<label>Brand</label>
+    closeModal("editProductModal");
 
-<input
-id="pbrand"
-value="${esc(existing?.brand||"")}">
+    refreshAll();
 
-</div>
 
-<div>
-
-<label>Cost Price — Per Piece</label>
-
-<input
-id="pcost"
-type="number"
-step="0.01"
-value="${existing?.cost_price||0}">
-
-</div>
-
-<div>
-
-<label>Retail Price — 1 Piece</label>
-
-<input
-id="pretail"
-type="number"
-step="0.01"
-value="${existing?.retail_price||0}">
-
-</div>
-
-<div>
-
-<label>Pieces In 1 Pack</label>
-
-<input
-id="ppacksize"
-type="number"
-min="1"
-value="${existing?.pack_size||1}">
-
-</div>
-
-<div>
-
-<label>Price — 1 Pack</label>
-
-<input
-id="ppackprice"
-type="number"
-step="0.01"
-value="${existing?.pack_price||0}">
-
-</div>
-
-<div>
-
-<label>Pieces In 1 Carton</label>
-
-<input
-id="pcartonsize"
-type="number"
-min="1"
-value="${existing?.carton_size||1}">
-
-</div>
-
-<div>
-
-<label>Price — 1 Carton</label>
-
-<input
-id="pcartonprice"
-type="number"
-step="0.01"
-value="${existing?.carton_price||0}">
-
-</div>
-
-<div>
-
-<label>Opening Stock — Pieces</label>
-
-<input
-id="pstock"
-type="number"
-step="1"
-value="${existing?.stock||0}">
-
-</div>
-
-<div>
-
-<label>Low Stock Alert — Pieces</label>
-
-<input
-id="plow"
-type="number"
-value="${existing?.low_stock_level||5}">
-
-</div>
-
-<div>
-
-<label>Expiry Date</label>
-
-<input
-id="pexpiry"
-type="date"
-value="${existing?.expiry_date||""}">
-
-</div>
-
-<div>
-
-<label>Active</label>
-
-<select id="pactive">
-
-<option value="true"
-${existing?.active!==false?"selected":""}>
-Yes
-</option>
-
-<option value="false"
-${existing?.active===false?"selected":""}>
-No
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<div class="retailExplanation">
-
-<strong>Stock is stored as individual pieces.</strong>
-
-<br><br>
-
-Example:
-
-<br>
-12 bottles = 1 pack
-
-<br>
-24 bottles = 1 carton
-
-</div>
-
-<div class="actions">
-
-<button
-class="secondary"
-onclick="closeModal()">
-
-Cancel
-
-</button>
-
-<button
-onclick="saveProduct('${existing?.id||""}')">
-
-Save Product
-
-</button>
-
-${existing?`
-
-<button
-class="red"
-onclick="deleteProduct('${existing.id}')">
-
-Delete
-
-</button>
-
-`:""}
-
-</div>
-
-`);
+    alert("Product updated successfully.");
 
 }
 
 
-async function saveProduct(existing){
 
-const product={
+function changePrice(id){
 
-business_id:
-currentProfile.business_id,
+    if(!requirePermission(
+        "edit_price",
+        "Only the Owner or Manager can change prices."
+    )) return;
 
-name:
-document.getElementById("pname").value.trim(),
 
-barcode:
-document.getElementById("pbarcode").value.trim()||null,
+    const product =
+        db.products.find(p=>p.id===id);
 
-category:
-document.getElementById("pcategory").value.trim(),
 
-brand:
-document.getElementById("pbrand").value.trim(),
+    if(!product) return;
 
-cost_price:
-Number(document.getElementById("pcost").value||0),
 
-retail_price:
-Number(document.getElementById("pretail").value||0),
+    const piece =
+        prompt(
+            `Enter new price per piece for ${product.name}:`,
+            product.piecePrice
+        );
 
-pack_size:
-Math.max(
-1,
-Number(document.getElementById("ppacksize").value||1)
-),
 
-pack_price:
-Number(document.getElementById("ppackprice").value||0),
+    if(piece === null) return;
 
-carton_size:
-Math.max(
-1,
-Number(document.getElementById("pcartonsize").value||1)
-),
 
-carton_price:
-Number(document.getElementById("pcartonprice").value||0),
+    const piecePrice = number(piece);
 
-stock:
-Number(document.getElementById("pstock").value||0),
 
-low_stock_level:
-Number(document.getElementById("plow").value||0),
+    if(piecePrice < 0){
 
-expiry_date:
-document.getElementById("pexpiry").value||null,
+        alert("Price cannot be negative.");
 
-active:
-document.getElementById("pactive").value==="true"
+        return;
 
-};
+    }
 
-if(!product.name){
 
-alert("Enter product name.");
+    const pack =
+        prompt(
+            `Enter new price per pack (${product.packSize} pieces):`,
+            product.packPrice
+        );
 
-return;
 
-}
+    if(pack === null) return;
 
-try{
 
-let result;
+    const packPrice = number(pack);
 
-if(existing){
 
-result=
-await supabaseClient
-.from("products")
-.update(product)
-.eq("id",existing)
-.eq("business_id",currentProfile.business_id);
+    if(packPrice < 0){
 
-}else{
+        alert("Price cannot be negative.");
 
-result=
-await supabaseClient
-.from("products")
-.insert(product);
+        return;
 
-}
+    }
 
-if(result.error){
 
-throw result.error;
+    const oldPiece = product.piecePrice;
 
-}
+    const oldPack = product.packPrice;
 
-closeModal();
 
-await render();
+    product.piecePrice = piecePrice;
 
-showToast("Product saved successfully.");
+    product.packPrice = packPrice;
 
-}catch(error){
 
-console.error(error);
+    saveDatabase();
 
-alert(
-"Could not save product:\n\n"+
-friendlyDatabaseError(error)
-);
 
-}
+    addAudit(
+        "PRICE_CHANGED",
+        `${product.name}: piece ${money(oldPiece)} → ${money(piecePrice)}, pack ${money(oldPack)} → ${money(packPrice)}`
+    );
+
+
+    refreshAll();
+
+
+    alert("Price updated successfully.");
 
 }
 
 
-async function editProduct(id){
 
-const {
-data,
-error
-}=await supabaseClient
-.from("products")
-.select("*")
-.eq("id",id)
-.eq("business_id",currentProfile.business_id)
-.single();
+function deleteProduct(id){
 
-if(error){
+    if(currentUser?.role !== "owner"){
 
-alert(friendlyDatabaseError(error));
+        alert("Only the Owner can delete products.");
 
-return;
+        return;
 
-}
-
-newProduct(data);
-
-}
+    }
 
 
-async function deleteProduct(id){
+    const product =
+        db.products.find(p=>p.id===id);
 
-if(!confirm(
-"Delete this product?"
-))return;
 
-const {
-error
-}=await supabaseClient
-.from("products")
-.update({
-active:false
-})
-.eq("id",id)
-.eq("business_id",currentProfile.business_id);
+    if(!product) return;
 
-if(error){
 
-alert(friendlyDatabaseError(error));
+    if(!confirm(
+        `Delete "${product.name}"?\n\nThis cannot be undone unless you restore a backup.`
+    )) return;
 
-return;
 
-}
+    db.products =
+        db.products.filter(p=>p.id!==id);
 
-closeModal();
 
-await render();
+    saveDatabase();
 
-showToast("Product removed.");
+
+    addAudit(
+        "PRODUCT_DELETED",
+        `Deleted product: ${product.name}`
+    );
+
+
+    refreshAll();
 
 }
 
 
-/* =========================================================
-   BARCODE
-   ========================================================= */
 
-function openBarcodeForField(field){
+/* ======================================================
+   STOCK
+====================================================== */
 
-barcodeTarget={
-type:"field",
-field:field
-};
+function openStockModal(id){
 
-openBarcodeScanner();
-
-}
+    if(!requirePermission(
+        "stock",
+        "You do not have permission to adjust stock."
+    )) return;
 
 
-function openBarcodeForSale(){
-
-barcodeTarget={
-type:"sale"
-};
-
-openBarcodeScanner();
-
-}
+    const product =
+        db.products.find(p=>p.id===id);
 
 
-function barcodeStatus(message){
-
-const box=document.getElementById("barcodeStatus");
-
-if(box)
-box.innerHTML=message;
-
-}
+    if(!product) return;
 
 
-async function openBarcodeScanner(){
+    document.getElementById("stockProductId").value =
+        id;
 
-await stopBarcodeScanner();
 
-document
-.getElementById("barcodeModal")
-.classList.add("show");
+    document.getElementById("stockProductName")
+        .innerHTML =
+            `<strong>${escapeHTML(product.name)}</strong>
+             <br>
+             Current stock:
+             ${number(product.stockPieces).toLocaleString()} pieces`;
 
-barcodeStatus("📷 Preparing camera...");
 
-setTimeout(
-startBarcodeScanner,
-350
-);
+    document.getElementById("stockAdjustment").value = "";
+
+    openModal("stockModal");
 
 }
 
 
-async function startBarcodeScanner(){
 
-if(barcodeStarting)return;
+function saveStockAdjustment(){
 
-barcodeStarting=true;
+    const id =
+        document.getElementById("stockProductId").value;
 
-await stopBarcodeScanner();
 
-const reader=document.getElementById("barcodeReader");
+    const product =
+        db.products.find(p=>p.id===id);
 
-if(!reader){
 
-barcodeStarting=false;
+    if(!product) return;
 
-return;
 
-}
+    const adjustment =
+        Number(document.getElementById("stockAdjustment").value);
 
-reader.innerHTML="";
 
-try{
+    if(!Number.isFinite(adjustment) || adjustment === 0){
 
-barcodeScanner=
-new Html5Qrcode("barcodeReader");
+        alert("Enter a valid stock adjustment.");
 
-const formats=[
+        return;
 
-Html5QrcodeSupportedFormats.EAN_13,
-Html5QrcodeSupportedFormats.EAN_8,
-Html5QrcodeSupportedFormats.UPC_A,
-Html5QrcodeSupportedFormats.UPC_E,
-Html5QrcodeSupportedFormats.CODE_128,
-Html5QrcodeSupportedFormats.CODE_39,
-Html5QrcodeSupportedFormats.ITF
+    }
 
-];
 
-const config={
+    const newStock =
+        number(product.stockPieces) + adjustment;
 
-fps:10,
 
-qrbox:function(width,height){
+    if(newStock < 0){
 
-return{
+        alert(
+            `Stock cannot go below zero.\n\nCurrent stock: ${product.stockPieces} pieces`
+        );
 
-width:Math.min(
-320,
-Math.floor(width*.85)
-),
+        return;
 
-height:Math.min(
-180,
-Math.floor(height*.40)
-)
+    }
 
-};
 
-},
+    product.stockPieces = newStock;
 
-aspectRatio:1.5,
 
-formatsToSupport:formats
+    const reason =
+        document.getElementById("stockReason").value;
 
-};
 
-await barcodeScanner.start(
+    saveDatabase();
 
-{
-facingMode:"environment"
-},
 
-config,
+    addAudit(
+        "STOCK_ADJUSTMENT",
+        `${product.name}: ${adjustment > 0 ? "+" : ""}${adjustment} pieces. Reason: ${reason}`
+    );
 
-function(code){
 
-handleScannedBarcode(code);
+    closeModal("stockModal");
 
-},
+    refreshAll();
 
-function(){}
 
-);
-
-barcodeRunning=true;
-
-barcodeStatus(
-"📷 Camera ready — point it at the barcode."
-);
-
-}catch(error){
-
-console.error(error);
-
-barcodeStatus(
-"⚠️ Live camera could not start.<br><br>"+
-"Use <strong>Take Barcode Photo</strong> "+
-"or enter the barcode manually."
-);
-
-}finally{
-
-barcodeStarting=false;
-
-}
+    alert("Stock updated successfully.");
 
 }
 
 
-async function handleScannedBarcode(code){
 
-code=String(code||"").trim();
-
-if(!code)return;
-
-if(
-barcodeTarget &&
-barcodeTarget.type==="field"
-){
-
-const input=
-document.getElementById(
-barcodeTarget.field
-);
-
-if(input){
-
-input.value=code;
-
-input.dispatchEvent(
-new Event("input",{bubbles:true})
-);
-
-}
-
-barcodeStatus(
-"✅ Barcode captured: <strong>"+
-esc(code)+
-"</strong>"
-);
-
-setTimeout(
-closeBarcodeScanner,
-600
-);
-
-return;
-
-}
-
-if(
-barcodeTarget &&
-barcodeTarget.type==="sale"
-){
-
-barcodeStatus(
-"🔎 Looking for product..."
-);
-
-await stopBarcodeScanner();
-
-await addScannedProductToSale(code);
-
-}
-
-}
-
-
-async function addScannedProductToSale(code){
-
-const product=
-salesProducts.find(
-p=>
-String(p.barcode||"").trim()===
-String(code).trim()
-);
-
-if(!product){
-
-barcodeStatus(
-"❌ Product not found for barcode "+
-esc(code)+
-"<br><br>"+
-"Add this barcode to the product first."
-);
-
-return;
-
-}
-
-closeBarcodeScanner();
-
-addSaleProduct(product.id);
-
-showToast(
-product.name+
-" added to sale."
-);
-
-}
-
-
-async function scanBarcodePhoto(event){
-
-const file=
-event.target.files?.[0];
-
-if(!file)return;
-
-barcodeStatus(
-"🔎 Reading barcode from photo..."
-);
-
-await stopBarcodeScanner();
-
-try{
-
-const scanner=
-new Html5Qrcode("barcodeReader");
-
-const result=
-await scanner.scanFile(file,true);
-
-try{
-
-await scanner.clear();
-
-}catch(e){}
-
-await handleScannedBarcode(result);
-
-}catch(error){
-
-console.error(error);
-
-barcodeStatus(
-"❌ Barcode could not be read.<br><br>"+
-"Take a clear photo with good lighting."
-);
-
-}
-
-event.target.value="";
-
-}
-
-
-function useManualBarcode(){
-
-const input=document.getElementById("manualBarcode");
-
-const code=input.value.trim();
-
-if(!code){
-
-alert("Enter a barcode first.");
-
-return;
-
-}
-
-handleScannedBarcode(code);
-
-}
-
-
-async function stopBarcodeScanner(){
-
-if(!barcodeScanner){
-
-barcodeRunning=false;
-
-return;
-
-}
-
-const scanner=barcodeScanner;
-
-barcodeScanner=null;
-
-try{
-
-if(barcodeRunning){
-
-await scanner.stop();
-
-}
-
-}catch(e){}
-
-try{
-
-await scanner.clear();
-
-}catch(e){}
-
-barcodeRunning=false;
-
-}
-
-
-async function closeBarcodeScanner(){
-
-await stopBarcodeScanner();
-
-const modal=document.getElementById("barcodeModal");
-
-if(modal)
-modal.classList.remove("show");
-
-const reader=document.getElementById("barcodeReader");
-
-if(reader)
-reader.innerHTML="";
-
-}
-
-
-/* =========================================================
-   SALES
-   ========================================================= */
-
-async function getSales(){
-
-const {
-data,
-error
-}=await supabaseClient
-.from("sales")
-.select(`
-*,
-sale_items(*)
-`)
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
-if(error){
-
-console.error(error);
-
-return [];
-
-}
-
-return data||[];
-
-}
-
-
-async function salesPage(){
-
-const sales=await getSales();
-
-const revenue=
-sales.reduce(
-(a,b)=>a+Number(b.total||0),
-0
-);
-
-return`
-
-<h1>Sales</h1>
-
-<div class="grid">
-
-<div class="card stat">
-
-Total Sales
-
-<strong>
-${money(revenue)}
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Transactions
-
-<strong>
-${sales.length}
-</strong>
-
-</div>
-
-</div>
-
-<div class="toolbar">
-
-<button
-onclick="newSale()">
-
-+ New Sale
-
-</button>
-
-</div>
-
-<div class="retailExplanation">
-
-<strong>🛒 Retail & Wholesale Selling</strong>
-
-<br><br>
-
-<strong>Retail</strong> = individual pieces.
-
-<br>
-
-<strong>Wholesale</strong> = pack or carton.
-
-<br><br>
-
-The system automatically calculates the number
-of pieces deducted from stock.
-
-</div>
-
-${salesTable(sales)}
-
-`;
-
-}
-
-
-function salesTable(sales){
-
-if(!sales.length){
-
-return`
-
-<div class="card empty">
-No sales recorded yet.
-</div>
-
-`;
-
-}
-
-return`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Date</th>
-<th>Invoice</th>
-<th>Customer</th>
-<th>Type</th>
-<th>Payment</th>
-<th>Discount</th>
-<th>Total</th>
-
-</tr>
-
-${sales.map(s=>`
-
-<tr>
-
-<td>${esc(s.sale_date||"")}</td>
-
-<td>${esc(s.invoice_number||"")}</td>
-
-<td>${esc(s.customer_name||"Walk-in")}</td>
-
-<td>
-
-<span class="badge">
-
-${esc(s.sale_type||"Retail")}
-
-</span>
-
-</td>
-
-<td>${esc(s.payment_method||"")}</td>
-
-<td>${money(s.discount||0)}</td>
-
-<td class="money">
-${money(s.total)}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-/* =========================================================
-   NEW SALE
-   ========================================================= */
-
-async function newSale(){
-
-salesProducts=await getProducts();
-
-saleCustomers=await getCustomers();
-
-if(!salesProducts.length){
-
-alert(
-"Please add products before making a sale."
-);
-
-go("products");
-
-return;
-
-}
-
-saleCart=[];
-
-openModal(`
-
-<h2>🛒 New Sale</h2>
-
-<div class="retailExplanation">
-
-<strong>Retail:</strong>
-Sell individual pieces.
-
-<br><br>
-
-<strong>Wholesale:</strong>
-Sell a complete pack or carton.
-
-<br><br>
-
-SalesPro automatically saves the correct
-sale type to the database.
-
-</div>
-
-<div class="formgrid">
-
-<div>
-
-<label>Customer</label>
-
-<select id="saleCustomer">
-
-<option value="">
-Walk-in Customer
-</option>
-
-${saleCustomers.map(c=>`
-
-<option value="${c.id}">
-${esc(c.name)}
-</option>
-
-`).join("")}
-
-</select>
-
-</div>
-
-<div>
-
-<label>Sale Type</label>
-
-<select
-id="saleType"
-onchange="refreshAllSaleRows()">
-
-<option value="Retail">
-Retail — Single Piece
-</option>
-
-<option value="Wholesale">
-Wholesale — Pack / Carton
-</option>
-
-</select>
-
-</div>
-
-<div>
-
-<label>Payment Method</label>
-
-<select id="salePayment">
-
-<option value="Cash">Cash</option>
-<option value="Transfer">Transfer</option>
-<option value="POS">POS</option>
-<option value="Credit">Credit</option>
-
-</select>
-
-</div>
-
-<div>
-
-<label>Sale Date</label>
-
-<input
-id="saleDate"
-type="date"
-value="${today()}">
-
-</div>
-
-</div>
-
-<hr>
-
-<div class="saleSearch">
-
-<input
-id="saleProductSearch"
-placeholder="Search product name or barcode..."
-oninput="searchSaleProducts()">
-
-<button
-type="button"
-onclick="openBarcodeForSale()">
-
-📷 Scan
-
-</button>
-
-</div>
-
-<div
-id="saleSearchResults"
-style="margin-top:8px">
-</div>
-
-<div id="saleItems">
-
-<div class="empty">
-No products added yet.
-</div>
-
-</div>
-
-<div class="formgrid">
-
-<div>
-
-<label>Overall Discount</label>
-
-<input
-id="saleDiscount"
-type="number"
-min="0"
-step="0.01"
-value="0"
-oninput="refreshSaleTotal()">
-
-</div>
-
-<div>
-
-<label>Discount Type</label>
-
-<select
-id="saleDiscountType"
-onchange="refreshSaleTotal()">
-
-<option value="amount">
-Amount — ₦
-</option>
-
-<option value="percent">
-Percentage — %
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<div class="saleSummary">
-
-<div class="saleSummaryRow">
-
-<span>Subtotal</span>
-
-<strong id="saleSubtotal">
-₦0.00
-</strong>
-
-</div>
-
-<div class="saleSummaryRow">
-
-<span>Discount</span>
-
-<strong id="saleDiscountDisplay">
-₦0.00
-</strong>
-
-</div>
-
-<div class="saleSummaryRow">
-
-<span class="saleTotal">
-TOTAL
-</span>
-
-<strong
-id="saleTotal"
-class="saleTotal">
-
-₦0.00
-
-</strong>
-
-</div>
-
-</div>
-
-<div class="actions">
-
-<button
-class="secondary"
-onclick="closeModal()">
-
-Cancel
-
-</button>
-
-<button
-id="completeSaleButton"
-class="green"
-onclick="completeSale()">
-
-✅ Complete Sale
-
-</button>
-
-</div>
-
-`);
-
-}
-
+/* ======================================================
+   SALES PRODUCT SEARCH
+====================================================== */
 
 function searchSaleProducts(){
 
-const input=
-document.getElementById("saleProductSearch");
-
-const box=
-document.getElementById("saleSearchResults");
-
-if(!input||!box)return;
-
-const search=
-input.value.trim().toLowerCase();
-
-if(!search){
-
-box.innerHTML="";
-
-return;
-
-}
-
-const results=
-salesProducts
-.filter(p=>
-
-String(p.name||"")
-.toLowerCase()
-.includes(search)
-
-||
-
-String(p.barcode||"")
-.toLowerCase()
-.includes(search)
-
-)
-.slice(0,8);
-
-if(!results.length){
-
-box.innerHTML=`
-
-<div class="card">
-No matching product found.
-</div>
-
-`;
-
-return;
-
-}
-
-box.innerHTML=
-results.map(p=>`
-
-<div
-class="card"
-style="padding:10px;margin-bottom:6px;cursor:pointer"
-onclick="addSaleProduct('${p.id}')">
-
-<strong>
-${esc(p.name)}
-</strong>
-
-<br>
-
-<small>
-Piece: ${money(p.retail_price)}
-|
-Pack: ${money(p.pack_price)}
-|
-Stock: ${p.stock}
-</small>
-
-</div>
-
-`).join("");
-
-}
+    const input =
+        document.getElementById("saleSearch");
 
 
-function addSaleProduct(productId){
+    const results =
+        document.getElementById("saleSearchResults");
 
-const existing=
-saleCart.find(
-item=>item.productId===productId
-);
 
-if(existing){
+    const query =
+        input.value.trim().toLowerCase();
 
-existing.quantity++;
 
-}else{
+    if(!query){
 
-saleCart.push({
+        results.classList.add("hidden");
 
-productId:productId,
+        results.innerHTML = "";
 
-quantity:1,
+        return;
 
-unitType:"piece",
+    }
 
-priceOverride:null
 
-});
+    const products =
+        db.products.filter(p=>
+            p.name.toLowerCase().includes(query) ||
+            String(p.sku || "").toLowerCase().includes(query)
+        ).slice(0,20);
 
-}
 
-const search=
-document.getElementById("saleProductSearch");
+    if(!products.length){
 
-if(search)
-search.value="";
+        results.innerHTML =
+            `<div class="empty">
+                No products found.
+             </div>`;
 
-const results=
-document.getElementById("saleSearchResults");
+        results.classList.remove("hidden");
 
-if(results)
-results.innerHTML="";
+        return;
 
-renderSaleItems();
+    }
+
+
+    results.innerHTML =
+        products.map(p=>{
+
+            const stock =
+                number(p.stockPieces);
+
+
+            return `
+            <div
+                class="product-result"
+                onclick="addSaleItem('${p.id}')"
+            >
+
+                <strong>${escapeHTML(p.name)}</strong>
+
+                <br>
+
+                <small>
+                    ${money(p.piecePrice)} / piece
+                    ·
+                    ${money(p.packPrice)} / pack
+                    ·
+                    Stock: ${stock}
+                </small>
+
+            </div>
+            `;
+
+        }).join("");
+
+
+    results.classList.remove("hidden");
 
 }
 
 
-function removeSaleProduct(index){
 
-saleCart.splice(index,1);
+function addSaleItem(productId){
 
-renderSaleItems();
+    const product =
+        db.products.find(p=>p.id===productId);
+
+
+    if(!product) return;
+
+
+    if(number(product.stockPieces) <= 0){
+
+        alert("This product is out of stock.");
+
+        return;
+
+    }
+
+
+    const existing =
+        currentSaleItems.find(i=>i.productId===productId);
+
+
+    if(existing){
+
+        if(
+            existing.quantity >=
+            number(product.stockPieces)
+        ){
+
+            alert("You cannot sell more than available stock.");
+
+            return;
+
+        }
+
+
+        existing.quantity++;
+
+    }else{
+
+        currentSaleItems.push({
+
+            productId,
+
+            quantity:1,
+
+            unitType:"piece"
+
+        });
+
+    }
+
+
+    document.getElementById("saleSearch").value = "";
+
+    document.getElementById("saleSearchResults")
+        .classList.add("hidden");
+
+
+    renderSaleItems();
 
 }
 
+
+
+function removeSaleItem(productId){
+
+    currentSaleItems =
+        currentSaleItems.filter(
+            i=>i.productId!==productId
+        );
+
+
+    renderSaleItems();
+
+}
+
+
+
+function changeSaleQuantity(productId,value){
+
+    const item =
+        currentSaleItems.find(
+            i=>i.productId===productId
+        );
+
+
+    const product =
+        db.products.find(
+            p=>p.id===productId
+        );
+
+
+    if(!item || !product) return;
+
+
+    let qty =
+        Math.floor(Number(value));
+
+
+    if(!Number.isFinite(qty) || qty < 1){
+
+        qty = 1;
+
+    }
+
+
+    if(qty > number(product.stockPieces)){
+
+        qty = number(product.stockPieces);
+
+        alert("Quantity cannot exceed available stock.");
+
+    }
+
+
+    item.quantity = qty;
+
+
+    renderSaleItems();
+
+}
+
+
+
+function changeSaleType(productId,type){
+
+    const item =
+        currentSaleItems.find(
+            i=>i.productId===productId
+        );
+
+
+    if(!item) return;
+
+
+    item.unitType = type;
+
+
+    renderSaleItems();
+
+}
+
+
+
+/* ======================================================
+   SALES RENDER
+====================================================== */
 
 function renderSaleItems(){
 
-const box=
-document.getElementById("saleItems");
+    const container =
+        document.getElementById("saleItems");
 
-if(!box)return;
 
-if(!saleCart.length){
+    if(!currentSaleItems.length){
 
-box.innerHTML=`
+        container.innerHTML =
+            `<div class="empty">
+                No products added to this sale.
+             </div>`;
 
-<div class="empty">
-No products added yet.
-</div>
+        updateSaleTotals();
 
-`;
+        return;
 
-refreshSaleTotal();
+    }
 
-return;
 
-}
+    container.innerHTML =
+        currentSaleItems.map(item=>{
 
-box.innerHTML=
-saleCart.map((item,index)=>{
+            const product =
+                db.products.find(
+                    p=>p.id===item.productId
+                );
 
-const p=
-salesProducts.find(
-x=>x.id===item.productId
-);
 
-if(!p)return"";
+            if(!product) return "";
 
-const unitSize=
-item.unitType==="piece"
-?
-1
-:
-item.unitType==="pack"
-?
-Number(p.pack_size||1)
-:
-Number(p.carton_size||1);
 
-const defaultPrice=
-item.unitType==="piece"
-?
-Number(p.retail_price||0)
-:
-item.unitType==="pack"
-?
-Number(p.pack_price||0)
-:
-Number(p.carton_price||0);
+            const price =
+                item.unitType === "pack"
+                    ? number(product.packPrice)
+                    : number(product.piecePrice);
 
-const price=
-item.priceOverride!==null
-?
-Number(item.priceOverride)
-:
-defaultPrice;
 
-return`
+            const maxQty =
+                item.unitType === "pack"
+                    ? Math.floor(
+                        number(product.stockPieces) /
+                        number(product.packSize || 1)
+                    )
+                    : number(product.stockPieces);
 
-<div class="saleItem">
 
-<div class="saleItemHeader">
+            if(item.quantity > maxQty){
 
-<div>
+                item.quantity = Math.max(1,maxQty);
 
-<strong>
-${esc(p.name)}
-</strong>
+            }
 
-<br>
 
-<small>
-Stock: ${p.stock} pieces
-</small>
+            return `
+            <div class="sale-item">
 
-</div>
+                <div class="sale-item-head">
 
-<button
-class="red"
-onclick="removeSaleProduct(${index})">
+                    <div>
 
-Remove
+                        <strong>
+                            ${escapeHTML(product.name)}
+                        </strong>
 
-</button>
+                        <div class="stat">
+                            Available:
+                            ${number(product.stockPieces).toLocaleString()}
+                            pieces
+                        </div>
 
-</div>
+                    </div>
 
-<div class="saleItemControls">
+                    <button
+                        class="btn red"
+                        onclick="removeSaleItem('${product.id}')"
+                    >
+                        Remove
+                    </button>
 
-<div>
+                </div>
 
-<label>Selling Unit</label>
 
-<select
-onchange="changeSaleUnit(${index},this.value)">
+                <div class="grid3" style="margin-top:10px">
 
-<option
-value="piece"
-${item.unitType==="piece"?"selected":""}>
+                    <div>
 
-1 Piece — ${money(p.retail_price)}
+                        <label>Unit</label>
 
-</option>
+                        <select
+                            onchange="changeSaleType('${product.id}',this.value)"
+                        >
 
-<option
-value="pack"
-${item.unitType==="pack"?"selected":""}
-${Number(p.pack_size||0)<=1?"disabled":""}>
+                            <option
+                                value="piece"
+                                ${item.unitType==="piece"?"selected":""}
+                            >
+                                Piece
+                            </option>
 
-1 Pack — ${p.pack_size||0} pcs — ${money(p.pack_price)}
+                            <option
+                                value="pack"
+                                ${item.unitType==="pack"?"selected":""}
+                                ${number(product.packSize)<=1?"disabled":""}
+                            >
+                                Pack
+                            </option>
 
-</option>
+                        </select>
 
-<option
-value="carton"
-${item.unitType==="carton"?"selected":""}
-${Number(p.carton_size||0)<=1?"disabled":""}>
+                    </div>
 
-1 Carton — ${p.carton_size||0} pcs — ${money(p.carton_price)}
 
-</option>
+                    <div>
 
-</select>
+                        <label>Quantity</label>
 
-</div>
+                        <input
+                            type="number"
+                            min="1"
+                            max="${Math.max(1,maxQty)}"
+                            value="${item.quantity}"
+                            onchange="changeSaleQuantity('${product.id}',this.value)"
+                        >
 
-<div>
+                    </div>
 
-<label>Quantity</label>
 
-<input
-type="number"
-min="1"
-value="${item.quantity}"
-onchange="changeSaleQuantity(${index},this.value)">
+                    <div>
 
-</div>
+                        <label>Price</label>
 
-<div>
+                        <input
+                            value="${money(price)}"
+                            disabled
+                        >
 
-<label>Price For This Sale</label>
+                    </div>
 
-<input
-type="number"
-min="0"
-step="0.01"
-value="${price}"
-oninput="changeSalePrice(${index},this.value)">
+                </div>
 
-</div>
 
-</div>
+                <div style="margin-top:10px;text-align:right">
 
-<div class="saleItemPrice">
+                    <strong>
+                        ${money(price * item.quantity)}
+                    </strong>
 
-Pieces deducted:
+                </div>
 
-<strong>
-${item.quantity*unitSize}
-</strong>
+            </div>
+            `;
 
-&nbsp; | &nbsp;
+        }).join("");
 
-Line Total:
 
-<strong>
-${money(price*item.quantity)}
-</strong>
-
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-refreshSaleTotal();
+    updateSaleTotals();
 
 }
 
 
-function changeSaleUnit(index,value){
 
-const item=saleCart[index];
+function calculateSaleSubtotal(){
 
-if(!item)return;
+    return currentSaleItems.reduce(
+        (sum,item)=>{
 
-item.unitType=value;
-
-item.priceOverride=null;
-
-renderSaleItems();
-
-}
+            const product =
+                db.products.find(
+                    p=>p.id===item.productId
+                );
 
 
-function changeSaleQuantity(index,value){
-
-const qty=Math.max(
-1,
-Number(value||1)
-);
-
-saleCart[index].quantity=qty;
-
-renderSaleItems();
-
-}
+            if(!product) return sum;
 
 
-function changeSalePrice(index,value){
+            const price =
+                item.unitType === "pack"
+                    ? number(product.packPrice)
+                    : number(product.piecePrice);
 
-saleCart[index].priceOverride=
-Math.max(0,Number(value||0));
 
-refreshSaleTotal();
+            return sum +
+                price *
+                number(item.quantity);
+
+        },
+        0
+    );
 
 }
 
 
-function refreshAllSaleRows(){
 
-renderSaleItems();
+function updateSaleTotals(){
 
-}
+    const subtotal =
+        calculateSaleSubtotal();
 
 
-function refreshSaleTotal(){
+    let discount =
+        number(
+            document.getElementById("saleDiscountInput")?.value
+        );
 
-let subtotal=0;
 
-saleCart.forEach(item=>{
+    if(discount > subtotal){
 
-const p=
-salesProducts.find(
-x=>x.id===item.productId
-);
+        discount = subtotal;
 
-if(!p)return;
+        if(document.getElementById("saleDiscountInput")){
 
-const defaultPrice=
-item.unitType==="piece"
-?
-Number(p.retail_price||0)
-:
-item.unitType==="pack"
-?
-Number(p.pack_price||0)
-:
-Number(p.carton_price||0);
+            document.getElementById("saleDiscountInput").value =
+                discount;
 
-const price=
-item.priceOverride!==null
-?
-Number(item.priceOverride)
-:
-defaultPrice;
+        }
 
-subtotal+=
-price*
-Number(item.quantity||0);
+    }
 
-});
 
-const discountInput=
-document.getElementById("saleDiscount");
+    const total =
+        Math.max(
+            0,
+            subtotal - discount
+        );
 
-const discountType=
-document.getElementById("saleDiscountType")?.value||
-"amount";
 
-let discount=
-Number(discountInput?.value||0);
+    document.getElementById("saleSubtotal")
+        .textContent = money(subtotal);
 
-if(discountType==="percent"){
 
-discount=
-subtotal*
-Math.min(
-100,
-Math.max(0,discount)
-)
-/100;
+    document.getElementById("saleDiscount")
+        .textContent = money(discount);
 
-}else{
 
-discount=
-Math.min(
-subtotal,
-Math.max(0,discount)
-);
-
-}
-
-const total=
-Math.max(
-0,
-subtotal-discount
-);
-
-const subtotalBox=
-document.getElementById("saleSubtotal");
-
-const discountBox=
-document.getElementById("saleDiscountDisplay");
-
-const totalBox=
-document.getElementById("saleTotal");
-
-if(subtotalBox)
-subtotalBox.textContent=money(subtotal);
-
-if(discountBox)
-discountBox.textContent=money(discount);
-
-if(totalBox)
-totalBox.textContent=money(total);
+    document.getElementById("saleTotal")
+        .textContent = money(total);
 
 }
 
 
-function getSaleUnitSize(product,type){
 
-if(type==="piece")
-return 1;
+function toggleDiscount(){
 
-if(type==="pack")
-return Math.max(
-1,
-Number(product.pack_size||1)
-);
-
-if(type==="carton")
-return Math.max(
-1,
-Number(product.carton_size||1)
-);
-
-return 1;
-
-}
+    if(!requirePermission(
+        "discount",
+        "Only the Owner or Manager can give a discount."
+    )) return;
 
 
-function getSalePrice(product,type){
+    const area =
+        document.getElementById("discountArea");
 
-if(type==="piece")
-return Number(product.retail_price||0);
 
-if(type==="pack")
-return Number(product.pack_price||0);
+    area.classList.toggle("hidden");
 
-if(type==="carton")
-return Number(product.carton_price||0);
 
-return 0;
+    if(area.classList.contains("hidden")){
+
+        document.getElementById("saleDiscountInput")
+            .value = 0;
+
+    }
+
+
+    updateSaleTotals();
 
 }
 
 
-/* =========================================================
-   SALE TYPE AUTO CORRECTION
-   ========================================================= */
 
-/*
-   This function makes sure the value sent to Supabase
-   is ALWAYS one of the expected sale types.
+function clearSale(){
 
-   It prevents:
-   "Retail / Wholesale"
-   "retail"
-   "wholesale"
-   "Retail Wholesale"
-   etc.
-*/
+    currentSaleItems = [];
 
-function normalizeSaleType(value){
+    document.getElementById("saleCustomer").value = "";
 
-const valueString=
-String(value||"")
-.trim()
-.toLowerCase();
+    document.getElementById("salePayment").value = "Cash";
 
-if(
-valueString==="wholesale"||
-valueString.includes("wholesale")
-){
+    document.getElementById("saleDiscountInput").value = 0;
 
-return "Wholesale";
+    document.getElementById("discountArea")
+        .classList.add("hidden");
 
-}
 
-return "Retail";
+    renderSaleItems();
 
 }
 
 
-/*
-   Automatically builds a clean sale object.
-*/
 
-function buildSaleRecord({
-
-invoice,
-customerId,
-customerName,
-saleType,
-subtotal,
-discount,
-total,
-paymentMethod,
-saleDate
-
-}){
-
-const cleanSaleType=
-normalizeSaleType(saleType);
-
-return{
-
-business_id:
-currentProfile.business_id,
-
-invoice_number:
-invoice,
-
-customer_id:
-customerId||null,
-
-user_id:
-currentUser.id,
-
-sale_type:
-cleanSaleType,
-
-subtotal:
-Number(subtotal||0),
-
-discount:
-Number(discount||0),
-
-total:
-Number(total||0),
-
-amount_paid:
-Number(total||0),
-
-balance:0,
-
-payment_method:
-paymentMethod||"Cash",
-
-status:"completed",
-
-sale_date:
-saleDate||today(),
-
-customer_name:
-customerName||"Walk-in Customer",
-
-created_by:
-currentUser.id
-
-};
-
-}
-
-
-/* =========================================================
+/* ======================================================
    COMPLETE SALE
-   ========================================================= */
+====================================================== */
 
-async function completeSale(){
+function completeSale(){
 
-const button=
-document.getElementById("completeSaleButton");
+    if(!currentSaleItems.length){
 
-if(button){
+        alert("Add at least one product to the sale.");
 
-button.disabled=true;
+        return;
 
-button.textContent="⏳ Processing Sale...";
+    }
 
-}
 
-try{
+    const subtotal =
+        calculateSaleSubtotal();
 
-if(!saleCart.length){
 
-throw new Error(
-"Please add at least one product."
-);
+    let discount =
+        number(
+            document.getElementById("saleDiscountInput").value
+        );
 
-}
 
-if(
-!currentProfile||
-!currentProfile.business_id
-){
+    if(discount > 0 && !hasPermission("discount")){
 
-throw new Error(
-"Business profile is not available. Please login again."
-);
+        alert(
+            "Only Owner or Manager can give discounts."
+        );
 
-}
+        return;
 
-const items=[];
+    }
 
-let subtotal=0;
 
+    if(discount < 0){
 
-/*
-   Build sale items and verify stock.
-*/
+        discount = 0;
 
-for(const cartItem of saleCart){
+    }
 
-const product=
-salesProducts.find(
-p=>p.id===cartItem.productId
-);
 
-if(!product){
+    if(discount > subtotal){
 
-throw new Error(
-"A selected product could not be found."
-);
+        discount = subtotal;
 
-}
+    }
 
-const unitSize=
-getSaleUnitSize(
-product,
-cartItem.unitType
-);
 
-const quantity=
-Number(cartItem.quantity||0);
+    const total =
+        Math.max(
+            0,
+            subtotal - discount
+        );
 
-if(
-!Number.isFinite(quantity)||
-quantity<=0
-){
 
-throw new Error(
-"Invalid quantity for "+product.name
-);
+    const stockChanges = [];
 
-}
 
-const piecesDeducted=
-quantity*unitSize;
+    for(const item of currentSaleItems){
 
-const availableStock=
-Number(product.stock||0);
+        const product =
+            db.products.find(
+                p=>p.id===item.productId
+            );
 
-if(
-piecesDeducted>availableStock
-){
 
-throw new Error(
-"Not enough stock for "+
-product.name+
-".\n\nAvailable: "+
-availableStock+
-" pieces.\nRequired: "+
-piecesDeducted+
-" pieces."
-);
+        if(!product){
 
-}
+            alert(
+                "One of the selected products no longer exists."
+            );
 
-const defaultPrice=
-getSalePrice(
-product,
-cartItem.unitType
-);
+            return;
 
-const unitPrice=
-cartItem.priceOverride!==null
-?
-Number(cartItem.priceOverride)
-:
-defaultPrice;
+        }
 
-if(
-!Number.isFinite(unitPrice)||
-unitPrice<0
-){
 
-throw new Error(
-"Invalid selling price for "+
-product.name
-);
+        let piecesNeeded;
 
-}
 
-const lineTotal=
-unitPrice*quantity;
+        if(item.unitType === "pack"){
 
-items.push({
+            piecesNeeded =
+                number(item.quantity) *
+                number(product.packSize);
 
-product_id:product.id,
+        }else{
 
-product_name:product.name,
+            piecesNeeded =
+                number(item.quantity);
 
-barcode:product.barcode||null,
+        }
 
-quantity:piecesDeducted,
 
-sold_quantity:quantity,
+        if(piecesNeeded >
+            number(product.stockPieces)
+        ){
 
-unit_type:cartItem.unitType,
+            alert(
+                `${product.name} does not have enough stock.`
+            );
 
-unit_size:unitSize,
+            return;
 
-unit_price:unitPrice,
+        }
 
-cost_price:Number(
-product.cost_price||0
-),
 
-total:lineTotal
+        stockChanges.push({
+            product,
+            piecesNeeded
+        });
 
-});
+    }
 
-subtotal+=lineTotal;
 
-}
+    const invoice =
+        "INV-" +
+        Date.now().toString().slice(-8);
 
 
-/*
-   Discount.
-*/
+    const sale = {
 
-let discount=
-Number(
-document.getElementById("saleDiscount")?.value||0
-);
+        id:uid("s"),
 
-const discountType=
-document.getElementById(
-"saleDiscountType"
-)?.value||"amount";
+        invoice,
 
-if(discountType==="percent"){
+        date:new Date().toISOString(),
 
-discount=
-subtotal*
-Math.min(
-100,
-Math.max(0,discount)
-)
-/100;
+        customer:
+            document.getElementById("saleCustomer")
+            .value.trim()
+            || "Walk-in Customer",
 
-}else{
+        payment:
+            document.getElementById("salePayment")
+            .value,
 
-discount=
-Math.min(
-subtotal,
-Math.max(0,discount)
-);
+        items:
+            currentSaleItems.map(item=>{
 
-}
+                const product =
+                    db.products.find(
+                        p=>p.id===item.productId
+                    );
 
-const total=
-Math.max(
-0,
-subtotal-discount
-);
 
+                const price =
+                    item.unitType === "pack"
+                        ? number(product.packPrice)
+                        : number(product.piecePrice);
 
-/*
-   Customer.
-*/
 
-const customerId=
-document.getElementById(
-"saleCustomer"
-)?.value||null;
+                return {
 
-const customer=
-saleCustomers.find(
-c=>c.id===customerId
-);
+                    productId:product.id,
 
+                    name:product.name,
 
-/*
-   IMPORTANT:
-   This now uses Retail OR Wholesale only.
-*/
+                    unitType:item.unitType,
 
-const selectedSaleType=
-document.getElementById(
-"saleType"
-)?.value||"Retail";
+                    quantity:number(item.quantity),
 
-const saleType=
-normalizeSaleType(
-selectedSaleType
-);
+                    price,
 
+                    total:
+                        price *
+                        number(item.quantity)
 
-/*
-   Unique invoice.
-*/
+                };
 
-const invoice=
-"INV-"+Date.now()+"-"+Math.floor(
-Math.random()*1000
-);
+            }),
 
+        subtotal,
 
-/*
-   Build clean sale record.
-*/
+        discount,
 
-const sale=
-buildSaleRecord({
+        total,
 
-invoice,
+        user:
+            currentUser.username
 
-customerId,
+    };
 
-customerName:
-customer?.name||
-"Walk-in Customer",
 
-saleType,
+    stockChanges.forEach(change=>{
 
-subtotal,
+        change.product.stockPieces -=
+            change.piecesNeeded;
 
-discount,
+    });
 
-total,
 
-paymentMethod:
-document.getElementById(
-"salePayment"
-)?.value||
-"Cash",
+    db.sales.unshift(sale);
 
-saleDate:
-document.getElementById(
-"saleDate"
-)?.value||
-today()
 
-});
+    saveDatabase();
 
 
-/*
-=========================================================
-INSERT SALE
-=========================================================
-*/
+    addAudit(
+        "SALE_COMPLETED",
+        `${invoice} completed for ${money(total)}`
+    );
 
-let saleResult=
-await supabaseClient
-.from("sales")
-.insert(sale)
-.select()
-.single();
 
+    alert(
+        `Sale completed successfully.\n\nInvoice: ${invoice}\nTotal: ${money(total)}`
+    );
 
-/*
-   If sale_type somehow still triggers the constraint,
-   automatically retry once with Retail.
 
-   This is a safety fallback and should normally
-   never be needed because normalizeSaleType()
-   already fixes the value.
-*/
+    clearSale();
 
-if(
-saleResult.error&&
-String(saleResult.error.message||"")
-.includes("sales_sale_type_check")
-){
-
-console.warn(
-"Sale type constraint detected. Retrying with Retail."
-);
-
-const retrySale={
-...sale,
-sale_type:"Retail"
-};
-
-saleResult=
-await supabaseClient
-.from("sales")
-.insert(retrySale)
-.select()
-.single();
+    refreshAll();
 
 }
 
 
-/*
-   Final sale insert check.
-*/
 
-if(saleResult.error){
+/* ======================================================
+   RECENT SALES
+====================================================== */
 
-throw saleResult.error;
+function renderRecentSales(){
 
-}
-
-const savedSale=saleResult.data;
+    const container =
+        document.getElementById("recentSales");
 
 
-/*
-=========================================================
-INSERT SALE ITEMS
-=========================================================
-*/
-
-const extendedItems=
-items.map(item=>({
-
-sale_id:
-savedSale.id,
-
-product_id:
-item.product_id,
-
-product_name:
-item.product_name,
-
-barcode:
-item.barcode,
-
-quantity:
-item.quantity,
-
-sold_quantity:
-item.sold_quantity,
-
-unit_type:
-item.unit_type,
-
-unit_size:
-item.unit_size,
-
-unit_price:
-item.unit_price,
-
-cost_price:
-item.cost_price,
-
-total:
-item.total
-
-}));
+    const sales =
+        db.sales.slice(0,8);
 
 
-let itemResult=
-await supabaseClient
-.from("sale_items")
-.insert(extendedItems);
+    if(!sales.length){
+
+        container.innerHTML =
+            `<div class="empty">
+                No sales recorded yet.
+             </div>`;
+
+        return;
+
+    }
 
 
-/*
-   If your current sale_items table doesn't yet contain
-   the extended packaging columns, retry with the basic
-   columns automatically.
-*/
+    container.innerHTML = `
+    <div class="table-wrap">
 
-if(itemResult.error){
+        <table>
 
-console.warn(
-"Extended sale item insert failed. Retrying with basic columns.",
-itemResult.error
-);
+            <thead>
 
-const basicItems=
-items.map(item=>({
+                <tr>
+                    <th>Date</th>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                </tr>
 
-sale_id:
-savedSale.id,
+            </thead>
 
-product_id:
-item.product_id,
+            <tbody>
 
-product_name:
-item.product_name,
+                ${sales.map(s=>`
 
-barcode:
-item.barcode,
+                    <tr>
 
-quantity:
-item.quantity,
+                        <td>${formatDate(s.date)}</td>
 
-unit_price:
-item.unit_price,
+                        <td>
+                            <strong>${escapeHTML(s.invoice)}</strong>
+                        </td>
 
-cost_price:
-item.cost_price,
+                        <td>${escapeHTML(s.customer)}</td>
 
-total:
-item.total
+                        <td>${money(s.total)}</td>
 
-}));
+                        <td>${escapeHTML(s.payment)}</td>
 
-itemResult=
-await supabaseClient
-.from("sale_items")
-.insert(basicItems);
+                    </tr>
+
+                `).join("")}
+
+            </tbody>
+
+        </table>
+
+    </div>
+    `;
 
 }
 
 
-if(itemResult.error){
 
-/*
-   The sale was already inserted but items failed.
-   Attempt to remove the incomplete sale.
-*/
-
-console.error(
-"Sale items failed. Attempting cleanup.",
-itemResult.error
-);
-
-await supabaseClient
-.from("sales")
-.delete()
-.eq("id",savedSale.id)
-.eq(
-"business_id",
-currentProfile.business_id
-);
-
-throw itemResult.error;
-
-}
-
-
-/*
-=========================================================
-DEDUCT STOCK
-=========================================================
-*/
-
-for(const item of items){
-
-const product=
-salesProducts.find(
-p=>p.id===item.product_id
-);
-
-if(!product)continue;
-
-const currentStock=
-Number(product.stock||0);
-
-const deduction=
-Number(item.quantity||0);
-
-const newStock=
-currentStock-deduction;
-
-if(newStock<0){
-
-throw new Error(
-"Stock calculation produced an invalid negative stock for "+
-product.name
-);
-
-}
-
-const {
-error:stockError
-}=await supabaseClient
-.from("products")
-.update({
-
-stock:newStock,
-
-updated_at:
-new Date().toISOString()
-
-})
-.eq(
-"id",
-item.product_id
-)
-.eq(
-"business_id",
-currentProfile.business_id
-);
-
-if(stockError){
-
-throw stockError;
-
-}
-
-}
-
-
-/*
-=========================================================
-SUCCESS
-=========================================================
-*/
-
-closeModal();
-
-await render();
-
-showToast(
-"Sale completed — "+invoice
-);
-
-alert(
-"Sale completed successfully.\n\n"+
-"Invoice: "+invoice+
-"\nSale Type: "+saleType+
-"\nTotal: "+money(total)
-);
-
-}catch(error){
-
-console.error(
-"COMPLETE SALE ERROR:",
-error
-);
-
-alert(
-"Sale could not be completed:\n\n"+
-friendlyDatabaseError(error)
-);
-
-}finally{
-
-if(button){
-
-button.disabled=false;
-
-button.textContent="✅ Complete Sale";
-
-}
-
-}
-
-}
-
-
-/* =========================================================
+/* ======================================================
    CUSTOMERS
-   ========================================================= */
+====================================================== */
 
-async function getCustomers(){
+function addCustomer(){
 
-const {
-data,
-error
-}=await supabaseClient
-.from("customers")
-.select("*")
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.order("name");
-
-if(error){
-
-console.error(error);
-
-return [];
-
-}
-
-return data||[];
-
-}
+    const name =
+        document.getElementById("customerName")
+        .value.trim();
 
 
-async function customersPage(){
+    if(!name){
 
-const customers=
-await getCustomers();
+        alert("Customer name is required.");
 
-return`
+        return;
 
-<h1>Customers</h1>
+    }
 
-<div class="toolbar">
 
-<button onclick="newCustomer()">
+    db.customers.push({
 
-+ Add Customer
+        id:uid("c"),
 
-</button>
+        name,
 
-</div>
+        phone:
+            document.getElementById("customerPhone")
+            .value.trim(),
 
-${customers.length?
+        address:
+            document.getElementById("customerAddress")
+            .value.trim(),
 
-`
+        createdAt:new Date().toISOString()
 
-<div class="table">
+    });
 
-<table>
 
-<tr>
+    saveDatabase();
 
-<th>Name</th>
-<th>Phone</th>
-<th>Email</th>
-<th>Type</th>
-<th>Balance</th>
-<th>Action</th>
 
-</tr>
+    addAudit(
+        "CUSTOMER_CREATED",
+        `Created customer: ${name}`
+    );
 
-${customers.map(c=>`
 
-<tr>
+    document.getElementById("customerName").value = "";
 
-<td>${esc(c.name)}</td>
+    document.getElementById("customerPhone").value = "";
 
-<td>${esc(c.phone||"-")}</td>
+    document.getElementById("customerAddress").value = "";
 
-<td>${esc(c.email||"-")}</td>
 
-<td>${esc(c.customer_type||"Retail")}</td>
+    renderCustomers();
 
-<td>${money(c.balance)}</td>
 
-<td>
-
-<button
-class="secondary"
-onclick="editCustomer('${c.id}')">
-
-Edit
-
-</button>
-
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`
-
-:
-
-`
-
-<div class="card empty">
-No customers yet.
-</div>
-
-`
-
-}
-
-`;
+    alert("Customer added successfully.");
 
 }
 
 
-async function newCustomer(existing=null){
 
-openModal(`
+function renderCustomers(){
 
-<h2>
-${existing?"Edit":"Add"} Customer
-</h2>
+    const tbody =
+        document.getElementById("customersTable");
 
-<label>Name</label>
 
-<input
-id="cname"
-value="${esc(existing?.name||"")}">
+    if(!db.customers.length){
 
-<label>Phone</label>
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="4" class="empty">
+                    No customers added.
+                </td>
+             </tr>`;
 
-<input
-id="cphone"
-value="${esc(existing?.phone||"")}">
+        return;
 
-<label>Email</label>
+    }
 
-<input
-id="cemail"
-value="${esc(existing?.email||"")}">
 
-<label>Address</label>
+    tbody.innerHTML =
+        db.customers.map(c=>{
 
-<textarea
-id="caddress">${esc(existing?.address||"")}</textarea>
+            const total =
+                db.sales
+                    .filter(s=>
+                        s.customer === c.name
+                    )
+                    .reduce(
+                        (sum,s)=>sum+number(s.total),
+                        0
+                    );
 
-<label>Customer Type</label>
 
-<select id="ctype">
+            return `
+            <tr>
 
-<option
-value="Retail"
-${existing?.customer_type==="Retail"?"selected":""}>
-Retail
-</option>
+                <td>${escapeHTML(c.name)}</td>
 
-<option
-value="Wholesale"
-${existing?.customer_type==="Wholesale"?"selected":""}>
-Wholesale
-</option>
+                <td>${escapeHTML(c.phone || "-")}</td>
 
-</select>
+                <td>${escapeHTML(c.address || "-")}</td>
 
-<label>Balance</label>
+                <td>${money(total)}</td>
 
-<input
-id="cbalance"
-type="number"
-value="${existing?.balance||0}">
+            </tr>
+            `;
 
-<div class="actions">
-
-<button
-class="secondary"
-onclick="closeModal()">
-
-Cancel
-
-</button>
-
-<button
-onclick="saveCustomer('${existing?.id||""}')">
-
-Save
-
-</button>
-
-</div>
-
-`);
+        }).join("");
 
 }
 
 
-async function saveCustomer(existing){
 
-const customer={
-
-business_id:
-currentProfile.business_id,
-
-name:
-document.getElementById("cname").value.trim(),
-
-phone:
-document.getElementById("cphone").value.trim(),
-
-email:
-document.getElementById("cemail").value.trim(),
-
-address:
-document.getElementById("caddress").value.trim(),
-
-customer_type:
-normalizeSaleType(
-document.getElementById("ctype").value
-),
-
-balance:
-Number(
-document.getElementById("cbalance").value||0
-)
-
-};
-
-if(!customer.name){
-
-alert("Enter customer name.");
-
-return;
-
-}
-
-let result;
-
-if(existing){
-
-result=
-await supabaseClient
-.from("customers")
-.update(customer)
-.eq("id",existing)
-.eq(
-"business_id",
-currentProfile.business_id
-);
-
-}else{
-
-result=
-await supabaseClient
-.from("customers")
-.insert(customer);
-
-}
-
-if(result.error){
-
-alert(
-friendlyDatabaseError(result.error)
-);
-
-return;
-
-}
-
-closeModal();
-
-await render();
-
-showToast("Customer saved.");
-
-}
-
-
-async function editCustomer(id){
-
-const {
-data,
-error
-}=await supabaseClient
-.from("customers")
-.select("*")
-.eq("id",id)
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.single();
-
-if(error){
-
-alert(friendlyDatabaseError(error));
-
-return;
-
-}
-
-newCustomer(data);
-
-}
-
-
-/* =========================================================
-   EXPENSES
-   ========================================================= */
-
-async function getExpenses(){
-
-const {
-data,
-error
-}=await supabaseClient
-.from("expenses")
-.select("*")
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.order(
-"date",
-{
-ascending:false
-}
-);
-
-if(error){
-
-console.error(error);
-
-return [];
-
-}
-
-return data||[];
-
-}
-
-
-async function expensesPage(){
-
-const expenses=
-await getExpenses();
-
-const total=
-expenses.reduce(
-(a,b)=>a+Number(b.amount||0),
-0
-);
-
-return`
-
-<h1>Expenses</h1>
-
-<div class="grid">
-
-<div class="card stat">
-
-Total Expenses
-
-<strong>
-${money(total)}
-</strong>
-
-</div>
-
-</div>
-
-<div class="toolbar">
-
-<button onclick="newExpense()">
-
-+ Add Expense
-
-</button>
-
-</div>
-
-${expenses.length?
-
-`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Date</th>
-<th>Description</th>
-<th>Category</th>
-<th>Amount</th>
-
-</tr>
-
-${expenses.map(e=>`
-
-<tr>
-
-<td>${esc(e.date||"")}</td>
-
-<td>${esc(e.description||"")}</td>
-
-<td>${esc(e.category||"")}</td>
-
-<td>${money(e.amount)}</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`
-
-:
-
-`
-
-<div class="card empty">
-No expenses recorded.
-</div>
-
-`
-
-}
-
-`;
-
-}
-
-
-async function newExpense(){
-
-openModal(`
-
-<h2>Add Expense</h2>
-
-<label>Date</label>
-
-<input
-id="edate"
-type="date"
-value="${today()}">
-
-<label>Description</label>
-
-<input id="edesc">
-
-<label>Category</label>
-
-<select id="ecat">
-
-<option>Transport</option>
-<option>Rent</option>
-<option>Electricity</option>
-<option>Salary</option>
-<option>Shopping</option>
-<option>Maintenance</option>
-<option>Other</option>
-
-</select>
-
-<label>Amount</label>
-
-<input
-id="eamount"
-type="number">
-
-<div class="actions">
-
-<button
-class="secondary"
-onclick="closeModal()">
-
-Cancel
-
-</button>
-
-<button
-onclick="saveExpense()">
-
-Save Expense
-
-</button>
-
-</div>
-
-`);
-
-}
-
-
-async function saveExpense(){
-
-const expense={
-
-business_id:
-currentProfile.business_id,
-
-date:
-document.getElementById("edate").value,
-
-description:
-document.getElementById("edesc").value.trim(),
-
-category:
-document.getElementById("ecat").value,
-
-amount:
-Number(
-document.getElementById("eamount").value||0
-)
-
-};
-
-if(
-!expense.description||
-!expense.amount
-){
-
-alert(
-"Enter description and amount."
-);
-
-return;
-
-}
-
-const {
-error
-}=await supabaseClient
-.from("expenses")
-.insert(expense);
-
-if(error){
-
-alert(
-friendlyDatabaseError(error)
-);
-
-return;
-
-}
-
-closeModal();
-
-await render();
-
-showToast("Expense saved.");
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-async function dashboard(){
-
-const [
-products,
-sales,
-expenses
-]=await Promise.all([
-
-getProducts(),
-getSales(),
-getExpenses()
-
-]);
-
-const revenue=
-sales.reduce(
-(a,b)=>a+Number(b.total||0),
-0
-);
-
-const cost=
-sales.reduce(
-(a,b)=>
-a+
-(b.sale_items||[]).reduce(
-(x,i)=>
-x+
-Number(i.quantity||0)*
-Number(i.cost_price||0),
-0
-),
-0
-);
-
-const expenseTotal=
-expenses.reduce(
-(a,b)=>a+Number(b.amount||0),
-0
-);
-
-const profit=
-revenue-cost-expenseTotal;
-
-const stockValue=
-products.reduce(
-(a,b)=>
-a+
-Number(b.stock||0)*
-Number(b.cost_price||0),
-0
-);
-
-const low=
-products.filter(
-p=>
-Number(p.stock||0)<=
-Number(p.low_stock_level||0)
-);
-
-const expiring=
-products.filter(p=>{
-
-if(!p.expiry_date)return false;
-
-const diff=
-Math.ceil(
-(new Date(p.expiry_date)-new Date())
-/
-(1000*60*60*24)
-);
-
-return diff<=30;
-
-});
-
-
-return`
-
-<h1>Dashboard</h1>
-
-<div class="grid">
-
-<div class="card stat">
-
-Sales Revenue
-
-<strong>
-${money(revenue)}
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Net Profit
-
-<strong
-class="${profit>=0?"good":"bad"}">
-
-${money(profit)}
-
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Products
-
-<strong>
-${products.length}
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Stock Value
-
-<strong>
-${money(stockValue)}
-</strong>
-
-</div>
-
-</div>
-
-<div class="toolbar">
-
-<button onclick="newSale()">
-
-🛒 New Sale
-
-</button>
-
-<button
-class="secondary"
-onclick="newProduct()">
-
-+ Add Product
-
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>⚠️ Low Stock</h2>
-
-${lowStockTable(products)}
-
-</div>
-
-<div class="card">
-
-<h2>⏰ Expiration Reminder</h2>
-
-${expiryTable(expiring)}
-
-</div>
-
-<div class="card">
-
-<h2>Recent Sales</h2>
-
-${recentSales(sales)}
-
-</div>
-
-<div class="footer">
-
-SalesPro •
-${esc(
-currentBusiness?.name||
-"KC Integrated Global Services"
-)}
-
-</div>
-
-`;
-
-}
-
-
-function lowStockTable(products){
-
-const low=
-products.filter(
-p=>
-Number(p.stock||0)<=
-Number(p.low_stock_level||0)
-);
-
-if(!low.length){
-
-return`
-<div class="empty">
-No low-stock products.
-</div>
-`;
-
-}
-
-return`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Product</th>
-<th>Stock</th>
-<th>Alert Level</th>
-
-</tr>
-
-${low.map(p=>`
-
-<tr class="lowStock">
-
-<td>
-<strong>
-${esc(p.name)}
-</strong>
-</td>
-
-<td class="bad">
-${p.stock}
-</td>
-
-<td>
-${p.low_stock_level}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-function expiryTable(products){
-
-if(!products.length){
-
-return`
-<div class="empty">
-No products expiring within 30 days.
-</div>
-`;
-
-}
-
-return`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Product</th>
-<th>Expiry</th>
-<th>Status</th>
-
-</tr>
-
-${products.map(p=>`
-
-<tr class="${expiryClass(p.expiry_date)}">
-
-<td>
-${esc(p.name)}
-</td>
-
-<td>
-${esc(p.expiry_date)}
-</td>
-
-<td>
-${expiryLabel(p.expiry_date)}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-function recentSales(sales){
-
-if(!sales.length){
-
-return`
-<div class="empty">
-No sales recorded yet.
-</div>
-`;
-
-}
-
-return`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Date</th>
-<th>Invoice</th>
-<th>Customer</th>
-<th>Type</th>
-<th>Total</th>
-
-</tr>
-
-${sales.slice(0,8).map(s=>`
-
-<tr>
-
-<td>${esc(s.sale_date||"")}</td>
-
-<td>${esc(s.invoice_number||"")}</td>
-
-<td>${esc(s.customer_name||"Walk-in")}</td>
-
-<td>${esc(s.sale_type||"Retail")}</td>
-
-<td class="money">
-${money(s.total)}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-/* =========================================================
+/* ======================================================
    REPORTS
-   ========================================================= */
+====================================================== */
 
-async function reportsPage(){
+function generateReport(){
 
-const sales=await getSales();
+    const from =
+        document.getElementById("reportFrom").value;
 
-const expenses=await getExpenses();
+    const to =
+        document.getElementById("reportTo").value;
 
-const revenue=
-sales.reduce(
-(a,b)=>a+Number(b.total||0),
-0
-);
 
-const cost=
-sales.reduce(
-(a,b)=>
-a+
-(b.sale_items||[]).reduce(
-(x,i)=>
-x+
-Number(i.quantity||0)*
-Number(i.cost_price||0),
-0
-),
-0
-);
+    let sales = [...db.sales];
 
-const expenseTotal=
-expenses.reduce(
-(a,b)=>a+Number(b.amount||0),
-0
-);
 
-const gross=
-revenue-cost;
+    if(from){
 
-const net=
-gross-expenseTotal;
+        sales =
+            sales.filter(
+                s=>String(s.date).slice(0,10) >= from
+            );
 
-return`
+    }
 
-<h1>Reports</h1>
 
-<div class="grid">
+    if(to){
 
-<div class="card stat">
+        sales =
+            sales.filter(
+                s=>String(s.date).slice(0,10) <= to
+            );
 
-Sales Revenue
+    }
 
-<strong>
-${money(revenue)}
-</strong>
 
-</div>
+    const revenue =
+        sales.reduce(
+            (sum,s)=>sum+number(s.total),
+            0
+        );
 
-<div class="card stat">
 
-Cost of Goods
+    const discounts =
+        sales.reduce(
+            (sum,s)=>sum+number(s.discount),
+            0
+        );
 
-<strong>
-${money(cost)}
-</strong>
 
-</div>
+    const units =
+        sales.reduce(
+            (sum,s)=>
+                sum +
+                s.items.reduce(
+                    (x,i)=>x+number(i.quantity),
+                    0
+                ),
+            0
+        );
 
-<div class="card stat">
 
-Gross Profit
+    document.getElementById("reportRevenue")
+        .textContent = money(revenue);
 
-<strong>
-${money(gross)}
-</strong>
 
-</div>
+    document.getElementById("reportTransactions")
+        .textContent = sales.length;
 
-<div class="card stat">
 
-Net Profit
+    document.getElementById("reportDiscounts")
+        .textContent = money(discounts);
 
-<strong
-class="${net>=0?"good":"bad"}">
 
-${money(net)}
+    document.getElementById("reportUnits")
+        .textContent = units.toLocaleString();
 
-</strong>
 
-</div>
+    const tbody =
+        document.getElementById("reportsTable");
 
-</div>
 
-<div class="toolbar noPrint">
+    if(!sales.length){
 
-<button onclick="window.print()">
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="9" class="empty">
+                    No sales found for this period.
+                </td>
+             </tr>`;
 
-🖨️ Print Report
+        return;
 
-</button>
+    }
 
-</div>
 
-<div class="card">
+    tbody.innerHTML =
+        sales.map(s=>`
 
-<h2>Payment Breakdown</h2>
+            <tr>
 
-${["Cash","Transfer","POS","Credit"].map(method=>{
+                <td>${formatDate(s.date)}</td>
 
-const total=
-sales
-.filter(
-s=>s.payment_method===method
-)
-.reduce(
-(a,b)=>a+Number(b.total||0),
-0
-);
+                <td>${escapeHTML(s.invoice)}</td>
 
-return`
+                <td>${escapeHTML(s.customer)}</td>
 
-<p>
+                <td>${s.items.length}</td>
 
-${method}:
+                <td>${money(s.subtotal)}</td>
 
-<strong>
-${money(total)}
-</strong>
+                <td>${money(s.discount)}</td>
 
-</p>
+                <td><strong>${money(s.total)}</strong></td>
 
-`;
+                <td>${escapeHTML(s.payment)}</td>
 
-}).join("")}
+                <td>${escapeHTML(s.user)}</td>
 
-</div>
+            </tr>
 
-<div class="card">
-
-<h2>Sale Type Breakdown</h2>
-
-<p>
-Retail:
-<strong>
-${money(
-sales
-.filter(s=>normalizeSaleType(s.sale_type)==="Retail")
-.reduce((a,b)=>a+Number(b.total||0),0)
-)}
-</strong>
-</p>
-
-<p>
-Wholesale:
-<strong>
-${money(
-sales
-.filter(s=>normalizeSaleType(s.sale_type)==="Wholesale")
-.reduce((a,b)=>a+Number(b.total||0),0)
-)}
-</strong>
-</p>
-
-</div>
-
-`;
+        `).join("");
 
 }
 
 
-/* =========================================================
+
+/* ======================================================
+   USERS
+====================================================== */
+
+function renderUsers(){
+
+    const tbody =
+        document.getElementById("usersTable");
+
+
+    if(!currentUser){
+
+        return;
+
+    }
+
+
+    if(currentUser.role !== "owner"){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="7" class="empty">
+                    Only the Owner can manage users.
+                </td>
+             </tr>`;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        db.users.map(user=>`
+
+            <tr>
+
+                <td>${escapeHTML(user.name)}</td>
+
+                <td>${escapeHTML(user.username)}</td>
+
+                <td>
+                    <span class="badge ${
+                        user.role==="owner"
+                            ?"green"
+                            :user.role==="manager"
+                                ?"orange"
+                                :""
+                    }">
+                        ${escapeHTML(user.role)}
+                    </span>
+                </td>
+
+                <td>
+                    ${["owner","manager"].includes(user.role)
+                        ?"Yes"
+                        :"No"}
+                </td>
+
+                <td>
+                    ${["owner","manager"].includes(user.role)
+                        ?"Yes"
+                        :"No"}
+                </td>
+
+                <td>
+                    ${user.active
+                        ?'<span class="good">Active</span>'
+                        :'<span class="low">Disabled</span>'}
+                </td>
+
+                <td>
+
+                    ${
+                        user.id !== currentUser.id
+                        ?
+                        `<button
+                            class="btn light"
+                            onclick="toggleUser('${user.id}')"
+                        >
+                            ${user.active?"Disable":"Enable"}
+                        </button>`
+                        :
+                        "Current User"
+                    }
+
+                </td>
+
+            </tr>
+
+        `).join("");
+
+}
+
+
+
+function addUser(){
+
+    if(currentUser?.role !== "owner"){
+
+        alert("Only the Owner can create users.");
+
+        return;
+
+    }
+
+
+    const name =
+        document.getElementById("newUserName")
+        .value.trim();
+
+
+    const username =
+        document.getElementById("newUsername")
+        .value.trim();
+
+
+    const password =
+        document.getElementById("newUserPassword")
+        .value;
+
+
+    const role =
+        document.getElementById("newUserRole")
+        .value;
+
+
+    if(!name || !username || !password){
+
+        alert("Name, username and password are required.");
+
+        return;
+
+    }
+
+
+    if(db.users.some(
+        u=>u.username.toLowerCase() === username.toLowerCase()
+    )){
+
+        alert("That username already exists.");
+
+        return;
+
+    }
+
+
+    db.users.push({
+
+        id:uid("u"),
+
+        name,
+
+        username,
+
+        password,
+
+        role,
+
+        active:true
+
+    });
+
+
+    saveDatabase();
+
+
+    addAudit(
+        "USER_CREATED",
+        `Created user ${username} with role ${role}`
+    );
+
+
+    document.getElementById("newUserName").value = "";
+
+    document.getElementById("newUsername").value = "";
+
+    document.getElementById("newUserPassword").value = "";
+
+
+    renderUsers();
+
+
+    alert("User created successfully.");
+
+}
+
+
+
+function toggleUser(id){
+
+    if(currentUser?.role !== "owner"){
+
+        alert("Only the Owner can change user access.");
+
+        return;
+
+    }
+
+
+    const user =
+        db.users.find(u=>u.id===id);
+
+
+    if(!user) return;
+
+
+    user.active = !user.active;
+
+
+    saveDatabase();
+
+
+    addAudit(
+        "USER_ACCESS_CHANGED",
+        `${user.username} is now ${user.active?"active":"disabled"}`
+    );
+
+
+    renderUsers();
+
+}
+
+
+
+/* ======================================================
    BACKUP
-   ========================================================= */
+====================================================== */
 
-function backupPage(){
+function downloadBackup(){
 
-return`
+    if(currentUser?.role !== "owner"){
 
-<h1>Backup & Data Protection</h1>
+        alert("Only the Owner can create or restore system backups.");
 
-<div class="card">
+        return;
 
-<h2>📱 Backup SalesPro</h2>
+    }
 
-<p>
 
-Export your business data before making major
-changes to the system.
+    const backup = {
 
-</p>
+        exportedAt:new Date().toISOString(),
 
-<div class="toolbar">
+        application:"SalesPro",
 
-<button
-onclick="downloadBackup()">
+        version:APP_VERSION,
 
-📥 Export Backup
+        database:db
 
-</button>
+    };
 
-</div>
 
-<p>
+    const blob =
+        new Blob(
+            [JSON.stringify(backup,null,2)],
+            {type:"application/json"}
+        );
 
-Your backup will contain products,
-sales, customers and expenses.
 
-</p>
+    const url =
+        URL.createObjectURL(blob);
 
-</div>
 
-`;
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+    a.download =
+        `SalesPro_Backup_${todayISO()}.json`;
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+
+    db.settings.lastBackup =
+        new Date().toISOString();
+
+
+    saveDatabase();
+
+
+    addAudit(
+        "BACKUP_CREATED",
+        "Database backup downloaded."
+    );
+
+
+    updateBackupStatus();
 
 }
 
 
-async function downloadBackup(){
 
-const [
-products,
-sales,
-customers,
-expenses
-]=await Promise.all([
+function restoreBackup(event){
 
-getProducts(),
-getSales(),
-getCustomers(),
-getExpenses()
+    if(currentUser?.role !== "owner"){
 
-]);
+        alert("Only the Owner can restore backups.");
 
-const backup={
+        event.target.value = "";
 
-version:"SalesPro Backup V3",
+        return;
 
-created_at:
-new Date().toISOString(),
+    }
 
-business:
-currentBusiness,
 
-products,
-sales,
-customers,
-expenses
+    const file =
+        event.target.files[0];
 
-};
 
-const blob=
-new Blob(
-[
-JSON.stringify(
-backup,
-null,
-2
-)
-],
-{
-type:"application/json"
+    if(!file) return;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function(e){
+
+        try{
+
+            const imported =
+                JSON.parse(e.target.result);
+
+
+            if(
+                !imported.database ||
+                !Array.isArray(imported.database.products) ||
+                !Array.isArray(imported.database.sales) ||
+                !Array.isArray(imported.database.users)
+            ){
+
+                throw new Error(
+                    "Invalid SalesPro backup file."
+                );
+
+            }
+
+
+            if(!confirm(
+                "Restore this backup?\n\nCurrent data will be replaced."
+            )){
+
+                event.target.value = "";
+
+                return;
+
+            }
+
+
+            db = imported.database;
+
+
+            repairDatabase();
+
+            saveDatabase();
+
+
+            addAudit(
+                "BACKUP_RESTORED",
+                "Database restored from backup."
+            );
+
+
+            refreshAll();
+
+
+            alert("Backup restored successfully.");
+
+        }catch(error){
+
+            console.error(error);
+
+            alert(
+                "Could not restore this file. It may not be a valid SalesPro backup."
+            );
+
+        }
+
+
+        event.target.value = "";
+
+    };
+
+
+    reader.readAsText(file);
+
 }
+
+
+
+/* ======================================================
+   SYSTEM REPAIR
+====================================================== */
+
+function runSystemRepair(){
+
+    if(currentUser?.role !== "owner"){
+
+        alert("Only the Owner can run system repair.");
+
+        return;
+
+    }
+
+
+    try{
+
+        repairDatabase();
+
+        saveDatabase();
+
+        refreshAll();
+
+
+        addAudit(
+            "SYSTEM_REPAIR",
+            "Owner manually ran automatic system repair."
+        );
+
+
+        alert(
+            "System repair completed.\n\nInvalid stock, prices, missing IDs and broken database structures were checked and corrected."
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "System repair encountered an error. Check your backup."
+        );
+
+    }
+
+}
+
+
+
+/* ======================================================
+   SYSTEM INFO
+====================================================== */
+
+function updateSystemInfo(){
+
+    const products =
+        document.getElementById("systemProducts");
+
+
+    const sales =
+        document.getElementById("systemSales");
+
+
+    const version =
+        document.getElementById("systemVersion");
+
+
+    if(products)
+        products.textContent = db.products.length;
+
+
+    if(sales)
+        sales.textContent = db.sales.length;
+
+
+    if(version)
+        version.textContent = APP_VERSION;
+
+}
+
+
+
+function updateBackupStatus(){
+
+    const element =
+        document.getElementById("backupStatus");
+
+
+    if(!element) return;
+
+
+    const last =
+        db.settings?.lastBackup;
+
+
+    if(!last){
+
+        element.textContent =
+            "No backup yet";
+
+        element.className =
+            "badge orange";
+
+        return;
+
+    }
+
+
+    element.textContent =
+        "Last: " +
+        new Date(last).toLocaleDateString("en-NG");
+
+
+    element.className =
+        "badge green";
+
+}
+
+
+
+/* ======================================================
+   AUDIT
+====================================================== */
+
+function renderAudit(){
+
+    const tbody =
+        document.getElementById("auditTable");
+
+
+    if(!tbody) return;
+
+
+    if(!db.audit.length){
+
+        tbody.innerHTML =
+            `<tr>
+                <td colspan="4" class="empty">
+                    No audit activity.
+                </td>
+             </tr>`;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        db.audit.slice(0,100).map(a=>`
+
+            <tr>
+
+                <td>${formatDate(a.date)}</td>
+
+                <td>${escapeHTML(a.user)}</td>
+
+                <td>${escapeHTML(a.action)}</td>
+
+                <td>${escapeHTML(a.details)}</td>
+
+            </tr>
+
+        `).join("");
+
+}
+
+
+
+/* ======================================================
+   MODALS
+====================================================== */
+
+function openModal(id){
+
+    document.getElementById(id)
+        .classList.add("show");
+
+}
+
+
+
+function closeModal(id){
+
+    document.getElementById(id)
+        .classList.remove("show");
+
+}
+
+
+
+/* ======================================================
+   AUTOMATIC BACKUP REMINDER
+====================================================== */
+
+function autoBackupReminder(){
+
+    if(!db || !currentUser) return;
+
+
+    const last =
+        db.settings?.lastBackup;
+
+
+    if(!last) return;
+
+
+    const age =
+        Date.now() -
+        new Date(last).getTime();
+
+
+    const days =
+        age / 86400000;
+
+
+    if(
+        days > 7 &&
+        currentUser.role === "owner"
+    ){
+
+        const alertBox =
+            document.getElementById("dashboardAlerts");
+
+
+        if(alertBox){
+
+            alertBox.innerHTML +=
+                `<div class="warning">
+                    💾 Your last backup was more than 7 days ago.
+                    Please create a backup from Backup & System.
+                 </div>`;
+
+        }
+
+    }
+
+}
+
+
+
+/* ======================================================
+   GLOBAL ERROR HANDLING
+====================================================== */
+
+window.addEventListener(
+    "error",
+    function(event){
+
+        console.error(
+            "SalesPro error:",
+            event.error || event.message
+        );
+
+        const message =
+            "SalesPro detected an unexpected error. " +
+            "Your current saved data has not been intentionally deleted.";
+
+        if(
+            currentUser &&
+            currentSection === "dashboard"
+        ){
+
+            document.getElementById("dashboardAlerts")
+                .innerHTML +=
+                    `<div class="error">
+                        ⚠️ ${message}
+                     </div>`;
+
+        }
+
+    }
 );
 
-const url=
-URL.createObjectURL(blob);
-
-const a=
-document.createElement("a");
-
-a.href=url;
-
-a.download=
-"SalesPro_Backup_"+
-today()+
-".json";
-
-document.body.appendChild(a);
-
-a.click();
-
-a.remove();
-
-setTimeout(
-()=>URL.revokeObjectURL(url),
-1000
-);
-
-showToast(
-"Backup exported successfully."
-);
-
-}
-
-
-/* =========================================================
-   SETTINGS
-   ========================================================= */
-
-function settingsPage(){
-
-return`
-
-<h1>Business Settings</h1>
-
-<div class="card">
-
-<h2>Business Information</h2>
-
-<label>Business Name</label>
-
-<input
-id="businessName"
-value="${esc(currentBusiness?.name||"")}">
-
-<label>Phone</label>
-
-<input
-id="businessPhone"
-value="${esc(currentBusiness?.phone||"")}">
-
-<label>Email</label>
-
-<input
-id="businessEmail"
-value="${esc(currentBusiness?.email||"")}">
-
-<label>Address</label>
-
-<textarea
-id="businessAddress">${esc(currentBusiness?.address||"")}</textarea>
-
-<label>Logo URL</label>
-
-<input
-id="businessLogoUrl"
-value="${esc(currentBusiness?.logo_url||"")}"
-placeholder="Paste your logo image URL here">
-
-<div id="logoPreviewBox">
-
-${currentBusiness?.logo_url?
-
-`
-
-<img
-class="logoPreview"
-src="${esc(currentBusiness.logo_url)}"
-alt="Logo"
-onerror="this.style.display='none'">
-
-`
-
-:""}
-
-</div>
-
-<div class="actions">
-
-<button
-onclick="saveBusinessSettings()">
-
-Save Settings
-
-</button>
-
-<button
-class="red"
-onclick="logout()">
-
-Logout
-
-</button>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>Account</h2>
-
-<p>
-
-Name:
-<strong>
-${esc(currentProfile?.full_name||"")}
-</strong>
-
-</p>
-
-<p>
-
-Role:
-<strong>
-${esc(currentProfile?.role||"")}
-</strong>
-
-</p>
-
-<p>
-
-Email:
-<strong>
-${esc(currentUser?.email||"")}
-</strong>
-
-</p>
-
-</div>
-
-`;
-
-}
-
-
-async function saveBusinessSettings(){
-
-const updates={
-
-name:
-document.getElementById(
-"businessName"
-).value.trim(),
-
-phone:
-document.getElementById(
-"businessPhone"
-).value.trim(),
-
-email:
-document.getElementById(
-"businessEmail"
-).value.trim(),
-
-address:
-document.getElementById(
-"businessAddress"
-).value.trim(),
-
-logo_url:
-document.getElementById(
-"businessLogoUrl"
-).value.trim()
-
-};
-
-const {
-error
-}=await supabaseClient
-.from("businesses")
-.update(updates)
-.eq(
-"id",
-currentProfile.business_id
-);
-
-if(error){
-
-alert(
-friendlyDatabaseError(error)
-);
-
-return;
-
-}
-
-currentBusiness={
-...currentBusiness,
-...updates
-};
-
-showApp();
-
-showToast(
-"Business settings saved."
-);
-
-}
-
-
-/* =========================================================
-   MODAL
-   ========================================================= */
-
-function openModal(html){
-
-const sheet=
-document.getElementById("sheet");
-
-const modal=
-document.getElementById("modal");
-
-if(!sheet||!modal)return;
-
-sheet.innerHTML=html;
-
-modal.classList.add("show");
-
-}
-
-
-function closeModal(){
-
-const modal=
-document.getElementById("modal");
-
-if(modal)
-modal.classList.remove("show");
-
-}
-
-
-/* =========================================================
-   AUTH LISTENER
-   ========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-async(event,session)=>{
-
-if(event==="SIGNED_OUT"){
-
-showLogin();
-
-}
-
-if(
-event==="SIGNED_IN"&&
-session
-){
-
-currentUser=session.user;
-
-await loadUserProfile();
-
-}
-
-});
-
-
-/* =========================================================
-   CAMERA CLEANUP
-   ========================================================= */
-
-document.addEventListener(
-"visibilitychange",
-function(){
-
-if(
-document.hidden&&
-barcodeRunning
-){
-
-stopBarcodeScanner();
-
-}
-
-});
 
 
 window.addEventListener(
-"pagehide",
-function(){
+    "unhandledrejection",
+    function(event){
 
-stopBarcodeScanner();
+        console.error(
+            "SalesPro promise error:",
+            event.reason
+        );
 
-});
+    }
+);
 
 
-/* =========================================================
-   START
-   ========================================================= */
 
-checkAuth();
+/* ======================================================
+   AUTOMATIC PERIODIC SAVE
+====================================================== */
+
+setInterval(
+    function(){
+
+        if(db){
+
+            try{
+
+                repairDatabase();
+
+                saveDatabase();
+
+            }catch(error){
+
+                console.error(
+                    "Automatic save error:",
+                    error
+                );
+
+            }
+
+        }
+
+    },
+    60000
+);
+
+
+
+/* ======================================================
+   KEYBOARD SHORTCUTS
+====================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.ctrlKey &&
+            event.key.toLowerCase() === "s"
+        ){
+
+            event.preventDefault();
+
+            if(
+                currentUser?.role === "owner"
+            ){
+
+                downloadBackup();
+
+            }
+
+        }
+
+
+        if(
+            event.key === "Escape"
+        ){
+
+            document
+                .querySelectorAll(".modal.show")
+                .forEach(modal=>{
+                    modal.classList.remove("show");
+                });
+
+        }
+
+    }
+);
+
+
+
+/* ======================================================
+   INITIALIZATION
+====================================================== */
+
+function init(){
+
+    loadDatabase();
+
+    restoreSession();
+
+    document.getElementById("todayText")
+        .textContent =
+            new Date().toLocaleDateString("en-NG",{
+                weekday:"long",
+                year:"numeric",
+                month:"long",
+                day:"numeric"
+            });
+
+
+    const today =
+        todayISO();
+
+
+    document.getElementById("reportFrom")
+        .value = today;
+
+
+    document.getElementById("reportTo")
+        .value = today;
+
+
+    document
+        .getElementById("discountButton")
+        .classList.toggle(
+            "hidden",
+            !hasPermission("discount")
+        );
+
+
+    if(currentUser){
+
+        refreshAll();
+
+        autoBackupReminder();
+
+    }
+
+}
+
+
+
+init();
 
 </script>
 
