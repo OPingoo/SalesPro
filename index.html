@@ -1,453 +1,6007 @@
--- ============================================================
--- SALESPRO V2 DATABASE UPGRADE
--- KC INTEGRATED GLOBAL SERVICES
--- ============================================================
+<!doctype html>
+<html lang="en">
+<head>
 
--- PRODUCTS
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS pieces_per_pack integer DEFAULT 1;
+<meta charset="utf-8">
 
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS packs_per_carton integer DEFAULT 1;
+<meta name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS carton_price numeric DEFAULT 0;
+<meta name="theme-color"
+content="#0b2a52">
 
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS pack_price numeric DEFAULT 0;
+<meta name="apple-mobile-web-app-capable"
+content="yes">
 
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS expiry_date date;
+<meta name="apple-mobile-web-app-title"
+content="SalesPro">
 
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
+<link rel="manifest"
+href="manifest.json">
 
+<title>
+SalesPro V2 — KC Integrated Global Services
+</title>
 
--- SALES
-ALTER TABLE sales
-ADD COLUMN IF NOT EXISTS discount numeric DEFAULT 0;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-ALTER TABLE sales
-ADD COLUMN IF NOT EXISTS discount_type text DEFAULT 'amount';
-
-ALTER TABLE sales
-ADD COLUMN IF NOT EXISTS gross_total numeric DEFAULT 0;
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 
--- SALE ITEMS
-ALTER TABLE sale_items
-ADD COLUMN IF NOT EXISTS selling_unit text DEFAULT 'piece';
+<style>
 
-ALTER TABLE sale_items
-ADD COLUMN IF NOT EXISTS discount numeric DEFAULT 0;
+:root{
+--navy:#0b2a52;
+--blue:#155fa0;
+--gold:#c6a15b;
+--bg:#f4f6f9;
+--white:#ffffff;
+--text:#172033;
+--muted:#667085;
+--green:#087443;
+--red:#b42318;
+--orange:#b54708;
+--border:#e2e6ec;
+}
 
-ALTER TABLE sale_items
-ADD COLUMN IF NOT EXISTS discount_type text DEFAULT 'amount';
+*{
+box-sizing:border-box;
+}
 
-ALTER TABLE sale_items
-ADD COLUMN IF NOT EXISTS pieces_sold numeric DEFAULT 1;
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,
+"Segoe UI",Arial,sans-serif;
+}
+
+button,
+input,
+select,
+textarea{
+font:inherit;
+}
+
+button{
+border:0;
+border-radius:11px;
+padding:11px 15px;
+font-weight:700;
+background:var(--navy);
+color:white;
+cursor:pointer;
+}
+
+button.secondary{
+background:#e8edf3;
+color:var(--navy);
+}
+
+button.green{
+background:var(--green);
+}
+
+button.red{
+background:#fee4e2;
+color:var(--red);
+}
+
+button.orange{
+background:#fff3cd;
+color:#8a4b00;
+}
+
+button:disabled{
+opacity:.55;
+cursor:not-allowed;
+}
+
+input,
+select,
+textarea{
+width:100%;
+border:1px solid #d0d5dd;
+border-radius:10px;
+padding:11px;
+background:white;
+outline:none;
+}
+
+textarea{
+min-height:90px;
+resize:vertical;
+}
+
+label{
+font-size:12px;
+font-weight:700;
+color:var(--muted);
+display:block;
+margin:8px 0 5px;
+}
+
+hr{
+border:0;
+border-top:1px solid var(--border);
+margin:18px 0;
+}
 
 
--- ============================================================
--- STOCK MOVEMENTS
--- ============================================================
+/* HEADER */
 
-CREATE TABLE IF NOT EXISTS stock_movements (
+.header{
+position:sticky;
+top:0;
+z-index:20;
+background:white;
+border-bottom:1px solid var(--border);
+}
 
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+padding:10px 14px;
+}
 
-    business_id uuid NOT NULL,
+.logo{
+width:52px;
+height:52px;
+border-radius:12px;
+object-fit:contain;
+background:white;
+border:1px solid #eee;
+}
 
-    product_id uuid NOT NULL,
+.brand strong{
+font-size:18px;
+}
 
-    movement_type text NOT NULL,
+.brand small{
+display:block;
+color:var(--muted);
+}
 
-    quantity numeric NOT NULL DEFAULT 0,
+.nav{
+display:flex;
+overflow-x:auto;
+gap:7px;
+padding:0 12px 10px;
+}
 
-    previous_stock numeric DEFAULT 0,
+.nav button{
+white-space:nowrap;
+background:#edf2f7;
+color:var(--navy);
+}
 
-    new_stock numeric DEFAULT 0,
+.nav button.active{
+background:var(--navy);
+color:white;
+}
 
-    reference_id uuid,
 
-    note text,
+/* GENERAL */
 
-    created_by uuid,
+.container{
+max-width:1180px;
+margin:auto;
+padding:15px 12px 100px;
+}
 
-    created_at timestamptz DEFAULT now()
+h1{
+font-size:25px;
+margin:18px 0 13px;
+}
 
+h2{
+font-size:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.card{
+background:white;
+border:1px solid var(--border);
+border-radius:16px;
+padding:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.04);
+margin-bottom:12px;
+}
+
+.stat{
+font-size:13px;
+color:var(--muted);
+}
+
+.stat strong{
+display:block;
+font-size:23px;
+color:var(--text);
+margin-top:5px;
+}
+
+.toolbar{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin:12px 0;
+}
+
+.formgrid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.full{
+grid-column:1/-1;
+}
+
+.table{
+overflow-x:auto;
+background:white;
+border:1px solid var(--border);
+border-radius:14px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+min-width:900px;
+}
+
+th,
+td{
+padding:11px;
+border-bottom:1px solid #edf0f3;
+text-align:left;
+}
+
+th{
+font-size:12px;
+background:#f8fafc;
+}
+
+.money{
+font-weight:800;
+}
+
+.good{
+color:var(--green);
+}
+
+.bad{
+color:var(--red);
+}
+
+.empty{
+padding:35px;
+text-align:center;
+color:var(--muted);
+}
+
+.badge{
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#edf2f7;
+font-size:12px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+justify-content:flex-end;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+
+/* MODAL */
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+z-index:100;
+align-items:flex-end;
+}
+
+.modal.show{
+display:flex;
+}
+
+.sheet{
+background:white;
+width:100%;
+max-height:95vh;
+overflow:auto;
+border-radius:22px 22px 0 0;
+padding:18px;
+}
+
+
+/* LOGIN */
+
+.auth{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:linear-gradient(
+135deg,
+#0b2a52,
+#155fa0
+);
+}
+
+.authCard{
+background:white;
+width:100%;
+max-width:450px;
+border-radius:22px;
+padding:25px;
+box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+.authCard h1{
+text-align:center;
+}
+
+.authBusiness{
+text-align:center;
+color:var(--muted);
+margin-bottom:20px;
+}
+
+.authLogo{
+width:85px;
+height:85px;
+object-fit:contain;
+display:block;
+margin:0 auto 10px;
+}
+
+.authLinks{
+text-align:center;
+margin-top:15px;
+}
+
+.authLinks button{
+background:none;
+color:var(--blue);
+padding:5px;
+}
+
+.error{
+background:#fee4e2;
+color:var(--red);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+font-size:13px;
+}
+
+.success{
+background:#dcfae6;
+color:var(--green);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+font-size:13px;
+}
+
+
+/* SALES */
+
+.saleLine{
+border:1px solid var(--border);
+border-radius:14px;
+padding:12px;
+margin:10px 0;
+}
+
+.saleLineTop{
+display:grid;
+grid-template-columns:2fr 1fr 1fr;
+gap:8px;
+}
+
+.priceBox{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:8px;
+margin-top:8px;
+}
+
+.totals{
+background:#f8fafc;
+border-radius:14px;
+padding:14px;
+margin-top:12px;
+}
+
+.saleTypeHelp{
+background:#eef6ff;
+border-left:4px solid var(--blue);
+padding:12px;
+border-radius:8px;
+font-size:13px;
+line-height:1.5;
+}
+
+
+/* SCANNER */
+
+.scanner{
+display:none;
+position:fixed;
+inset:0;
+z-index:9999;
+background:rgba(0,0,0,.94);
+align-items:center;
+justify-content:center;
+padding:12px;
+}
+
+.scanner.show{
+display:flex;
+}
+
+.scannerBox{
+background:white;
+width:100%;
+max-width:520px;
+border-radius:20px;
+padding:15px;
+}
+
+.scannerHead{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+#reader{
+background:#111;
+border-radius:14px;
+overflow:hidden;
+min-height:250px;
+}
+
+#reader video{
+width:100%!important;
+height:auto!important;
+}
+
+#scanStatus{
+background:#f4f6f9;
+padding:12px;
+border-radius:10px;
+font-size:13px;
+}
+
+
+/* EXPIRY */
+
+.expiry{
+background:#fff3cd;
+}
+
+.expired{
+background:#fee4e2;
+}
+
+.expiryText{
+font-size:12px;
+font-weight:700;
+}
+
+
+/* REALTIME */
+
+.live{
+display:inline-flex;
+align-items:center;
+gap:6px;
+font-size:12px;
+color:var(--green);
+font-weight:700;
+}
+
+.dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:#0a8f55;
+}
+
+
+/* FOOTER */
+
+.footer{
+text-align:center;
+color:var(--muted);
+padding:30px;
+font-size:12px;
+}
+
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+.grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.formgrid,
+.saleLineTop,
+.priceBox{
+grid-template-columns:1fr;
+}
+
+.full{
+grid-column:auto;
+}
+
+.brand small{
+font-size:11px;
+}
+
+}
+
+
+/* PRINT */
+
+@media print{
+
+.header,
+.toolbar,
+.noPrint{
+display:none!important;
+}
+
+.container{
+padding:0;
+}
+
+.card{
+box-shadow:none;
+}
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div id="root"></div>
+
+
+<!-- =====================================================
+BARCODE SCANNER
+===================================================== -->
+
+<div
+id="scanner"
+class="scanner">
+
+<div class="scannerBox">
+
+<div class="scannerHead">
+
+<h2>
+📷 Barcode Scanner
+</h2>
+
+<button
+class="secondary"
+onclick="closeScanner()">
+
+✕
+
+</button>
+
+</div>
+
+
+<div
+id="reader">
+</div>
+
+
+<p id="scanStatus">
+Preparing camera…
+</p>
+
+
+<button
+onclick="startScanner()"
+style="width:100%">
+
+📷 Start Camera
+
+</button>
+
+
+<button
+class="secondary"
+onclick="document.getElementById('photoInput').click()"
+style="width:100%;margin-top:8px">
+
+📸 Scan Barcode From Photo
+
+</button>
+
+
+<input
+id="photoInput"
+type="file"
+accept="image/*"
+capture="environment"
+style="display:none"
+onchange="scanPhoto(event)">
+
+
+<input
+id="scanManual"
+placeholder="Or enter barcode manually"
+style="margin-top:8px">
+
+
+<button
+class="secondary"
+onclick="useManualScan()"
+style="width:100%;margin-top:8px">
+
+Use Barcode
+
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+"https://olkugewqersskavvcrhm.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_35hM0m_Gy7HVDmgs-CoEvA_QcJMv3te";
+
+const sb =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
 
--- ============================================================
--- INDEXES
--- ============================================================
+/* =====================================================
+STATE
+===================================================== */
 
-CREATE INDEX IF NOT EXISTS
-idx_products_business
-ON products(business_id);
+let user = null;
 
-CREATE INDEX IF NOT EXISTS
-idx_products_barcode
-ON products(barcode);
+let profile = null;
 
-CREATE INDEX IF NOT EXISTS
-idx_sales_business
-ON sales(business_id);
+let business = null;
 
-CREATE INDEX IF NOT EXISTS
-idx_sale_items_sale
-ON sale_items(sale_id);
+let page = "dashboard";
 
-CREATE INDEX IF NOT EXISTS
-idx_stock_movements_product
-ON stock_movements(product_id);
+let scanner = null;
 
-CREATE INDEX IF NOT EXISTS
-idx_stock_movements_business
-ON stock_movements(business_id);
+let scannerRunning = false;
+
+let scanTarget = null;
+
+let saleProducts = [];
+
+let saleCustomers = [];
+
+let realtimeChannels = [];
 
 
--- ============================================================
--- REALTIME
--- ============================================================
+/* =====================================================
+HELPERS
+===================================================== */
 
-ALTER TABLE products REPLICA IDENTITY FULL;
+function esc(value){
 
-ALTER TABLE sales REPLICA IDENTITY FULL;
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
-ALTER TABLE sale_items REPLICA IDENTITY FULL;
-
-ALTER TABLE stock_movements REPLICA IDENTITY FULL;
-
-
--- Add tables to realtime publication where necessary.
-DO $$
-BEGIN
-
-    BEGIN
-        ALTER PUBLICATION supabase_realtime
-        ADD TABLE products;
-    EXCEPTION
-        WHEN duplicate_object THEN NULL;
-    END;
-
-    BEGIN
-        ALTER PUBLICATION supabase_realtime
-        ADD TABLE sales;
-    EXCEPTION
-        WHEN duplicate_object THEN NULL;
-    END;
-
-    BEGIN
-        ALTER PUBLICATION supabase_realtime
-        ADD TABLE sale_items;
-    EXCEPTION
-        WHEN duplicate_object THEN NULL;
-    END;
-
-    BEGIN
-        ALTER PUBLICATION supabase_realtime
-        ADD TABLE stock_movements;
-    EXCEPTION
-        WHEN duplicate_object THEN NULL;
-    END;
-
-END $$;
+}
 
 
--- ============================================================
--- RLS
--- ============================================================
+function money(value){
 
-ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
+return "₦" +
+Number(value || 0)
+.toLocaleString(
+"en-NG",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+);
+
+}
 
 
-DROP POLICY IF EXISTS
-"Users can view stock movements"
-ON stock_movements;
+function today(){
 
-CREATE POLICY
-"Users can view stock movements"
-ON stock_movements
-FOR SELECT
-TO authenticated
-USING (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
+return new Date()
+.toISOString()
+.slice(0,10);
+
+}
+
+
+function uid(){
+
+return crypto.randomUUID();
+
+}
+
+
+function daysUntil(date){
+
+if(!date)return null;
+
+const a =
+new Date();
+
+const b =
+new Date(date);
+
+a.setHours(0,0,0,0);
+
+b.setHours(0,0,0,0);
+
+return Math.ceil(
+(b-a)/(1000*60*60*24)
+);
+
+}
+
+
+function expiryStatus(date){
+
+const days =
+daysUntil(date);
+
+if(days === null)
+return "";
+
+if(days < 0)
+return "expired";
+
+if(days <= 30)
+return "expiry";
+
+return "";
+
+}
+
+
+function expiryLabel(date){
+
+const days =
+daysUntil(date);
+
+if(days === null)
+return "";
+
+if(days < 0)
+return "⚠️ EXPIRED";
+
+if(days === 0)
+return "⚠️ Expires today";
+
+if(days <= 30)
+return "⚠️ Expires in " + days + " days";
+
+return "Expires " + date;
+
+}
+
+
+/* =====================================================
+AUTH MESSAGE
+===================================================== */
+
+function authMessage(
+text,
+type="error"
+){
+
+const box =
+document.getElementById(
+"authMessage"
+);
+
+if(!box)return;
+
+box.innerHTML =
+`<div class="${type}">
+${esc(text)}
+</div>`;
+
+}
+
+
+/* =====================================================
+AUTH
+===================================================== */
+
+async function checkAuth(){
+
+const {
+data:{
+session
+}
+} =
+await sb.auth.getSession();
+
+if(!session){
+
+showLogin();
+
+return;
+
+}
+
+user =
+session.user;
+
+await loadProfile();
+
+}
+
+
+async function loadProfile(){
+
+const {
+data,
+error
+} =
+await sb
+.from("profiles")
+.select("*")
+.eq("id",user.id)
+.maybeSingle();
+
+if(error){
+
+console.error(error);
+
+showLogin();
+
+return;
+
+}
+
+if(!data){
+
+showLogin();
+
+setTimeout(()=>{
+
+authMessage(
+"Your SalesPro owner profile is missing. Please contact the system administrator."
+);
+
+},100);
+
+return;
+
+}
+
+profile =
+data;
+
+
+const {
+data:biz,
+error:bizError
+} =
+await sb
+.from("businesses")
+.select("*")
+.eq("id",profile.business_id)
+.maybeSingle();
+
+if(bizError){
+
+console.error(bizError);
+
+}
+
+business =
+biz;
+
+
+showApp();
+
+setupRealtime();
+
+}
+
+
+/* =====================================================
+LOGIN
+===================================================== */
+
+function showLogin(){
+
+document.getElementById(
+"root"
+).innerHTML = `
+
+<div class="auth">
+
+<div class="authCard">
+
+<div id="authMessage"></div>
+
+<div id="loginLogo"></div>
+
+<h1>
+SalesPro
+</h1>
+
+<div class="authBusiness">
+KC Integrated Global Services
+</div>
+
+<label>
+Email Address
+</label>
+
+<input
+id="loginEmail"
+type="email"
+autocomplete="email"
+placeholder="Email Address">
+
+<label>
+Password
+</label>
+
+<input
+id="loginPassword"
+type="password"
+autocomplete="current-password"
+placeholder="Password">
+
+<button
+onclick="login()"
+style="width:100%;margin-top:15px">
+
+🔐 Login
+
+</button>
+
+<div class="authLinks">
+
+New to SalesPro?
+
+<button
+onclick="showRegister()">
+
+Create Owner Account
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+function showRegister(){
+
+document.getElementById(
+"root"
+).innerHTML = `
+
+<div class="auth">
+
+<div class="authCard">
+
+<div id="authMessage"></div>
+
+<h1>
+Create Owner Account
+</h1>
+
+<div class="authBusiness">
+KC Integrated Global Services
+</div>
+
+<label>
+Full Name
+</label>
+
+<input
+id="regName"
+placeholder="Full name">
+
+<label>
+Email
+</label>
+
+<input
+id="regEmail"
+type="email"
+placeholder="Email address">
+
+<label>
+Password
+</label>
+
+<input
+id="regPassword"
+type="password"
+placeholder="Minimum 6 characters">
+
+<hr>
+
+<h2>
+Business Information
+</h2>
+
+<label>
+Business Name
+</label>
+
+<input
+id="regBusiness"
+value="KC Integrated Global Services">
+
+<label>
+Phone
+</label>
+
+<input
+id="regPhone"
+placeholder="Business phone">
+
+<label>
+Business Email
+</label>
+
+<input
+id="regBusinessEmail"
+placeholder="Business email">
+
+<label>
+Business Address
+</label>
+
+<textarea
+id="regAddress"
+placeholder="Business address">
+</textarea>
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="showLogin()">
+
+Back
+
+</button>
+
+<button
+onclick="register()">
+
+Create Account
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+async function register(){
+
+const name =
+document.getElementById(
+"regName"
+).value.trim();
+
+const email =
+document.getElementById(
+"regEmail"
+).value.trim();
+
+const password =
+document.getElementById(
+"regPassword"
+).value;
+
+const businessName =
+document.getElementById(
+"regBusiness"
+).value.trim();
+
+const phone =
+document.getElementById(
+"regPhone"
+).value.trim();
+
+const businessEmail =
+document.getElementById(
+"regBusinessEmail"
+).value.trim();
+
+const address =
+document.getElementById(
+"regAddress"
+).value.trim();
+
+
+if(
+!name ||
+!email ||
+!password ||
+!businessName
+){
+
+authMessage(
+"Please complete all required fields."
+);
+
+return;
+
+}
+
+
+if(password.length < 6){
+
+authMessage(
+"Password must contain at least 6 characters."
+);
+
+return;
+
+}
+
+
+try{
+
+authMessage(
+"Creating account...",
+"success"
 );
 
 
-DROP POLICY IF EXISTS
-"Users can insert stock movements"
-ON stock_movements;
+const {
+data,
+error
+} =
+await sb.auth.signUp({
 
-CREATE POLICY
-"Users can insert stock movements"
-ON stock_movements
-FOR INSERT
-TO authenticated
-WITH CHECK (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
+email,
+
+password,
+
+options:{
+data:{
+full_name:name
+}
+}
+
+});
+
+
+if(error)
+throw error;
+
+
+if(!data.user){
+
+throw new Error(
+"Account could not be created."
+);
+
+}
+
+
+if(data.session){
+
+const businessId =
+uid();
+
+
+const {
+error:be
+} =
+await sb
+.from("businesses")
+.insert({
+
+id:businessId,
+
+name:businessName,
+
+phone,
+
+email:
+businessEmail || email,
+
+address,
+
+logo_url:""
+
+});
+
+
+if(be)
+throw be;
+
+
+const {
+error:pe
+} =
+await sb
+.from("profiles")
+.upsert({
+
+id:data.user.id,
+
+full_name:name,
+
+role:"owner",
+
+business_id:businessId,
+
+active:true
+
+},{
+onConflict:"id"
+});
+
+
+if(pe)
+throw pe;
+
+
+authMessage(
+"Account created successfully. You can now login.",
+"success"
+);
+
+setTimeout(
+showLogin,
+1800
+);
+
+}else{
+
+authMessage(
+"Account created. Please check your email and verify your account before logging in.",
+"success"
+);
+
+}
+
+}catch(error){
+
+console.error(error);
+
+authMessage(
+error.message ||
+"Registration failed."
+);
+
+}
+
+}
+
+
+async function login(){
+
+const email =
+document.getElementById(
+"loginEmail"
+).value.trim();
+
+const password =
+document.getElementById(
+"loginPassword"
+).value;
+
+
+if(!email || !password){
+
+authMessage(
+"Enter your email and password."
+);
+
+return;
+
+}
+
+
+try{
+
+authMessage(
+"Signing in...",
+"success"
 );
 
 
--- ============================================================
--- PRODUCT UPDATE POLICY
--- ============================================================
+const {
+error
+} =
+await sb.auth.signInWithPassword({
 
-DROP POLICY IF EXISTS
-"Users can update their business products"
-ON products;
+email,
 
-CREATE POLICY
-"Users can update their business products"
-ON products
-FOR UPDATE
-TO authenticated
-USING (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
+password
+
+});
+
+
+if(error)
+throw error;
+
+
+await checkAuth();
+
+
+}catch(error){
+
+console.error(error);
+
+authMessage(
+error.message ||
+"Login failed."
+);
+
+}
+
+}
+
+
+async function logout(){
+
+await sb.auth.signOut();
+
+user=null;
+
+profile=null;
+
+business=null;
+
+showLogin();
+
+}
+
+
+/* =====================================================
+APP
+===================================================== */
+
+function showApp(){
+
+document.getElementById(
+"root"
+).innerHTML = `
+
+<header class="header">
+
+<div class="brand">
+
+<div id="businessLogo">
+
+</div>
+
+<div>
+
+<strong>
+SalesPro
+</strong>
+
+<small>
+${esc(
+business?.name ||
+"KC Integrated Global Services"
+)}
+</small>
+
+</div>
+
+</div>
+
+
+<nav
+class="nav"
+id="nav">
+</nav>
+
+</header>
+
+
+<main
+class="container"
+id="app">
+</main>
+
+<div
+class="modal"
+id="modal">
+
+<div
+class="sheet"
+id="sheet">
+</div>
+
+</div>
+
+`;
+
+renderNav();
+
+render();
+
+displayLogo();
+
+}
+
+
+/* =====================================================
+LOGO
+===================================================== */
+
+function displayLogo(){
+
+const box =
+document.getElementById(
+"businessLogo"
+);
+
+if(!box)return;
+
+
+if(business?.logo_url){
+
+box.innerHTML = `
+
+<img
+src="${esc(business.logo_url)}"
+class="logo"
+alt="Business Logo"
+onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+
+<div
+class="logo"
+style="
+display:none;
+align-items:center;
+justify-content:center;
+font-weight:900;
+font-size:20px;
+color:#0b2a52;
+">
+
+KC
+
+</div>
+
+`;
+
+}else{
+
+box.innerHTML = `
+
+<div
+class="logo"
+style="
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+font-size:20px;
+color:#0b2a52;
+">
+
+KC
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* =====================================================
+NAV
+===================================================== */
+
+const navItems = [
+
+["dashboard","Dashboard"],
+
+["sales","Sales"],
+
+["products","Products"],
+
+["customers","Customers"],
+
+["expenses","Expenses"],
+
+["reports","Reports"],
+
+["backup","Backup"],
+
+["settings","Settings"]
+
+];
+
+
+function renderNav(){
+
+const nav =
+document.getElementById(
+"nav"
+);
+
+if(!nav)return;
+
+nav.innerHTML =
+navItems.map(
+item=>`
+
+<button
+class="${page===item[0]?"active":""}"
+onclick="go('${item[0]}')">
+
+${item[1]}
+
+</button>
+
+`
+).join("");
+
+}
+
+
+function go(p){
+
+page=p;
+
+renderNav();
+
+render();
+
+window.scrollTo(0,0);
+
+}
+
+
+async function render(){
+
+const app =
+document.getElementById(
+"app"
+);
+
+if(!app)return;
+
+
+if(page==="dashboard")
+app.innerHTML =
+await dashboardPage();
+
+
+if(page==="sales")
+app.innerHTML =
+await salesPage();
+
+
+if(page==="products")
+app.innerHTML =
+await productsPage();
+
+
+if(page==="customers")
+app.innerHTML =
+await customersPage();
+
+
+if(page==="expenses")
+app.innerHTML =
+await expensesPage();
+
+
+if(page==="reports")
+app.innerHTML =
+await reportsPage();
+
+
+if(page==="backup")
+app.innerHTML =
+backupPage();
+
+
+if(page==="settings")
+app.innerHTML =
+settingsPage();
+
+}
+
+
+/* =====================================================
+PRODUCTS
+===================================================== */
+
+async function getProducts(){
+
+const {
+data,
+error
+} =
+await sb
+.from("products")
+.select("*")
+.eq(
+"business_id",
+profile.business_id
 )
-WITH CHECK (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
-);
-
-
--- ============================================================
--- SALES POLICIES
--- ============================================================
-
-DROP POLICY IF EXISTS
-"Users can insert business sales"
-ON sales;
-
-CREATE POLICY
-"Users can insert business sales"
-ON sales
-FOR INSERT
-TO authenticated
-WITH CHECK (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
-);
-
-
-DROP POLICY IF EXISTS
-"Users can view business sales"
-ON sales;
-
-CREATE POLICY
-"Users can view business sales"
-ON sales
-FOR SELECT
-TO authenticated
-USING (
-    business_id IN (
-        SELECT business_id
-        FROM profiles
-        WHERE id = auth.uid()
-    )
-);
-
-
--- ============================================================
--- SALE ITEMS
--- ============================================================
-
-DROP POLICY IF EXISTS
-"Users can insert sale items"
-ON sale_items;
-
-CREATE POLICY
-"Users can insert sale items"
-ON sale_items
-FOR INSERT
-TO authenticated
-WITH CHECK (
-    sale_id IN (
-        SELECT id
-        FROM sales
-        WHERE business_id IN (
-            SELECT business_id
-            FROM profiles
-            WHERE id = auth.uid()
-        )
-    )
-);
-
-
-DROP POLICY IF EXISTS
-"Users can view sale items"
-ON sale_items;
-
-CREATE POLICY
-"Users can view sale items"
-ON sale_items
-FOR SELECT
-TO authenticated
-USING (
-    sale_id IN (
-        SELECT id
-        FROM sales
-        WHERE business_id IN (
-            SELECT business_id
-            FROM profiles
-            WHERE id = auth.uid()
-        )
-    )
-);
-
-
--- ============================================================
--- ATOMIC STOCK SALE FUNCTION
--- ============================================================
-
-CREATE OR REPLACE FUNCTION process_salespro_sale(
-    p_business_id uuid,
-    p_product_id uuid,
-    p_quantity numeric
+.eq(
+"active",
+true
 )
-RETURNS numeric
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
+.order("name");
 
-DECLARE
+if(error){
 
-    old_stock numeric;
+console.error(error);
 
-    new_stock numeric;
+return [];
 
-BEGIN
+}
 
-    IF p_quantity <= 0 THEN
+return data || [];
 
-        RAISE EXCEPTION
-        'Quantity must be greater than zero';
-
-    END IF;
+}
 
 
-    SELECT stock
-    INTO old_stock
+/* =====================================================
+DASHBOARD
+===================================================== */
 
-    FROM products
+async function dashboardPage(){
 
-    WHERE id = p_product_id
+const products =
+await getProducts();
 
-    AND business_id = p_business_id
+const sales =
+await getSales();
 
-    FOR UPDATE;
-
-
-    IF old_stock IS NULL THEN
-
-        RAISE EXCEPTION
-        'Product not found';
-
-    END IF;
+const expenses =
+await getExpenses();
 
 
-    IF old_stock < p_quantity THEN
-
-        RAISE EXCEPTION
-        'Insufficient stock. Available: %',
-        old_stock;
-
-    END IF;
-
-
-    new_stock :=
-        old_stock - p_quantity;
+const revenue =
+sales.reduce(
+(a,b)=>
+a+Number(b.total||0),
+0
+);
 
 
-    UPDATE products
-
-    SET
-
-        stock = new_stock,
-
-        updated_at = now()
-
-    WHERE id = p_product_id
-
-    AND business_id = p_business_id;
+const expenseTotal =
+expenses.reduce(
+(a,b)=>
+a+Number(b.amount||0),
+0
+);
 
 
-    INSERT INTO stock_movements(
-
-        business_id,
-
-        product_id,
-
-        movement_type,
-
-        quantity,
-
-        previous_stock,
-
-        new_stock,
-
-        created_by
-
-    )
-
-    VALUES(
-
-        p_business_id,
-
-        p_product_id,
-
-        'SALE',
-
-        p_quantity,
-
-        old_stock,
-
-        new_stock,
-
-        auth.uid()
-
-    );
+const cost =
+sales.reduce(
+(a,s)=>
+a+
+(s.sale_items||[]).reduce(
+(x,i)=>
+x+
+Number(i.quantity||0)*
+Number(i.cost_price||0),
+0
+),
+0
+);
 
 
-    RETURN new_stock;
-
-END;
-
-$$;
+const profit =
+revenue-cost-expenseTotal;
 
 
--- ============================================================
--- EXPIRY INDEX
--- ============================================================
+const stockValue =
+products.reduce(
+(a,p)=>
+a+
+Number(p.stock||0)*
+Number(p.cost_price||0),
+0
+);
 
-CREATE INDEX IF NOT EXISTS
-idx_products_expiry
-ON products(expiry_date);
+
+const low =
+products.filter(
+p=>
+Number(p.stock||0)
+<=
+Number(p.low_stock_level||0)
+);
 
 
--- ============================================================
--- DONE
--- ============================================================
+const expiring =
+products.filter(
+p=>{
+const d=daysUntil(p.expiry_date);
+return d!==null && d<=30;
+}
+);
 
-SELECT 'SalesPro V2 database upgrade completed successfully.'
-AS result;
+
+return `
+
+<h1>
+Dashboard
+</h1>
+
+
+<div class="live">
+
+<span class="dot"></span>
+
+Cloud data synchronized
+
+</div>
+
+
+<div class="grid">
+
+<div class="card stat">
+
+Sales Revenue
+
+<strong>
+${money(revenue)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Net Profit
+
+<strong
+class="${profit>=0?"good":"bad"}">
+
+${money(profit)}
+
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Products
+
+<strong>
+${products.length}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Stock Value
+
+<strong>
+${money(stockValue)}
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="toolbar">
+
+<button
+onclick="newSale()">
+
++ New Sale
+
+</button>
+
+<button
+class="secondary"
+onclick="newProduct()">
+
++ Add Product
+
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Low Stock
+</h2>
+
+${
+low.length
+?
+productMiniTable(low)
+:
+`<div class="empty">No low-stock products.</div>`
+}
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Expiry Monitoring
+</h2>
+
+${
+expiring.length
+?
+productExpiryTable(expiring)
+:
+`<div class="empty">
+No products expiring within 30 days.
+</div>`
+}
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Recent Sales
+</h2>
+
+${recentSales(sales)}
+
+</div>
+
+
+<div class="footer">
+
+SalesPro V2<br>
+
+${esc(
+business?.name ||
+"KC Integrated Global Services"
+)}
+
+</div>
+
+`;
+
+}
+
+
+function productMiniTable(products){
+
+return `
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>
+Product
+</th>
+
+<th>
+Barcode
+</th>
+
+<th>
+Stock
+</th>
+
+<th>
+Alert
+</th>
+
+</tr>
+
+${products.map(
+p=>`
+
+<tr>
+
+<td>
+<strong>
+${esc(p.name)}
+</strong>
+</td>
+
+<td>
+${esc(p.barcode||"-")}
+</td>
+
+<td class="bad">
+${p.stock}
+</td>
+
+<td>
+${p.low_stock_level}
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+function productExpiryTable(products){
+
+return `
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>
+Product
+</th>
+
+<th>
+Expiry
+</th>
+
+<th>
+Status
+</th>
+
+</tr>
+
+${products.map(
+p=>`
+
+<tr class="${expiryStatus(p.expiry_date)}">
+
+<td>
+${esc(p.name)}
+</td>
+
+<td>
+${esc(p.expiry_date||"")}
+</td>
+
+<td class="expiryText">
+
+${expiryLabel(p.expiry_date)}
+
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>
+
+`;
+
+
+}
+
+
+/* =====================================================
+PRODUCT PAGE
+===================================================== */
+
+async function productsPage(){
+
+const products =
+await getProducts();
+
+
+return `
+
+<h1>
+Products & Inventory
+</h1>
+
+
+<div class="toolbar">
+
+<button
+onclick="newProduct()">
+
++ Add Product
+
+</button>
+
+
+<input
+id="productSearch"
+style="max-width:330px"
+placeholder="Search product or barcode..."
+oninput="filterProducts()">
+
+</div>
+
+
+<div
+id="productTable"
+class="table">
+
+${productTable(products)}
+
+</div>
+
+`;
+
+}
+
+
+function productTable(products){
+
+if(!products.length){
+
+return `
+<div class="empty">
+No products found.
+</div>
+`;
+
+}
+
+
+return `
+
+<table>
+
+<tr>
+
+<th>
+Product
+</th>
+
+<th>
+Barcode
+</th>
+
+<th>
+Packaging
+</th>
+
+<th>
+Piece Price
+</th>
+
+<th>
+Pack Price
+</th>
+
+<th>
+Carton Price
+</th>
+
+<th>
+Stock
+</th>
+
+<th>
+Expiry
+</th>
+
+<th>
+Action
+</th>
+
+</tr>
+
+
+${products.map(
+p=>`
+
+<tr
+class="${expiryStatus(p.expiry_date)}">
+
+<td>
+
+<strong>
+${esc(p.name)}
+</strong>
+
+<br>
+
+<small>
+${esc(p.brand||"")}
+</small>
+
+</td>
+
+
+<td>
+${esc(p.barcode||"-")}
+</td>
+
+
+<td>
+
+${p.pieces_per_pack||1}
+pcs/pack
+
+<br>
+
+${p.packs_per_carton||1}
+packs/carton
+
+</td>
+
+
+<td>
+${money(p.retail_price)}
+</td>
+
+
+<td>
+${money(p.pack_price)}
+</td>
+
+
+<td>
+${money(p.carton_price)}
+</td>
+
+
+<td
+class="${
+Number(p.stock)<=
+Number(p.low_stock_level||0)
+?"bad":""
+}">
+
+${p.stock}
+
+</td>
+
+
+<td>
+
+${p.expiry_date
+?
+expiryLabel(p.expiry_date)
+:
+"-"}
+
+</td>
+
+
+<td>
+
+<button
+class="secondary"
+onclick="editProduct('${p.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+`;
+
+}
+
+
+async function filterProducts(){
+
+const q =
+document.getElementById(
+"productSearch"
+).value
+.toLowerCase();
+
+
+const products =
+await getProducts();
+
+
+const filtered =
+products.filter(
+p=>
+String(p.name||"")
+.toLowerCase()
+.includes(q)
+||
+String(p.barcode||"")
+.toLowerCase()
+.includes(q)
+||
+String(p.brand||"")
+.toLowerCase()
+.includes(q)
+);
+
+
+document.getElementById(
+"productTable"
+).innerHTML =
+productTable(filtered);
+
+}
+
+
+/* =====================================================
+PRODUCT FORM
+===================================================== */
+
+async function newProduct(existing=null){
+
+openModal(`
+
+<h2>
+${existing?"Edit":"Add"} Product
+</h2>
+
+
+<div class="formgrid">
+
+<div class="full">
+
+<label>
+Product Name *
+</label>
+
+<input
+id="pname"
+value="${esc(existing?.name||"")}"
+placeholder="Example: Eva Water 60cl">
+
+</div>
+
+
+<div>
+
+<label>
+Barcode
+</label>
+
+<input
+id="pbarcode"
+value="${esc(existing?.barcode||"")}"
+placeholder="Scan or type barcode">
+
+<button
+onclick="openScannerFor('pbarcode')"
+style="width:100%;margin-top:7px">
+
+📷 Scan Barcode
+
+</button>
+
+</div>
+
+
+<div>
+
+<label>
+Category
+</label>
+
+<input
+id="pcategory"
+value="${esc(existing?.category||"")}"
+placeholder="Water, Drinks, Beer...">
+
+</div>
+
+
+<div>
+
+<label>
+Brand
+</label>
+
+<input
+id="pbrand"
+value="${esc(existing?.brand||"")}"
+placeholder="Eva, Coca-Cola...">
+
+</div>
+
+
+<div>
+
+<label>
+Cost Price - Single Piece
+</label>
+
+<input
+id="pcost"
+type="number"
+step="0.01"
+value="${existing?.cost_price||0}">
+
+</div>
+
+
+<div>
+
+<label>
+Retail Price - Single Piece
+</label>
+
+<input
+id="pretail"
+type="number"
+step="0.01"
+value="${existing?.retail_price||0}">
+
+</div>
+
+
+<div>
+
+<label>
+Pieces in One Pack
+</label>
+
+<input
+id="ppieces"
+type="number"
+min="1"
+value="${existing?.pieces_per_pack||1}">
+
+</div>
+
+
+<div>
+
+<label>
+Pack Selling Price
+</label>
+
+<input
+id="ppackprice"
+type="number"
+step="0.01"
+value="${existing?.pack_price||0}">
+
+</div>
+
+
+<div>
+
+<label>
+Packs in One Carton
+</label>
+
+<input
+id="ppacks"
+type="number"
+min="1"
+value="${existing?.packs_per_carton||1}">
+
+</div>
+
+
+<div>
+
+<label>
+Carton Selling Price
+</label>
+
+<input
+id="pcartonprice"
+type="number"
+step="0.01"
+value="${existing?.carton_price||0}">
+
+</div>
+
+
+<div>
+
+<label>
+Opening Stock - Pieces
+</label>
+
+<input
+id="pstock"
+type="number"
+min="0"
+value="${existing?.stock||0}">
+
+</div>
+
+
+<div>
+
+<label>
+Low Stock Alert
+</label>
+
+<input
+id="plow"
+type="number"
+min="0"
+value="${existing?.low_stock_level||5}">
+
+</div>
+
+
+<div>
+
+<label>
+Expiry Date
+</label>
+
+<input
+id="pexpiry"
+type="date"
+value="${existing?.expiry_date||""}">
+
+</div>
+
+
+<div>
+
+<label>
+Unit
+</label>
+
+<select id="punit">
+
+<option value="piece"
+${existing?.unit==="piece"?"selected":""}>
+Piece
+</option>
+
+<option value="pack"
+${existing?.unit==="pack"?"selected":""}>
+Pack
+</option>
+
+<option value="carton"
+${existing?.unit==="carton"?"selected":""}>
+Carton
+</option>
+
+</select>
+
+</div>
+
+
+</div>
+
+
+<div class="card">
+
+<strong>
+Packaging Example
+</strong>
+
+<p>
+If Eva Water 60cl has 12 bottles in one pack,
+enter <strong>12</strong> under Pieces in One Pack.
+</p>
+
+<p>
+If another product has 24 pieces in a carton,
+enter the appropriate pack and carton quantities.
+</p>
+
+</div>
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+onclick="saveProduct('${existing?.id||""}')">
+
+Save Product
+
+</button>
+
+
+${
+existing
+?
+`<button
+class="red"
+onclick="deleteProduct('${existing.id}')">
+
+Delete
+
+</button>`
+:
+""
+}
+
+</div>
+
+`);
+
+}
+
+
+async function saveProduct(id){
+
+const product = {
+
+business_id:
+profile.business_id,
+
+name:
+document.getElementById("pname")
+.value.trim(),
+
+barcode:
+document.getElementById("pbarcode")
+.value.trim()||null,
+
+category:
+document.getElementById("pcategory")
+.value.trim(),
+
+brand:
+document.getElementById("pbrand")
+.value.trim(),
+
+cost_price:
+Number(
+document.getElementById("pcost")
+.value||0
+),
+
+retail_price:
+Number(
+document.getElementById("pretail")
+.value||0
+),
+
+pieces_per_pack:
+Math.max(
+1,
+Number(
+document.getElementById("ppieces")
+.value||1
+)
+),
+
+pack_price:
+Number(
+document.getElementById("ppackprice")
+.value||0
+),
+
+packs_per_carton:
+Math.max(
+1,
+Number(
+document.getElementById("ppacks")
+.value||1
+)
+),
+
+carton_price:
+Number(
+document.getElementById("pcartonprice")
+.value||0
+),
+
+stock:
+Number(
+document.getElementById("pstock")
+.value||0
+),
+
+low_stock_level:
+Number(
+document.getElementById("plow")
+.value||0
+),
+
+expiry_date:
+document.getElementById("pexpiry")
+.value||null,
+
+unit:
+document.getElementById("punit").value,
+
+active:true,
+
+updated_at:
+new Date().toISOString()
+
+};
+
+
+if(!product.name){
+
+alert(
+"Product name is required."
+);
+
+return;
+
+}
+
+
+let result;
+
+
+if(id){
+
+result =
+await sb
+.from("products")
+.update(product)
+.eq("id",id)
+.eq(
+"business_id",
+profile.business_id
+);
+
+}else{
+
+result =
+await sb
+.from("products")
+.insert(product);
+
+}
+
+
+if(result.error){
+
+alert(
+result.error.message
+);
+
+return;
+
+}
+
+
+closeModal();
+
+await render();
+
+}
+
+
+/* =====================================================
+DELETE PRODUCT
+===================================================== */
+
+async function editProduct(id){
+
+const {
+data,
+error
+} =
+await sb
+.from("products")
+.select("*")
+.eq("id",id)
+.single();
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+newProduct(data);
+
+}
+
+
+async function deleteProduct(id){
+
+if(
+!confirm(
+"Are you sure you want to deactivate this product?"
+)
+)return;
+
+
+const {
+error
+} =
+await sb
+.from("products")
+.update({
+active:false
+})
+.eq("id",id)
+.eq(
+"business_id",
+profile.business_id
+);
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+closeModal();
+
+render();
+
+}
+
+
+/* =====================================================
+BARCODE
+===================================================== */
+
+function openScannerFor(
+field
+){
+
+scanTarget=field;
+
+openScanner();
+
+}
+
+
+function openScanner(){
+
+document
+.getElementById("scanner")
+.classList.add("show");
+
+document
+.getElementById("scanStatus")
+.innerHTML =
+"📷 Preparing camera...";
+
+setTimeout(
+startScanner,
+300
+);
+
+}
+
+
+async function startScanner(){
+
+if(scannerRunning)
+return;
+
+
+await stopScanner();
+
+
+try{
+
+scanner =
+new Html5Qrcode(
+"reader"
+);
+
+
+const formats = [
+
+Html5QrcodeSupportedFormats.EAN_13,
+
+Html5QrcodeSupportedFormats.EAN_8,
+
+Html5QrcodeSupportedFormats.UPC_A,
+
+Html5QrcodeSupportedFormats.UPC_E,
+
+Html5QrcodeSupportedFormats.CODE_128,
+
+Html5QrcodeSupportedFormats.CODE_39,
+
+Html5QrcodeSupportedFormats.ITF
+
+];
+
+
+await scanner.start(
+
+{
+facingMode:"environment"
+},
+
+{
+fps:10,
+
+qrbox:{
+width:280,
+height:160
+},
+
+formatsToSupport:
+formats
+
+},
+
+code=>{
+
+handleScan(code);
+
+},
+
+()=>{}
+
+);
+
+
+scannerRunning=true;
+
+
+document.getElementById(
+"scanStatus"
+).innerHTML =
+"✅ Camera ready. Point the camera at the barcode.";
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById(
+"scanStatus"
+).innerHTML =
+"⚠️ Camera could not start. Use barcode photo or enter it manually.";
+
+}
+
+}
+
+
+function handleScan(code){
+
+code =
+String(code||"").trim();
+
+if(!code)
+return;
+
+
+if(scanTarget){
+
+const input =
+document.getElementById(
+scanTarget
+);
+
+if(input){
+
+input.value=code;
+
+input.dispatchEvent(
+new Event(
+"input",
+{
+bubbles:true
+}
+)
+);
+
+}
+
+}
+
+
+document.getElementById(
+"scanStatus"
+).innerHTML =
+"✅ Barcode captured: <strong>"+
+esc(code)+
+"</strong>";
+
+
+setTimeout(
+closeScanner,
+600
+);
+
+}
+
+
+async function scanPhoto(event){
+
+const file =
+event.target.files?.[0];
+
+if(!file)
+return;
+
+
+document.getElementById(
+"scanStatus"
+).innerHTML =
+"🔎 Reading barcode from image...";
+
+
+await stopScanner();
+
+
+try{
+
+const reader =
+new Html5Qrcode(
+"reader"
+);
+
+
+const result =
+await reader.scanFile(
+file,
+true
+);
+
+
+try{
+await reader.clear();
+}catch(e){}
+
+
+handleScan(result);
+
+
+}catch(error){
+
+console.error(error);
+
+document.getElementById(
+"scanStatus"
+).innerHTML =
+"❌ Barcode not detected. Take a clearer picture.";
+
+}
+
+
+event.target.value="";
+
+}
+
+
+function useManualScan(){
+
+const code =
+document.getElementById(
+"scanManual"
+).value.trim();
+
+
+if(!code){
+
+alert(
+"Enter a barcode."
+);
+
+return;
+
+}
+
+
+handleScan(code);
+
+}
+
+
+async function stopScanner(){
+
+if(!scanner){
+
+scannerRunning=false;
+
+return;
+
+}
+
+
+const s =
+scanner;
+
+scanner=null;
+
+
+try{
+
+if(scannerRunning){
+
+await s.stop();
+
+}
+
+}catch(e){
+
+console.log(e);
+
+}
+
+
+try{
+
+await s.clear();
+
+}catch(e){
+
+console.log(e);
+
+}
+
+
+scannerRunning=false;
+
+}
+
+
+async function closeScanner(){
+
+await stopScanner();
+
+document
+.getElementById("scanner")
+.classList.remove("show");
+
+}
+
+
+/* =====================================================
+SALES
+===================================================== */
+
+async function getSales(){
+
+const {
+data,
+error
+} =
+await sb
+.from("sales")
+.select(`
+*,
+sale_items(*)
+`)
+.eq(
+"business_id",
+profile.business_id
+)
+.order(
+"created_at",
+{
+ascending:false
+}
+);
+
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+
+return data||[];
+
+}
+
+
+async function salesPage(){
+
+const sales =
+await getSales();
+
+
+return `
+
+<h1>
+Sales
+</h1>
+
+
+<div class="toolbar">
+
+<button
+onclick="newSale()">
+
++ New Sale
+
+</button>
+
+</div>
+
+
+${salesTable(sales)}
+
+`;
+
+}
+
+
+function salesTable(sales){
+
+if(!sales.length){
+
+return `
+
+<div class="card empty">
+No sales recorded yet.
+</div>
+
+`;
+
+}
+
+
+return `
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>
+Date
+</th>
+
+<th>
+Invoice
+</th>
+
+<th>
+Customer
+</th>
+
+<th>
+Type
+</th>
+
+<th>
+Payment
+</th>
+
+<th>
+Discount
+</th>
+
+<th>
+Total
+</th>
+
+</tr>
+
+
+${sales.map(
+s=>`
+
+<tr>
+
+<td>
+${esc(s.sale_date||"")}
+</td>
+
+<td>
+${esc(s.invoice_number||"")}
+</td>
+
+<td>
+${esc(
+s.customer_name||
+"Walk-in Customer"
+)}
+</td>
+
+<td>
+${esc(s.sale_type||"")}
+</td>
+
+<td>
+${esc(s.payment_method||"")}
+</td>
+
+<td>
+${money(s.discount)}
+</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+NEW SALE
+===================================================== */
+
+async function newSale(){
+
+saleProducts =
+await getProducts();
+
+saleCustomers =
+await getCustomers();
+
+
+if(!saleProducts.length){
+
+alert(
+"Please add products first."
+);
+
+go("products");
+
+return;
+
+}
+
+
+openModal(`
+
+<h2>
+New Sale
+</h2>
+
+
+<div class="saleTypeHelp">
+
+<strong>
+Retail:
+</strong>
+
+Sell individual items such as
+1 bottle of water, 1 cold Coke PET,
+1 bottle of beer, 1 yoghurt, etc.
+
+<br><br>
+
+<strong>
+Wholesale:
+</strong>
+
+Sell full packs or cartons.
+SalesPro automatically converts the
+pack/carton quantity into individual
+pieces for stock deduction.
+
+</div>
+
+
+<div class="formgrid">
+
+<div>
+
+<label>
+Customer
+</label>
+
+<select id="saleCustomer">
+
+<option value="">
+Walk-in Customer
+</option>
+
+${saleCustomers.map(
+c=>`
+
+<option value="${c.id}">
+${esc(c.name)}
+</option>
+
+`
+).join("")}
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Sale Type
+</label>
+
+<select
+id="saleType"
+onchange="refreshSaleLines()">
+
+<option value="Retail">
+Retail - Single Piece
+</option>
+
+<option value="Wholesale">
+Wholesale - Pack / Carton
+</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Payment Method
+</label>
+
+<select id="salePayment">
+
+<option>
+Cash
+</option>
+
+<option>
+Transfer
+</option>
+
+<option>
+POS
+</option>
+
+<option>
+Credit
+</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Sale Date
+</label>
+
+<input
+id="saleDate"
+type="date"
+value="${today()}">
+
+</div>
+
+</div>
+
+
+<hr>
+
+
+<div id="saleLines">
+</div>
+
+
+<button
+class="secondary"
+onclick="addSaleLine()">
+
++ Add Item
+
+</button>
+
+
+<div class="card">
+
+<label>
+Overall Discount
+</label>
+
+<div class="formgrid">
+
+<div>
+
+<select id="discountType"
+onchange="refreshSaleLines()">
+
+<option value="amount">
+₦ Amount
+</option>
+
+<option value="percent">
+Percentage %
+</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<input
+id="discount"
+type="number"
+min="0"
+value="0"
+oninput="refreshSaleLines()">
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="totals">
+
+<p>
+Gross Total:
+<strong id="grossTotal">
+₦0.00
+</strong>
+</p>
+
+
+<p>
+Discount:
+<strong id="discountTotal">
+₦0.00
+</strong>
+</p>
+
+
+<h2>
+
+Total:
+<span id="saleTotal">
+₦0.00
+</span>
+
+</h2>
+
+</div>
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+
+<button
+class="green"
+onclick="completeSale()">
+
+Complete Sale
+
+</button>
+
+</div>
+
+`);
+
+
+addSaleLine();
+
+}
+
+
+function addSaleLine(){
+
+const box =
+document.getElementById(
+"saleLines"
+);
+
+if(!box)return;
+
+
+const row =
+document.createElement(
+"div"
+);
+
+row.className="saleLine";
+
+
+row.innerHTML = `
+
+<div class="saleLineTop">
+
+<div>
+
+<label>
+Product
+</label>
+
+<select
+class="saleProduct"
+onchange="refreshSaleLines()">
+
+<option value="">
+Select Product
+</option>
+
+${saleProducts.map(
+p=>`
+
+<option value="${p.id}">
+${esc(p.name)}
+— Stock: ${p.stock}
+</option>
+
+`
+).join("")}
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Quantity
+</label>
+
+<input
+class="saleQty"
+type="number"
+min="1"
+value="1"
+oninput="refreshSaleLines()">
+
+</div>
+
+
+<div>
+
+<label>
+Selling Unit
+</label>
+
+<select
+class="saleUnit"
+onchange="refreshSaleLines()">
+
+<option value="piece">
+Piece
+</option>
+
+<option value="pack">
+Pack
+</option>
+
+<option value="carton">
+Carton
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="priceBox">
+
+<div>
+
+<label>
+System Price
+</label>
+
+<input
+class="systemPrice"
+readonly>
+
+</div>
+
+
+<div>
+
+<label>
+Selling Price
+</label>
+
+<input
+class="salePrice"
+type="number"
+step="0.01"
+oninput="refreshSaleLines()">
+
+</div>
+
+
+<div>
+
+<label>
+Item Discount
+</label>
+
+<input
+class="itemDiscount"
+type="number"
+min="0"
+value="0"
+oninput="refreshSaleLines()">
+
+</div>
+
+</div>
+
+
+<div
+style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:10px;
+">
+
+<strong>
+Line Total:
+<span class="lineTotal">
+₦0.00
+</span>
+</strong>
+
+
+<button
+class="red"
+onclick="this.closest('.saleLine').remove();refreshSaleLines()">
+
+Remove
+
+</button>
+
+</div>
+
+`;
+
+
+box.appendChild(row);
+
+
+refreshSaleLines();
+
+}
+
+
+/* =====================================================
+SALE CALCULATION
+===================================================== */
+
+function getSalePrice(
+product,
+unit
+){
+
+if(!product)
+return 0;
+
+
+if(unit==="pack")
+return Number(
+product.pack_price||0
+);
+
+
+if(unit==="carton")
+return Number(
+product.carton_price||0
+);
+
+
+return Number(
+product.retail_price||0
+);
+
+
+}
+
+
+function piecesForSale(
+product,
+unit,
+quantity
+){
+
+if(unit==="pack"){
+
+return quantity *
+Number(
+product.pieces_per_pack||1
+);
+
+}
+
+
+if(unit==="carton"){
+
+return quantity *
+Number(
+product.pieces_per_pack||1
+) *
+Number(
+product.packs_per_carton||1
+);
+
+}
+
+
+return quantity;
+
+}
+
+
+function refreshSaleLines(){
+
+const rows =
+document.querySelectorAll(
+".saleLine"
+);
+
+
+let gross=0;
+
+
+rows.forEach(row=>{
+
+const product =
+saleProducts.find(
+p=>
+p.id ===
+row.querySelector(
+".saleProduct"
+).value
+);
+
+
+const unit =
+row.querySelector(
+".saleUnit"
+).value;
+
+
+const qty =
+Number(
+row.querySelector(
+".saleQty"
+).value||0
+);
+
+
+if(!product){
+
+row.querySelector(
+".systemPrice"
+).value =
+money(0);
+
+row.querySelector(
+".salePrice"
+).value=0;
+
+row.querySelector(
+".lineTotal"
+).textContent =
+money(0);
+
+return;
+
+}
+
+
+const systemPrice =
+getSalePrice(
+product,
+unit
+);
+
+
+const priceInput =
+row.querySelector(
+".salePrice"
+);
+
+
+if(
+!priceInput.dataset.manual
+){
+
+priceInput.value =
+systemPrice;
+
+}
+
+
+row.querySelector(
+".systemPrice"
+).value =
+money(systemPrice);
+
+
+const price =
+Number(
+priceInput.value||0
+);
+
+
+const itemDiscount =
+Number(
+row.querySelector(
+".itemDiscount"
+).value||0
+);
+
+
+const lineGross =
+price*qty;
+
+
+const lineTotal =
+Math.max(
+0,
+lineGross-itemDiscount
+);
+
+
+gross += lineTotal;
+
+
+row.querySelector(
+".lineTotal"
+).textContent =
+money(lineTotal);
+
+
+const pieces =
+piecesForSale(
+product,
+unit,
+qty
+);
+
+
+row.dataset.pieces =
+pieces;
+
+});
+
+
+const discountType =
+document.getElementById(
+"discountType"
+)?.value ||
+"amount";
+
+
+const overall =
+Number(
+document.getElementById(
+"discount"
+)?.value||0
+);
+
+
+const discount =
+discountType==="percent"
+?
+gross*overall/100
+:
+overall;
+
+
+const total =
+Math.max(
+0,
+gross-discount
+);
+
+
+const grossBox =
+document.getElementById(
+"grossTotal"
+);
+
+if(grossBox)
+grossBox.textContent =
+money(gross);
+
+
+const discountBox =
+document.getElementById(
+"discountTotal"
+);
+
+if(discountBox)
+discountBox.textContent =
+money(discount);
+
+
+const totalBox =
+document.getElementById(
+"saleTotal"
+);
+
+if(totalBox)
+totalBox.textContent =
+money(total);
+
+}
+
+
+/* =====================================================
+TRACK MANUAL PRICE CHANGES
+===================================================== */
+
+document.addEventListener(
+"input",
+event=>{
+
+if(
+event.target.classList.contains(
+"salePrice"
+)
+){
+
+event.target.dataset.manual =
+"1";
+
+}
+
+}
+);
+
+
+/* =====================================================
+COMPLETE SALE
+===================================================== */
+
+async function completeSale(){
+
+const rows =
+document.querySelectorAll(
+".saleLine"
+);
+
+
+const saleType =
+document.getElementById(
+"saleType"
+).value;
+
+
+const items=[];
+
+let gross=0;
+
+
+for(const row of rows){
+
+const productId =
+row.querySelector(
+".saleProduct"
+).value;
+
+
+const quantity =
+Number(
+row.querySelector(
+".saleQty"
+).value||0
+);
+
+
+const unit =
+row.querySelector(
+".saleUnit"
+).value;
+
+
+if(
+!productId ||
+quantity<=0
+)
+continue;
+
+
+const product =
+saleProducts.find(
+p=>p.id===productId
+);
+
+
+if(!product)
+continue;
+
+
+const pieces =
+piecesForSale(
+product,
+unit,
+quantity
+);
+
+
+if(
+pieces >
+Number(product.stock||0)
+){
+
+alert(
+`Not enough stock for ${product.name}.
+
+Available:
+${product.stock} pieces.
+
+Required:
+${pieces} pieces.`
+);
+
+return;
+
+}
+
+
+const price =
+Number(
+row.querySelector(
+".salePrice"
+).value||0
+);
+
+
+const itemDiscount =
+Number(
+row.querySelector(
+".itemDiscount"
+).value||0
+);
+
+
+const lineGross =
+price*quantity;
+
+
+const lineTotal =
+Math.max(
+0,
+lineGross-itemDiscount
+);
+
+
+gross += lineTotal;
+
+
+items.push({
+
+product,
+
+product_id:
+product.id,
+
+product_name:
+product.name,
+
+barcode:
+product.barcode,
+
+quantity,
+
+selling_unit:
+unit,
+
+pieces_sold:
+pieces,
+
+unit_price:
+price,
+
+cost_price:
+Number(
+product.cost_price||0
+),
+
+discount:
+itemDiscount,
+
+discount_type:
+"amount",
+
+total:
+lineTotal
+
+});
+
+}
+
+
+if(!items.length){
+
+alert(
+"Add at least one product."
+);
+
+return;
+
+}
+
+
+const discountType =
+document.getElementById(
+"discountType"
+).value;
+
+
+const discountInput =
+Number(
+document.getElementById(
+"discount"
+).value||0
+);
+
+
+const overallDiscount =
+discountType==="percent"
+?
+gross*discountInput/100
+:
+discountInput;
+
+
+const finalTotal =
+Math.max(
+0,
+gross-overallDiscount
+);
+
+
+const invoice =
+"INV-" +
+Date.now();
+
+
+const customerId =
+document.getElementById(
+"saleCustomer"
+).value ||
+null;
+
+
+const customer =
+saleCustomers.find(
+c=>c.id===customerId
+);
+
+
+const sale={
+
+business_id:
+profile.business_id,
+
+invoice_number:
+invoice,
+
+customer_id:
+customerId,
+
+user_id:
+user.id,
+
+created_by:
+user.id,
+
+customer_name:
+customer?.name ||
+"Walk-in Customer",
+
+sale_type:
+saleType,
+
+subtotal:
+gross,
+
+gross_total:
+gross,
+
+discount:
+overallDiscount,
+
+discount_type:
+discountType,
+
+total:
+finalTotal,
+
+amount_paid:
+finalTotal,
+
+balance:0,
+
+payment_method:
+document.getElementById(
+"salePayment"
+).value,
+
+status:
+"completed",
+
+sale_date:
+document.getElementById(
+"saleDate"
+).value
+
+};
+
+
+try{
+
+/*
+IMPORTANT:
+Create sale first.
+*/
+
+const {
+data:saleData,
+error:saleError
+} =
+await sb
+.from("sales")
+.insert(sale)
+.select()
+.single();
+
+
+if(saleError)
+throw saleError;
+
+
+/*
+Insert items.
+*/
+
+const itemRows =
+items.map(
+item=>({
+
+sale_id:
+saleData.id,
+
+product_id:
+item.product_id,
+
+product_name:
+item.product_name,
+
+barcode:
+item.barcode,
+
+quantity:
+item.quantity,
+
+selling_unit:
+item.selling_unit,
+
+pieces_sold:
+item.pieces_sold,
+
+unit_price:
+item.unit_price,
+
+cost_price:
+item.cost_price,
+
+discount:
+item.discount,
+
+discount_type:
+item.discount_type,
+
+total:
+item.total
+
+})
+);
+
+
+const {
+error:itemError
+} =
+await sb
+.from("sale_items")
+.insert(itemRows);
+
+
+if(itemError)
+throw itemError;
+
+
+/*
+Atomic stock update.
+*/
+
+for(
+const item of items
+){
+
+const {
+data:newStock,
+error:stockError
+} =
+await sb.rpc(
+"process_salespro_sale",
+{
+
+p_business_id:
+profile.business_id,
+
+p_product_id:
+item.product_id,
+
+p_quantity:
+item.pieces_sold
+
+}
+);
+
+
+if(stockError){
+
+throw stockError;
+
+}
+
+}
+
+
+/*
+Refresh cloud data.
+*/
+
+closeModal();
+
+await render();
+
+
+alert(
+`Sale completed successfully.
+
+Invoice:
+${invoice}
+
+Total:
+${money(finalTotal)}`
+);
+
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Sale could not be completed:\n\n"+
+error.message
+);
+
+}
+
+}
+
+
+/* =====================================================
+CUSTOMERS
+===================================================== */
+
+async function getCustomers(){
+
+const {
+data,
+error
+} =
+await sb
+.from("customers")
+.select("*")
+.eq(
+"business_id",
+profile.business_id
+)
+.order("name");
+
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+
+return data||[];
+
+}
+
+
+async function customersPage(){
+
+const customers =
+await getCustomers();
+
+
+return `
+
+<h1>
+Customers
+</h1>
+
+
+<div class="toolbar">
+
+<button
+onclick="newCustomer()">
+
++ Add Customer
+
+</button>
+
+</div>
+
+
+${
+customers.length
+?
+
+`<div class="table">
+
+<table>
+
+<tr>
+
+<th>Name</th>
+<th>Phone</th>
+<th>Email</th>
+<th>Type</th>
+<th>Balance</th>
+<th>Action</th>
+
+</tr>
+
+
+${customers.map(
+c=>`
+
+<tr>
+
+<td>
+${esc(c.name)}
+</td>
+
+<td>
+${esc(c.phone||"-")}
+</td>
+
+<td>
+${esc(c.email||"-")}
+</td>
+
+<td>
+${esc(c.customer_type||"Retail")}
+</td>
+
+<td>
+${money(c.balance)}
+</td>
+
+<td>
+
+<button
+class="secondary"
+onclick="editCustomer('${c.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>`
+
+:
+
+`<div class="card empty">
+No customers yet.
+</div>`
+
+}
+
+`;
+
+}
+
+
+async function newCustomer(
+existing=null
+){
+
+openModal(`
+
+<h2>
+${existing?"Edit":"Add"} Customer
+</h2>
+
+
+<label>
+Name
+</label>
+
+<input
+id="cname"
+value="${esc(existing?.name||"")}">
+
+
+<label>
+Phone
+</label>
+
+<input
+id="cphone"
+value="${esc(existing?.phone||"")}">
+
+
+<label>
+Email
+</label>
+
+<input
+id="cemail"
+value="${esc(existing?.email||"")}">
+
+
+<label>
+Address
+</label>
+
+<textarea
+id="caddress">${esc(existing?.address||"")}</textarea>
+
+
+<label>
+Customer Type
+</label>
+
+<select id="ctype">
+
+<option
+${existing?.customer_type==="Retail"?"selected":""}>
+Retail
+</option>
+
+<option
+${existing?.customer_type==="Wholesale"?"selected":""}>
+Wholesale
+</option>
+
+</select>
+
+
+<label>
+Balance
+</label>
+
+<input
+id="cbalance"
+type="number"
+value="${existing?.balance||0}">
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+onclick="saveCustomer('${existing?.id||""}')">
+
+Save
+
+</button>
+
+</div>
+
+`);
+
+}
+
+
+async function saveCustomer(id){
+
+const customer={
+
+business_id:
+profile.business_id,
+
+name:
+document.getElementById(
+"cname"
+).value.trim(),
+
+phone:
+document.getElementById(
+"cphone"
+).value.trim(),
+
+email:
+document.getElementById(
+"cemail"
+).value.trim(),
+
+address:
+document.getElementById(
+"caddress"
+).value.trim(),
+
+customer_type:
+document.getElementById(
+"ctype"
+).value,
+
+balance:
+Number(
+document.getElementById(
+"cbalance"
+).value||0
+)
+
+};
+
+
+if(!customer.name){
+
+alert(
+"Enter customer name."
+);
+
+return;
+
+}
+
+
+let result;
+
+
+if(id){
+
+result =
+await sb
+.from("customers")
+.update(customer)
+.eq("id",id)
+.eq(
+"business_id",
+profile.business_id
+);
+
+}else{
+
+result =
+await sb
+.from("customers")
+.insert(customer);
+
+}
+
+
+if(result.error){
+
+alert(
+result.error.message
+);
+
+return;
+
+}
+
+
+closeModal();
+
+render();
+
+}
+
+
+async function editCustomer(id){
+
+const {
+data,
+error
+} =
+await sb
+.from("customers")
+.select("*")
+.eq("id",id)
+.single();
+
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+newCustomer(data);
+
+}
+
+
+/* =====================================================
+EXPENSES
+===================================================== */
+
+async function getExpenses(){
+
+const {
+data,
+error
+} =
+await sb
+.from("expenses")
+.select("*")
+.eq(
+"business_id",
+profile.business_id
+)
+.order(
+"date",
+{
+ascending:false
+}
+);
+
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+
+return data||[];
+
+}
+
+
+async function expensesPage(){
+
+const expenses =
+await getExpenses();
+
+
+const total =
+expenses.reduce(
+(a,b)=>
+a+Number(b.amount||0),
+0
+);
+
+
+return `
+
+<h1>
+Expenses
+</h1>
+
+
+<div class="grid">
+
+<div class="card stat">
+
+Total Expenses
+
+<strong>
+${money(total)}
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="toolbar">
+
+<button
+onclick="newExpense()">
+
++ Add Expense
+
+</button>
+
+</div>
+
+
+${
+expenses.length
+?
+
+`<div class="table">
+
+<table>
+
+<tr>
+
+<th>Date</th>
+<th>Description</th>
+<th>Category</th>
+<th>Amount</th>
+
+</tr>
+
+
+${expenses.map(
+e=>`
+
+<tr>
+
+<td>
+${esc(e.date||"")}
+</td>
+
+<td>
+${esc(e.description||"")}
+</td>
+
+<td>
+${esc(e.category||"")}
+</td>
+
+<td>
+${money(e.amount)}
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>`
+
+:
+
+`<div class="card empty">
+No expenses recorded.
+</div>`
+
+}
+
+`;
+
+}
+
+
+async function newExpense(){
+
+openModal(`
+
+<h2>
+Add Expense
+</h2>
+
+
+<label>
+Date
+</label>
+
+<input
+id="edate"
+type="date"
+value="${today()}">
+
+
+<label>
+Description
+</label>
+
+<input id="edesc">
+
+
+<label>
+Category
+</label>
+
+<select id="ecat">
+
+<option>
+Transport
+</option>
+
+<option>
+Rent
+</option>
+
+<option>
+Electricity
+</option>
+
+<option>
+Salary
+</option>
+
+<option>
+Shopping
+</option>
+
+<option>
+Maintenance
+</option>
+
+<option>
+Other
+</option>
+
+</select>
+
+
+<label>
+Amount
+</label>
+
+<input
+id="eamount"
+type="number">
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+onclick="saveExpense()">
+
+Save Expense
+
+</button>
+
+</div>
+
+`);
+
+}
+
+
+async function saveExpense(){
+
+const expense={
+
+business_id:
+profile.business_id,
+
+date:
+document.getElementById(
+"edate"
+).value,
+
+description:
+document.getElementById(
+"edesc"
+).value.trim(),
+
+category:
+document.getElementById(
+"ecat"
+).value,
+
+amount:
+Number(
+document.getElementById(
+"eamount"
+).value||0
+)
+
+};
+
+
+if(
+!expense.description ||
+!expense.amount
+){
+
+alert(
+"Enter description and amount."
+);
+
+return;
+
+}
+
+
+const {
+error
+} =
+await sb
+.from("expenses")
+.insert(expense);
+
+
+if(error){
+
+alert(
+error.message
+);
+
+return;
+
+}
+
+
+closeModal();
+
+render();
+
+}
+
+
+/* =====================================================
+REPORTS
+===================================================== */
+
+async function reportsPage(){
+
+const sales =
+await getSales();
+
+const expenses =
+await getExpenses();
+
+
+const revenue =
+sales.reduce(
+(a,b)=>
+a+Number(b.total||0),
+0
+);
+
+
+const cost =
+sales.reduce(
+(a,s)=>
+a+
+(s.sale_items||[]).reduce(
+(x,i)=>
+x+
+Number(i.quantity||0)*
+Number(i.cost_price||0),
+0
+),
+0
+);
+
+
+const expenseTotal =
+expenses.reduce(
+(a,b)=>
+a+Number(b.amount||0),
+0
+);
+
+
+const gross =
+revenue-cost;
+
+
+const net =
+gross-expenseTotal;
+
+
+return `
+
+<h1>
+Reports
+</h1>
+
+
+<div class="live">
+
+<span class="dot"></span>
+
+Cloud monitoring active
+
+</div>
+
+
+<div class="grid">
+
+<div class="card stat">
+
+Sales Revenue
+
+<strong>
+${money(revenue)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Cost of Goods
+
+<strong>
+${money(cost)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Gross Profit
+
+<strong>
+${money(gross)}
+</strong>
+
+</div>
+
+
+<div class="card stat">
+
+Net Profit
+
+<strong
+class="${net>=0?"good":"bad"}">
+
+${money(net)}
+
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="toolbar noPrint">
+
+<button
+onclick="window.print()">
+
+🖨️ Print Report
+
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Payment Breakdown
+</h2>
+
+
+${[
+"Cash",
+"Transfer",
+"POS",
+"Credit"
+].map(
+method=>{
+
+const total =
+sales
+.filter(
+s=>
+s.payment_method===
+method
+)
+.reduce(
+(a,b)=>
+a+Number(b.total||0),
+0
+);
+
+
+return `
+
+<p>
+
+${method}:
+
+<strong>
+${money(total)}
+</strong>
+
+</p>
+
+`;
+
+}
+).join("")}
+
+
+<hr>
+
+
+<p>
+Total Transactions:
+<strong>
+${sales.length}
+</strong>
+</p>
+
+
+<p>
+Total Expenses:
+<strong>
+${money(expenseTotal)}
+</strong>
+</p>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+RECENT SALES
+===================================================== */
+
+function recentSales(
+sales
+){
+
+if(!sales.length){
+
+return `
+<div class="empty">
+No sales recorded yet.
+</div>
+`;
+
+}
+
+
+return `
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Date</th>
+<th>Invoice</th>
+<th>Customer</th>
+<th>Type</th>
+<th>Total</th>
+
+</tr>
+
+
+${sales.slice(0,10).map(
+s=>`
+
+<tr>
+
+<td>
+${esc(s.sale_date||"")}
+</td>
+
+<td>
+${esc(s.invoice_number||"")}
+</td>
+
+<td>
+${esc(
+s.customer_name||
+"Walk-in Customer"
+)}
+</td>
+
+<td>
+${esc(s.sale_type||"")}
+</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`
+).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+BACKUP
+===================================================== */
+
+function backupPage(){
+
+return `
+
+<h1>
+Backup & Data Protection
+</h1>
+
+
+<div class="card">
+
+<h2>
+📥 Export SalesPro Data
+</h2>
+
+<p>
+Download a copy of your business data.
+</p>
+
+
+<button
+onclick="downloadBackup()">
+
+Export Backup
+
+</button>
+
+</div>
+
+`;
+
+}
+
+
+async function downloadBackup(){
+
+const products =
+await getProducts();
+
+const sales =
+await getSales();
+
+const customers =
+await getCustomers();
+
+const expenses =
+await getExpenses();
+
+
+const backup={
+
+version:
+"SalesPro V2",
+
+created_at:
+new Date().toISOString(),
+
+business,
+
+products,
+
+sales,
+
+customers,
+
+expenses
+
+};
+
+
+const blob =
+new Blob(
+[
+JSON.stringify(
+backup,
+null,
+2
+)
+],
+{
+type:"application/json"
+}
+);
+
+
+const url =
+URL.createObjectURL(
+blob
+);
+
+
+const a =
+document.createElement(
+"a"
+);
+
+a.href=url;
+
+a.download =
+"SalesPro_Backup_"+
+today()+
+".json";
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
+
+
+alert(
+"Backup created successfully."
+);
+
+}
+
+
+/* =====================================================
+SETTINGS
+===================================================== */
+
+function settingsPage(){
+
+return `
+
+<h1>
+Business Settings
+</h1>
+
+
+<div class="card">
+
+<h2>
+Business Information
+</h2>
+
+
+<label>
+Business Name
+</label>
+
+<input
+id="businessName"
+value="${esc(business?.name||"")}">
+
+
+<label>
+Phone
+</label>
+
+<input
+id="businessPhone"
+value="${esc(business?.phone||"")}">
+
+
+<label>
+Email
+</label>
+
+<input
+id="businessEmail"
+value="${esc(business?.email||"")}">
+
+
+<label>
+Address
+</label>
+
+<textarea
+id="businessAddress">${esc(business?.address||"")}</textarea>
+
+
+<label>
+Logo URL
+</label>
+
+<input
+id="businessLogoUrl"
+value="${esc(business?.logo_url||"")}"
+placeholder="https://...">
+
+
+<p style="font-size:12px;color:#667085">
+
+For now, you can paste your publicly accessible
+logo image URL here. The next improvement can
+be direct image upload to Supabase Storage.
+
+</p>
+
+
+<div class="actions">
+
+<button
+onclick="saveBusinessSettings()">
+
+Save Settings
+
+</button>
+
+
+<button
+class="red"
+onclick="logout()">
+
+Logout
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+Account
+</h2>
+
+<p>
+Name:
+<strong>
+${esc(profile?.full_name||"")}
+</strong>
+</p>
+
+<p>
+Role:
+<strong>
+${esc(profile?.role||"")}
+</strong>
+</p>
+
+<p>
+Email:
+<strong>
+${esc(user?.email||"")}
+</strong>
+</p>
+
+</div>
+
+`;
+
+}
+
+
+async function saveBusinessSettings(){
+
+const updates={
+
+name:
+document.getElementById(
+"businessName"
+).value.trim(),
+
+phone:
+document.getElementById(
+"businessPhone"
+).value.trim(),
+
+email:
+document.getElementById(
+"businessEmail"
+).value.trim(),
+
+address:
+document.getElementById(
+"businessAddress"
+).value.trim(),
+
+logo_url:
+document.getElementById(
+"businessLogoUrl"
+).value.trim()
+
+};
+
+
+const {
+error
+} =
+await sb
+.from("businesses")
+.update(updates)
+.eq(
+"id",
+profile.business_id
+);
+
+
+if(error){
+
+alert(
+error.message
+);
+
+return;
+
+}
+
+
+business={
+...business,
+...updates
+};
+
+
+alert(
+"Business settings saved."
+);
+
+
+showApp();
+
+}
+
+
+/* =====================================================
+MODAL
+===================================================== */
+
+function openModal(
+html
+){
+
+document.getElementById(
+"sheet"
+).innerHTML =
+html;
+
+
+document.getElementById(
+"modal"
+).classList.add(
+"show"
+);
+
+}
+
+
+function closeModal(){
+
+document.getElementById(
+"modal"
+).classList.remove(
+"show"
+);
+
+}
+
+
+/* =====================================================
+REALTIME CLOUD SYNCHRONIZATION
+===================================================== */
+
+function setupRealtime(){
+
+cleanupRealtime();
+
+
+const channel =
+sb
+.channel(
+"salespro-business-"+profile.business_id
+);
+
+
+channel.on(
+"postgres_changes",
+{
+event:"*",
+schema:"public",
+table:"products",
+filter:
+"business_id=eq."+
+profile.business_id
+},
+payload=>{
+
+if(page==="dashboard"||
+page==="products"||
+page==="sales"){
+
+render();
+
+}
+
+}
+);
+
+
+channel.on(
+"postgres_changes",
+{
+event:"*",
+schema:"public",
+table:"sales",
+filter:
+"business_id=eq."+
+profile.business_id
+},
+payload=>{
+
+if(page==="dashboard"||
+page==="sales"||
+page==="reports"){
+
+render();
+
+}
+
+}
+);
+
+
+channel.on(
+"postgres_changes",
+{
+event:"*",
+schema:"public",
+table:"stock_movements",
+filter:
+"business_id=eq."+
+profile.business_id
+},
+payload=>{
+
+if(page==="dashboard"||
+page==="products"||
+page==="sales"||
+page==="reports"){
+
+render();
+
+}
+
+}
+);
+
+
+channel.subscribe(
+status=>{
+
+console.log(
+"SalesPro realtime:",
+status
+);
+
+}
+);
+
+
+realtimeChannels.push(
+channel
+);
+
+}
+
+
+function cleanupRealtime(){
+
+realtimeChannels.forEach(
+channel=>{
+sb.removeChannel(channel);
+}
+);
+
+realtimeChannels=[];
+
+}
+
+
+/* =====================================================
+AUTH STATE
+===================================================== */
+
+sb.auth.onAuthStateChange(
+async(
+event,
+session
+)=>{
+
+if(event==="SIGNED_OUT"){
+
+cleanupRealtime();
+
+showLogin();
+
+}
+
+
+if(
+event==="SIGNED_IN" &&
+session
+){
+
+user =
+session.user;
+
+await loadProfile();
+
+}
+
+});
+
+
+/* =====================================================
+CAMERA CLEANUP
+===================================================== */
+
+document.addEventListener(
+"visibilitychange",
+()=>{
+
+if(
+document.hidden &&
+scannerRunning
+){
+
+stopScanner();
+
+}
+
+});
+
+
+window.addEventListener(
+"pagehide",
+()=>{
+
+stopScanner();
+
+});
+
+
+/* =====================================================
+START APPLICATION
+===================================================== */
+
+checkAuth();
+
+</script>
+
+</body>
+</html>
