@@ -1,34 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover">
-
-<meta name="apple-mobile-web-app-capable"
-content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style"
-content="default">
-
-<meta name="apple-mobile-web-app-title"
-content="SalesPro">
-
-<meta name="theme-color"
-content="#0b2a52">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SalesPro">
+<meta name="theme-color" content="#0b2a52">
 
 <title>SalesPro - KC Integrated Global Services</title>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- BARCODE LIBRARY -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
-
 :root{
 --navy:#0b2a52;
 --blue:#155fa0;
@@ -39,27 +24,20 @@ content="#0b2a52">
 --muted:#667085;
 --green:#087443;
 --red:#b42318;
+--orange:#b54708;
 --border:#e2e6ec;
 }
 
-*{
-box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
 margin:0;
 background:var(--bg);
 color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,
-"Segoe UI",Arial,sans-serif;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif
 }
 
-button,
-input,
-select,
-textarea{
-font:inherit;
-}
+button,input,select,textarea{font:inherit}
 
 button{
 border:0;
@@ -68,42 +46,30 @@ padding:11px 15px;
 font-weight:700;
 background:var(--navy);
 color:white;
-cursor:pointer;
+cursor:pointer
 }
 
 button.secondary{
 background:#e8edf3;
-color:var(--navy);
+color:var(--navy)
 }
 
-button.green{
-background:var(--green);
-}
+button.green{background:var(--green)}
+button.red{background:#fee4e2;color:var(--red)}
+button.orange{background:#fff1e8;color:var(--orange)}
 
-button.red{
-background:#fee4e2;
-color:var(--red);
-}
-
-button:disabled{
-opacity:.55;
-cursor:not-allowed;
-}
-
-input,
-select,
-textarea{
+input,select,textarea{
 width:100%;
 border:1px solid #d0d5dd;
 border-radius:10px;
 padding:11px;
 background:white;
-outline:none;
+outline:none
 }
 
 textarea{
 min-height:90px;
-resize:vertical;
+resize:vertical
 }
 
 label{
@@ -111,7 +77,7 @@ font-size:12px;
 font-weight:700;
 color:var(--muted);
 display:block;
-margin:8px 0 5px;
+margin:8px 0 5px
 }
 
 .header{
@@ -119,14 +85,14 @@ position:sticky;
 top:0;
 z-index:20;
 background:white;
-border-bottom:1px solid var(--border);
+border-bottom:1px solid var(--border)
 }
 
 .brand{
 display:flex;
 align-items:center;
 gap:12px;
-padding:10px 14px;
+padding:10px 14px
 }
 
 .logo{
@@ -135,55 +101,53 @@ height:52px;
 border-radius:12px;
 object-fit:contain;
 background:white;
-border:1px solid #eee;
+border:1px solid #eee
 }
 
 .brand strong{
 font-size:18px;
-display:block;
+display:block
 }
 
-.brand small{
-color:var(--muted);
-}
+.brand small{color:var(--muted)}
 
 .nav{
 display:flex;
 overflow-x:auto;
 gap:7px;
-padding:0 12px 10px;
+padding:0 12px 10px
 }
 
 .nav button{
 white-space:nowrap;
 background:#edf2f7;
-color:var(--navy);
+color:var(--navy)
 }
 
 .nav button.active{
 background:var(--navy);
-color:white;
+color:white
 }
 
 .container{
 max-width:1150px;
 margin:auto;
-padding:15px 12px 100px;
+padding:15px 12px 100px
 }
 
 h1{
 font-size:25px;
-margin:18px 0 13px;
+margin:18px 0 13px
 }
 
-h2{
-font-size:20px;
-}
+h2{font-size:20px}
+
+h3{margin-top:0}
 
 .grid{
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:12px;
+gap:12px
 }
 
 .card{
@@ -192,87 +156,92 @@ border:1px solid var(--border);
 border-radius:16px;
 padding:15px;
 box-shadow:0 2px 8px rgba(0,0,0,.04);
-margin-bottom:12px;
+margin-bottom:12px
 }
 
 .stat{
 font-size:13px;
-color:var(--muted);
+color:var(--muted)
 }
 
 .stat strong{
 display:block;
 font-size:23px;
 color:var(--text);
-margin-top:5px;
+margin-top:5px
 }
 
 .toolbar{
 display:flex;
 gap:8px;
 flex-wrap:wrap;
-margin:12px 0;
+margin:12px 0
 }
 
 .formgrid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:10px;
+gap:10px
 }
 
-.full{
-grid-column:1/-1;
-}
+.full{grid-column:1/-1}
 
 .table{
 overflow-x:auto;
 background:white;
 border:1px solid var(--border);
-border-radius:14px;
+border-radius:14px
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-min-width:750px;
+min-width:750px
 }
 
-th,
-td{
+th,td{
 padding:11px;
 border-bottom:1px solid #edf0f3;
-text-align:left;
+text-align:left
 }
 
 th{
 font-size:12px;
-background:#f8fafc;
+background:#f8fafc
 }
 
-.money{
-font-weight:800;
-}
-
-.good{
-color:var(--green);
-}
-
-.bad{
-color:var(--red);
-}
+.money{font-weight:800}
+.good{color:var(--green)}
+.bad{color:var(--red)}
+.warning{color:var(--orange)}
 
 .empty{
 padding:35px;
 text-align:center;
-color:var(--muted);
+color:var(--muted)
 }
 
 .badge{
 display:inline-block;
-padding:4px 8px;
+padding:5px 9px;
 border-radius:20px;
 background:#edf2f7;
-font-size:12px;
+font-size:12px
+}
+
+.badge.green{
+background:#dcfae6;
+color:var(--green)
+}
+
+.badge.red{
+background:#fee4e2;
+color:var(--red)
+}
+
+.badge.orange{
+background:#fff1e8;
+color:var(--orange)
 }
 
 .actions{
@@ -280,7 +249,7 @@ display:flex;
 gap:8px;
 justify-content:flex-end;
 flex-wrap:wrap;
-margin-top:15px;
+margin-top:15px
 }
 
 .modal{
@@ -289,12 +258,10 @@ position:fixed;
 inset:0;
 background:rgba(0,0,0,.55);
 z-index:100;
-align-items:flex-end;
+align-items:flex-end
 }
 
-.modal.show{
-display:flex;
-}
+.modal.show{display:flex}
 
 .sheet{
 background:white;
@@ -302,14 +269,14 @@ width:100%;
 max-height:94vh;
 overflow:auto;
 border-radius:22px 22px 0 0;
-padding:18px;
+padding:18px
 }
 
 .footer{
 text-align:center;
 color:var(--muted);
 padding:30px 10px;
-font-size:12px;
+font-size:12px
 }
 
 .auth{
@@ -318,11 +285,7 @@ display:flex;
 align-items:center;
 justify-content:center;
 padding:20px;
-background:linear-gradient(
-135deg,
-#0b2a52,
-#155fa0
-);
+background:linear-gradient(135deg,#0b2a52,#155fa0)
 }
 
 .authCard{
@@ -331,37 +294,29 @@ width:100%;
 max-width:430px;
 border-radius:22px;
 padding:25px;
-box-shadow:0 20px 60px rgba(0,0,0,.25);
-}
-
-.authLogo{
-width:80px;
-height:80px;
-display:block;
-margin:0 auto 12px;
-object-fit:contain;
+box-shadow:0 20px 60px rgba(0,0,0,.25)
 }
 
 .authCard h1{
 text-align:center;
-margin:5px 0;
+margin:5px 0
 }
 
 .authBusiness{
 text-align:center;
 color:var(--muted);
-margin-bottom:20px;
+margin-bottom:20px
 }
 
 .authLinks{
 text-align:center;
-margin-top:15px;
+margin-top:15px
 }
 
 .authLinks button{
 background:none;
 color:var(--blue);
-padding:5px;
+padding:5px
 }
 
 .error{
@@ -370,7 +325,7 @@ color:var(--red);
 padding:10px;
 border-radius:10px;
 margin-bottom:10px;
-font-size:13px;
+font-size:13px
 }
 
 .success{
@@ -379,8 +334,10 @@ color:var(--green);
 padding:10px;
 border-radius:10px;
 margin-bottom:10px;
-font-size:13px;
+font-size:13px
 }
+
+/* BARCODE */
 
 .barcodeModal{
 display:none;
@@ -390,12 +347,10 @@ z-index:999999;
 background:rgba(0,0,0,.94);
 padding:12px;
 align-items:center;
-justify-content:center;
+justify-content:center
 }
 
-.barcodeModal.show{
-display:flex;
-}
+.barcodeModal.show{display:flex}
 
 .barcodeBox{
 width:100%;
@@ -404,18 +359,18 @@ max-height:96vh;
 overflow:auto;
 background:white;
 border-radius:22px;
-padding:18px;
+padding:18px
 }
 
 .barcodeHeader{
 display:flex;
 align-items:center;
-justify-content:space-between;
+justify-content:space-between
 }
 
 .barcodeHeader h2{
 margin:0;
-color:var(--navy);
+color:var(--navy)
 }
 
 .barcodeInfo{
@@ -424,7 +379,7 @@ border-radius:12px;
 padding:12px;
 font-size:13px;
 line-height:1.5;
-margin:12px 0;
+margin:12px 0
 }
 
 #barcodeReader{
@@ -432,14 +387,14 @@ width:100%;
 min-height:250px;
 background:#111;
 border-radius:15px;
-overflow:hidden;
+overflow:hidden
 }
 
 #barcodeReader video{
 width:100%!important;
 height:auto!important;
 display:block;
-border-radius:15px;
+border-radius:15px
 }
 
 .barcodeStatus{
@@ -448,103 +403,154 @@ padding:12px;
 background:#f4f6f9;
 border-radius:10px;
 text-align:center;
-font-size:14px;
+font-size:14px
 }
 
 .barcodeButtons{
 display:grid;
 grid-template-columns:1fr;
 gap:9px;
-margin-top:12px;
-}
-
-.barcodeButtons button{
-width:100%;
+margin-top:12px
 }
 
 .barcodePhoto{
-background:var(--green);
+background:var(--green)
 }
 
 .manualBarcode{
 display:flex;
 gap:8px;
-margin-top:10px;
+margin-top:10px
 }
 
-.manualBarcode input{
-flex:1;
-}
+.manualBarcode input{flex:1}
+
+/* SALES */
 
 .saleItem{
 border:1px solid var(--border);
 border-radius:14px;
 padding:12px;
 margin-bottom:10px;
+background:#fff
 }
 
 .saleItemHeader{
 display:flex;
 justify-content:space-between;
 align-items:center;
-gap:10px;
+gap:10px
 }
 
 .saleItemPrice{
 font-weight:800;
+margin-top:8px
+}
+
+.saleTypeCard{
+border:2px solid var(--border);
+border-radius:14px;
+padding:14px;
+margin-bottom:12px
+}
+
+.saleTypeCard.selected{
+border-color:var(--navy);
+background:#f5f9ff
+}
+
+.saleTypeCard strong{
+display:block;
+font-size:16px;
+margin-bottom:5px
+}
+
+.saleTypeCard small{
+color:var(--muted)
+}
+
+.stockBox{
+background:#f8fafc;
+border-radius:10px;
+padding:8px;
 margin-top:8px;
+font-size:12px
+}
+
+.expired{
+background:#fee4e2
+}
+
+.expiring{
+background:#fff7ed
 }
 
 .lowStock{
-background:#fff1f0;
+background:#fff1f0
+}
+
+.alertBox{
+border-radius:14px;
+padding:14px;
+margin-bottom:12px
+}
+
+.alertBox.red{
+background:#fee4e2;
+color:var(--red)
+}
+
+.alertBox.orange{
+background:#fff1e8;
+color:var(--orange)
+}
+
+.alertBox.green{
+background:#dcfae6;
+color:var(--green)
+}
+
+.infoBox{
+background:#eff6ff;
+border-radius:14px;
+padding:14px;
+margin-bottom:12px;
+font-size:13px;
+line-height:1.6
 }
 
 @media(max-width:700px){
 
 .grid{
-grid-template-columns:repeat(2,1fr);
+grid-template-columns:repeat(2,1fr)
 }
 
 .formgrid{
-grid-template-columns:1fr;
+grid-template-columns:1fr
 }
 
-.full{
-grid-column:auto;
-}
+.full{grid-column:auto}
 
 }
 
 @media print{
 
-.header,
-.toolbar,
-.noPrint{
-display:none!important;
+.header,.toolbar,.noPrint{
+display:none!important
 }
 
-.container{
-padding:0;
-}
-
-.card{
-box-shadow:none;
-}
+.container{padding:0}
+.card{box-shadow:none}
 
 }
-
 </style>
-
 </head>
 
 <body>
 
 <div id="root"></div>
 
-
-<!-- =====================================================
-     BARCODE SCANNER
-     ===================================================== -->
+<!-- BARCODE SCANNER -->
 
 <div id="barcodeModal" class="barcodeModal">
 
@@ -554,51 +560,40 @@ box-shadow:none;
 
 <h2>📷 Scan Barcode</h2>
 
-<button
-type="button"
+<button type="button"
 class="secondary"
-onclick="closeBarcodeScanner()">
-✕
-</button>
+onclick="closeBarcodeScanner()">✕</button>
 
 </div>
 
 <div class="barcodeInfo">
-
 <strong>Live scanner:</strong>
 Point the rear camera at the barcode.
 
 <br><br>
 
-If the live camera is black, use
-<strong>Take Barcode Photo</strong> below.
-
+If the live camera doesn't read it,
+use <strong>Take Barcode Photo</strong>
+or enter the barcode manually.
 </div>
 
 <div id="barcodeReader"></div>
 
-<div id="barcodeStatus"
-class="barcodeStatus">
+<div id="barcodeStatus" class="barcodeStatus">
 Preparing scanner...
 </div>
 
 <div class="barcodeButtons">
 
-<button
-type="button"
+<button type="button"
 onclick="startBarcodeScanner()">
-
 📷 Start Live Camera
-
 </button>
 
-<button
-type="button"
+<button type="button"
 class="barcodePhoto"
 onclick="document.getElementById('barcodePhotoInput').click()">
-
 📸 Take Barcode Photo
-
 </button>
 
 </div>
@@ -619,8 +614,7 @@ type="text"
 inputmode="numeric"
 placeholder="Enter barcode manually">
 
-<button
-type="button"
+<button type="button"
 onclick="useManualBarcode()">
 Use
 </button>
@@ -628,15 +622,13 @@ Use
 </div>
 
 </div>
-
 </div>
-
 
 <script>
 
-/* =====================================================
-   SUPABASE
-   ===================================================== */
+/* =========================================================
+SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
 "https://olkugewqersskavvcrhm.supabase.co";
@@ -651,9 +643,9 @@ SUPABASE_KEY
 );
 
 
-/* =====================================================
-   APPLICATION STATE
-   ===================================================== */
+/* =========================================================
+STATE
+========================================================= */
 
 let currentUser=null;
 let currentProfile=null;
@@ -664,11 +656,12 @@ let page="dashboard";
 let barcodeScanner=null;
 let barcodeRunning=false;
 let barcodeStarting=false;
+let barcodeTargetId="";
 
 
-/* =====================================================
-   HELPERS
-   ===================================================== */
+/* =========================================================
+HELPERS
+========================================================= */
 
 function esc(value){
 
@@ -681,7 +674,6 @@ return String(value??"")
 
 }
 
-
 function money(value){
 
 return "₦"+Number(value||0).toLocaleString(
@@ -689,10 +681,10 @@ return "₦"+Number(value||0).toLocaleString(
 {
 minimumFractionDigits:2,
 maximumFractionDigits:2
-});
+}
+);
 
 }
-
 
 function today(){
 
@@ -700,30 +692,54 @@ return new Date().toISOString().slice(0,10);
 
 }
 
+function daysUntil(date){
 
-function uuid(){
+if(!date)return null;
 
-return crypto.randomUUID();
+const now=new Date();
+now.setHours(0,0,0,0);
+
+const target=new Date(date+"T00:00:00");
+
+return Math.ceil(
+(target-now)/(1000*60*60*24)
+);
+
+}
+
+function isExpired(date){
+
+const d=daysUntil(date);
+
+return d!==null && d<0;
+
+}
+
+function isExpiringSoon(product){
+
+if(!product.expiry_date)return false;
+
+const d=daysUntil(product.expiry_date);
+const alertDays=Number(product.expiry_alert_days||30);
+
+return d>=0 && d<=alertDays;
 
 }
 
 
-/* =====================================================
-   AUTH
-   ===================================================== */
+/* =========================================================
+AUTH
+========================================================= */
 
 async function checkAuth(){
 
 const {
-data:{
-session
-}
+data:{session}
 }=await supabaseClient.auth.getSession();
 
 if(!session){
 
 showLogin();
-
 return;
 
 }
@@ -751,7 +767,7 @@ if(error){
 console.error(error);
 
 showError(
-"Unable to load your SalesPro profile."
+"Unable to load your SalesPro profile: "+error.message
 );
 
 return;
@@ -780,9 +796,7 @@ error:businessError
 .maybeSingle();
 
 if(businessError){
-
 console.error(businessError);
-
 }
 
 currentBusiness=business;
@@ -792,9 +806,9 @@ showApp();
 }
 
 
-/* =====================================================
-   LOGIN SCREEN
-   ===================================================== */
+/* =========================================================
+AUTH SCREENS
+========================================================= */
 
 function showLogin(){
 
@@ -806,28 +820,22 @@ document.getElementById("root").innerHTML=`
 
 <div id="authMessage"></div>
 
-<div id="authLogo"></div>
-
 <h1>SalesPro</h1>
 
 <div class="authBusiness">
 KC Integrated Global Services
 </div>
 
-<div id="loginForm">
-
 <label>Email Address</label>
 
-<input
-id="loginEmail"
+<input id="loginEmail"
 type="email"
 autocomplete="email"
 placeholder="Email Address">
 
 <label>Password</label>
 
-<input
-id="loginPassword"
+<input id="loginPassword"
 type="password"
 autocomplete="current-password"
 placeholder="Password">
@@ -835,25 +843,17 @@ placeholder="Password">
 <button
 style="width:100%;margin-top:15px"
 onclick="loginUser()">
-
 🔐 Login
-
 </button>
 
 <div class="authLinks">
-
 New to SalesPro?
-
 <button onclick="showRegister()">
 Create Owner Account
 </button>
-
 </div>
 
 </div>
-
-</div>
-
 </div>
 `;
 
@@ -878,22 +878,19 @@ KC Integrated Global Services
 
 <label>Full Name</label>
 
-<input
-id="regName"
+<input id="regName"
 type="text"
 placeholder="Your full name">
 
 <label>Email Address</label>
 
-<input
-id="regEmail"
+<input id="regEmail"
 type="email"
 placeholder="Email address">
 
 <label>Password</label>
 
-<input
-id="regPassword"
+<input id="regPassword"
 type="password"
 placeholder="Minimum 6 characters">
 
@@ -903,47 +900,39 @@ placeholder="Minimum 6 characters">
 
 <label>Business Name</label>
 
-<input
-id="regBusiness"
+<input id="regBusiness"
 value="KC Integrated Global Services">
 
 <label>Phone</label>
 
-<input
-id="regPhone"
+<input id="regPhone"
 placeholder="Business phone">
 
 <label>Email</label>
 
-<input
-id="regBusinessEmail"
+<input id="regBusinessEmail"
 placeholder="Business email">
 
 <label>Address</label>
 
-<textarea
-id="regAddress"
+<textarea id="regAddress"
 placeholder="Business address"></textarea>
 
 <div class="actions">
 
-<button
-class="secondary"
+<button class="secondary"
 onclick="showLogin()">
 Back
 </button>
 
-<button
-onclick="registerOwner()">
+<button onclick="registerOwner()">
 Create Account
 </button>
 
 </div>
 
 </div>
-
 </div>
-
 `;
 
 }
@@ -951,35 +940,55 @@ Create Account
 
 function authMessage(text,type="error"){
 
-const box=
-document.getElementById(
-"authMessage"
-);
+const box=document.getElementById("authMessage");
 
 if(!box)return;
 
 box.innerHTML=
-`<div class="${type}">
+`<div class="${type}">${esc(text)}</div>`;
+
+}
+
+function showError(text){
+
+const root=document.getElementById("root");
+
+if(root){
+
+root.innerHTML=`
+
+<div class="auth">
+
+<div class="authCard">
+
+<div class="error">
 ${esc(text)}
-</div>`;
+</div>
+
+<button
+style="width:100%"
+onclick="showLogin()">
+Back to Login
+</button>
+
+</div>
+</div>
+`;
+
+}
 
 }
 
 
-/* =====================================================
-   REGISTER
-   ===================================================== */
+/* =========================================================
+REGISTER
+========================================================= */
 
 async function registerOwner(){
 
-const name=
-document.getElementById("regName").value.trim();
-
-const email=
-document.getElementById("regEmail").value.trim();
-
-const password=
-document.getElementById("regPassword").value;
+const name=document.getElementById("regName").value.trim();
+const email=document.getElementById("regEmail").value.trim();
+const password=document.getElementById("regPassword").value;
 
 const businessName=
 document.getElementById("regBusiness").value.trim();
@@ -1020,11 +1029,6 @@ authMessage(
 "success"
 );
 
-
-/*
- Create authentication user.
-*/
-
 const {
 data,
 error
@@ -1041,17 +1045,9 @@ full_name:name
 
 });
 
+if(error)throw error;
 
-if(error){
-
-throw error;
-
-}
-
-
-const user=data.user;
-
-if(!user){
+if(!data.user){
 
 throw new Error(
 "Account could not be created."
@@ -1059,19 +1055,9 @@ throw new Error(
 
 }
 
-
-/*
- The database triggers/RLS should create
- the profile if configured.
-
- We create business first only if
- the session is available.
-*/
-
 if(data.session){
 
-const businessId=uuid();
-
+const businessId=crypto.randomUUID();
 
 const {
 error:businessError
@@ -1080,28 +1066,18 @@ error:businessError
 .insert({
 
 id:businessId,
-
 name:businessName,
-
 phone:phone,
-
 email:businessEmail||email,
-
 address:address,
-
 logo_url:""
 
 });
 
-
 if(businessError){
 
-console.error(
-businessError
-);
-
 authMessage(
-"Account created, but the business profile could not be created: "+
+"Account created, but business profile failed: "+
 businessError.message
 );
 
@@ -1109,40 +1085,26 @@ return;
 
 }
 
-
-/*
- Create owner profile.
-*/
-
 const {
 error:profileError
 }=await supabaseClient
 .from("profiles")
 .upsert({
 
-id:user.id,
-
+id:data.user.id,
 full_name:name,
-
 role:"owner",
-
 business_id:businessId,
-
 active:true
 
 },{
 onConflict:"id"
 });
 
-
 if(profileError){
 
-console.error(
-profileError
-);
-
 authMessage(
-"Account created, but the owner profile could not be created: "+
+"Account created, but owner profile failed: "+
 profileError.message
 );
 
@@ -1150,31 +1112,21 @@ return;
 
 }
 
-
 authMessage(
-"Account created successfully. You can now login.",
+"Account created successfully.",
 "success"
 );
 
-setTimeout(
-showLogin,
-1800
-);
+setTimeout(showLogin,1500);
 
 return;
 
 }
 
-
-/*
- Email confirmation is enabled.
-*/
-
 authMessage(
 "Account created successfully. Please check your email and verify your account before logging in.",
 "success"
 );
-
 
 }catch(error){
 
@@ -1189,9 +1141,9 @@ error.message||"Registration failed."
 }
 
 
-/* =====================================================
-   LOGIN
-   ===================================================== */
+/* =========================================================
+LOGIN
+========================================================= */
 
 async function loginUser(){
 
@@ -1218,21 +1170,13 @@ authMessage(
 "success"
 );
 
-const {
-error
-}=await supabaseClient.auth.signInWithPassword({
-
+const {error}=
+await supabaseClient.auth.signInWithPassword({
 email,
 password
-
 });
 
-
-if(error){
-
-throw error;
-
-}
+if(error)throw error;
 
 await checkAuth();
 
@@ -1249,18 +1193,12 @@ error.message||"Login failed."
 }
 
 
-/* =====================================================
-   LOGOUT
-   ===================================================== */
-
 async function logout(){
 
 await supabaseClient.auth.signOut();
 
 currentUser=null;
-
 currentProfile=null;
-
 currentBusiness=null;
 
 showLogin();
@@ -1268,9 +1206,9 @@ showLogin();
 }
 
 
-/* =====================================================
-   APP
-   ===================================================== */
+/* =========================================================
+APP
+========================================================= */
 
 function showApp(){
 
@@ -1297,49 +1235,28 @@ currentBusiness?.name||
 
 </div>
 
-<nav
-class="nav"
-id="nav">
-</nav>
+<nav class="nav" id="nav"></nav>
 
 </header>
 
-<main
-class="container"
-id="app">
-</main>
+<main class="container" id="app"></main>
 
-<div
-class="modal"
-id="modal">
-
-<div
-class="sheet"
-id="sheet">
+<div class="modal" id="modal">
+<div class="sheet" id="sheet"></div>
 </div>
 
-</div>
 `;
 
 renderNav();
-
 render();
-
 loadBusinessLogo();
 
 }
 
 
-/* =====================================================
-   LOGO
-   ===================================================== */
-
 function loadBusinessLogo(){
 
-const box=
-document.getElementById(
-"businessLogo"
-);
+const box=document.getElementById("businessLogo");
 
 if(!box)return;
 
@@ -1350,8 +1267,14 @@ box.innerHTML=`
 <img
 class="logo"
 src="${esc(currentBusiness.logo_url)}"
-alt="Business Logo">
+alt="Business Logo"
+onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
 
+<div
+class="logo"
+style="display:none;align-items:center;justify-content:center;font-weight:800;color:#0b2a52;font-size:20px">
+KC
+</div>
 `;
 
 }else{
@@ -1360,17 +1283,9 @@ box.innerHTML=`
 
 <div
 class="logo"
-style="
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:800;
-color:#0b2a52;
-font-size:20px;
-">
+style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#0b2a52;font-size:20px">
 KC
 </div>
-
 `;
 
 }
@@ -1378,35 +1293,24 @@ KC
 }
 
 
-/* =====================================================
-   NAVIGATION
-   ===================================================== */
+/* =========================================================
+NAV
+========================================================= */
 
 const navItems=[
-
 ["dashboard","Dashboard"],
-
 ["sales","Sales"],
-
 ["products","Products"],
-
 ["customers","Customers"],
-
 ["expenses","Expenses"],
-
 ["reports","Reports"],
-
 ["backup","Backup"],
-
 ["settings","Settings"]
-
 ];
-
 
 function renderNav(){
 
-const nav=
-document.getElementById("nav");
+const nav=document.getElementById("nav");
 
 if(!nav)return;
 
@@ -1416,303 +1320,84 @@ navItems.map(item=>`
 <button
 class="${page===item[0]?"active":""}"
 onclick="go('${item[0]}')">
-
 ${item[1]}
-
 </button>
 
 `).join("");
 
 }
 
-
 function go(p){
 
 page=p;
 
 renderNav();
-
 render();
 
-window.scrollTo(
-0,
-0
-);
+window.scrollTo(0,0);
 
 }
 
 
 async function render(){
 
-const app=
-document.getElementById("app");
+const app=document.getElementById("app");
 
 if(!app)return;
 
+app.innerHTML=
+`<div class="card">Loading...</div>`;
+
+try{
+
 if(page==="dashboard")
-app.innerHTML=
-await dashboard();
+app.innerHTML=await dashboard();
 
-if(page==="sales")
-app.innerHTML=
-await salesPage();
+else if(page==="sales")
+app.innerHTML=await salesPage();
 
-if(page==="products")
-app.innerHTML=
-await productsPage();
+else if(page==="products")
+app.innerHTML=await productsPage();
 
-if(page==="customers")
-app.innerHTML=
-await customersPage();
+else if(page==="customers")
+app.innerHTML=await customersPage();
 
-if(page==="expenses")
-app.innerHTML=
-await expensesPage();
+else if(page==="expenses")
+app.innerHTML=await expensesPage();
 
-if(page==="reports")
-app.innerHTML=
-await reportsPage();
+else if(page==="reports")
+app.innerHTML=await reportsPage();
 
-if(page==="backup")
-app.innerHTML=
-backupPage();
+else if(page==="backup")
+app.innerHTML=backupPage();
 
-if(page==="settings")
-app.innerHTML=
-settingsPage();
+else if(page==="settings")
+app.innerHTML=settingsPage();
 
-}
+}catch(error){
 
+console.error(error);
 
-/* =====================================================
-   DASHBOARD
-   ===================================================== */
-
-async function dashboard(){
-
-const products=
-await getProducts();
-
-const sales=
-await getSales();
-
-const expenses=
-await getExpenses();
-
-const revenue=
-sales.reduce(
-(a,b)=>a+Number(b.total||0),
-0
-);
-
-const cost=
-sales.reduce(
-(a,b)=>
-a+
-(b.sale_items||[]).reduce(
-(x,i)=>
-x+
-Number(i.quantity||0)*
-Number(i.cost_price||0),
-0
-),
-0
-);
-
-const expenseTotal=
-expenses.reduce(
-(a,b)=>a+Number(b.amount||0),
-0
-);
-
-const profit=
-revenue-cost-expenseTotal;
-
-const stockValue=
-products.reduce(
-(a,b)=>
-a+
-Number(b.stock||0)*
-Number(b.cost_price||0),
-0
-);
-
-return`
-
-<h1>Dashboard</h1>
-
-<div class="grid">
-
-<div class="card stat">
-
-Total Sales
-
-<strong>
-${money(revenue)}
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Net Profit
-
-<strong
-class="${profit>=0?"good":"bad"}">
-
-${money(profit)}
-
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Products
-
-<strong>
-${products.length}
-</strong>
-
-</div>
-
-<div class="card stat">
-
-Stock Value
-
-<strong>
-${money(stockValue)}
-</strong>
-
-</div>
-
-</div>
-
-<div class="toolbar">
-
-<button onclick="newSale()">
-+ New Sale
-</button>
-
-<button
-class="secondary"
-onclick="newProduct()">
-+ Add Product
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>Low Stock</h2>
-
-${lowStockTable(products)}
-
-</div>
-
-<div class="card">
-
-<h2>Recent Sales</h2>
-
-${recentSales(sales)}
-
-</div>
-
-<div class="footer">
-
-SalesPro •
-${esc(
-currentBusiness?.name||
-"KC Integrated Global Services"
-)}
-
-</div>
-
-`;
-
-}
-
-
-function lowStockTable(products){
-
-const low=
-products.filter(
-p=>
-Number(p.stock||0)<=
-Number(p.low_stock_level||0)
-);
-
-if(!low.length){
-
-return `
-<div class="empty">
-No low-stock products.
+app.innerHTML=`
+<div class="card error">
+Unable to load this section:
+${esc(error.message)}
 </div>
 `;
 
 }
 
-return `
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Product</th>
-
-<th>Barcode</th>
-
-<th>Stock</th>
-
-<th>Alert Level</th>
-
-</tr>
-
-${low.map(p=>`
-
-<tr class="lowStock">
-
-<td>
-<strong>${esc(p.name)}</strong>
-</td>
-
-<td>
-${esc(p.barcode||"-")}
-</td>
-
-<td class="bad">
-${p.stock}
-</td>
-
-<td>
-${p.low_stock_level}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
 }
 
 
-/* =====================================================
-   PRODUCTS
-   ===================================================== */
+/* =========================================================
+PRODUCTS
+========================================================= */
 
 async function getProducts(){
 
-const {
-data,
-error
-}=await supabaseClient
+const {data,error}=
+await supabaseClient
 .from("products")
 .select("*")
 .eq("business_id",currentProfile.business_id)
@@ -1722,7 +1407,6 @@ error
 if(error){
 
 console.error(error);
-
 return [];
 
 }
@@ -1734,12 +1418,73 @@ return data||[];
 
 async function productsPage(){
 
-const products=
-await getProducts();
+const products=await getProducts();
+
+const expired=
+products.filter(p=>isExpired(p.expiry_date));
+
+const expiring=
+products.filter(p=>isExpiringSoon(p));
+
+let alerts="";
+
+if(expired.length){
+
+alerts+=`
+
+<div class="alertBox red">
+
+<strong>🔴 ${expired.length} expired product(s)</strong>
+
+<br>
+
+Please check the expiry dates below.
+
+</div>
+
+`;
+
+}
+
+if(expiring.length){
+
+alerts+=`
+
+<div class="alertBox orange">
+
+<strong>⚠️ ${expiring.length} product(s) expiring soon</strong>
+
+<br>
+
+These products are within their expiry reminder period.
+
+</div>
+
+`;
+
+}
 
 return`
 
 <h1>Products & Inventory</h1>
+
+${alerts}
+
+<div class="infoBox">
+
+<strong>🧊 Retail / Single Piece:</strong>
+Use this when selling one bottle, can, yoghurt, water, malt, beer, etc.
+
+<br><br>
+
+<strong>📦 Wholesale:</strong>
+Use Pack or Carton when selling complete packs or cartons.
+
+<br><br>
+
+SalesPro will automatically convert packs/cartons into individual pieces when deducting stock.
+
+</div>
 
 <div class="toolbar">
 
@@ -1755,14 +1500,9 @@ oninput="filterProducts()">
 
 </div>
 
-<div
-class="table"
-id="productTable">
-
+<div class="table" id="productTable">
 ${productTable(products)}
-
 </div>
-
 `;
 
 }
@@ -1772,7 +1512,7 @@ function productTable(products){
 
 if(!products.length){
 
-return `
+return`
 <div class="empty">
 No products yet.
 </div>
@@ -1787,35 +1527,66 @@ return`
 <tr>
 
 <th>Product</th>
-
 <th>Barcode</th>
-
-<th>Category</th>
-
-<th>Retail</th>
-
+<th>Retail / Piece</th>
 <th>Wholesale</th>
-
 <th>Stock</th>
-
+<th>Expiry</th>
 <th>Action</th>
 
 </tr>
 
-${products.map(p=>`
+${products.map(p=>{
 
-<tr>
+const expired=isExpired(p.expiry_date);
+const soon=isExpiringSoon(p);
+
+let expiryHtml="-";
+
+if(p.expiry_date){
+
+const d=daysUntil(p.expiry_date);
+
+expiryHtml=`
+
+<span class="badge ${
+expired?"red":soon?"orange":"green"
+}">
+
+${expired?
+"Expired":
+d===0?
+"Today":
+d+" days"
+}
+
+</span>
+
+<br>
+
+<small>${esc(p.expiry_date)}</small>
+`;
+
+}
+
+return`
+
+<tr class="${expired?"expired":soon?"expiring":""}">
 
 <td>
+
 <strong>${esc(p.name)}</strong>
+
+<br>
+
+<small>
+${esc(p.category||"")}
+</small>
+
 </td>
 
 <td>
 ${esc(p.barcode||"-")}
-</td>
-
-<td>
-${esc(p.category||"-")}
 </td>
 
 <td>
@@ -1826,31 +1597,40 @@ ${money(p.retail_price)}
 ${money(p.wholesale_price)}
 </td>
 
-<td
-class="${Number(p.stock)<=Number(p.low_stock_level||0)?"bad":""}">
+<td class="${
+Number(p.stock)<=Number(p.low_stock_level||0)
+?"bad":""
+}">
 
-${p.stock}
+${Number(p.stock||0).toLocaleString()}
+
+<br>
+
+<small>
+${esc(p.unit||"piece")}
+</small>
 
 </td>
+
+<td>${expiryHtml}</td>
 
 <td>
 
 <button
 class="secondary"
 onclick="editProduct('${p.id}')">
-
 Edit
-
 </button>
 
 </td>
 
 </tr>
 
-`).join("")}
+`;
+
+}).join("")}
 
 </table>
-
 `;
 
 }
@@ -1859,68 +1639,53 @@ Edit
 async function filterProducts(){
 
 const search=
-document.getElementById(
-"productSearch"
-).value.toLowerCase();
+document.getElementById("productSearch").value.toLowerCase();
 
-const products=
-await getProducts();
+const products=await getProducts();
 
 const filtered=
 products.filter(p=>
 
-String(p.name||"")
-.toLowerCase()
-.includes(search)
+String(p.name||"").toLowerCase().includes(search)||
 
-||
+String(p.barcode||"").toLowerCase().includes(search)||
 
-String(p.barcode||"")
-.toLowerCase()
-.includes(search)
+String(p.brand||"").toLowerCase().includes(search)
 
 );
 
-document.getElementById(
-"productTable"
-).innerHTML=
+document.getElementById("productTable").innerHTML=
 productTable(filtered);
 
 }
 
 
-/* =====================================================
-   PRODUCT FORM
-   ===================================================== */
+/* =========================================================
+PRODUCT FORM
+========================================================= */
 
 async function newProduct(existing=null){
 
 openModal(`
 
-<h2>
-${existing?"Edit":"Add"} Product
-</h2>
+<h2>${existing?"Edit":"Add"} Product</h2>
 
 <div class="formgrid">
 
 <div class="full">
 
-<label>
-Product Name
-</label>
+<label>Product Name</label>
 
 <input
 id="pname"
 value="${esc(existing?.name||"")}"
-placeholder="e.g. Fanta 60cl">
+placeholder="e.g. Coke 60cl">
 
 </div>
 
 <div>
 
-<label>
-Barcode
-</label>
+<label>Barcode</label>
 
 <input
 id="pbarcode"
@@ -1940,51 +1705,45 @@ onclick="openBarcodeForField('pbarcode')">
 
 <div>
 
-<label>
-Category
-</label>
+<label>Category</label>
 
 <input
 id="pcategory"
 value="${esc(existing?.category||"")}"
-placeholder="Drinks, Water, Malt...">
+placeholder="Soft Drink, Water, Beer...">
 
 </div>
 
 <div>
 
-<label>
-Brand
-</label>
+<label>Brand</label>
 
 <input
 id="pbrand"
 value="${esc(existing?.brand||"")}"
-placeholder="Coca-Cola, Pepsi...">
+placeholder="Coca-Cola, Eva, Hollandia...">
 
 </div>
 
 <div>
 
-<label>
-Unit
-</label>
+<label>Stock is counted in</label>
 
 <select id="punit">
 
 <option value="piece"
 ${existing?.unit==="piece"?"selected":""}>
-Piece
+Pieces / Bottles / Cans
 </option>
 
 <option value="pack"
 ${existing?.unit==="pack"?"selected":""}>
-Pack
+Packs
 </option>
 
 <option value="carton"
 ${existing?.unit==="carton"?"selected":""}>
-Carton
+Cartons
 </option>
 
 </select>
@@ -1993,72 +1752,122 @@ Carton
 
 <div>
 
-<label>
-Cost Price
-</label>
+<label>Cost Price / Piece</label>
 
 <input
 id="pcost"
 type="number"
 step="0.01"
 value="${existing?.cost_price||0}">
-
 </div>
 
 <div>
 
-<label>
-Retail Price - Single Piece
-</label>
+<label>🧊 Retail Price / Single Piece</label>
 
 <input
 id="pretail"
 type="number"
 step="0.01"
 value="${existing?.retail_price||0}">
-
 </div>
 
 <div>
 
-<label>
-Wholesale Price
-</label>
+<label>📦 Wholesale Price / Pack or Carton</label>
 
 <input
 id="pwholesale"
 type="number"
 step="0.01"
 value="${existing?.wholesale_price||0}">
+</div>
+
+<div>
+
+<label>Pieces Per Pack</label>
+
+<input
+id="ppack"
+type="number"
+min="1"
+value="${existing?.pieces_per_pack||1}">
 
 </div>
 
 <div>
 
-<label>
-Opening Stock
-</label>
+<label>Packs Per Carton</label>
+
+<input
+id="pcarton"
+type="number"
+min="1"
+value="${existing?.packs_per_carton||1}">
+
+</div>
+
+<div>
+
+<label>Opening Stock / Current Stock (Pieces)</label>
 
 <input
 id="pstock"
 type="number"
-step="1"
+min="0"
 value="${existing?.stock||0}">
-
 </div>
 
 <div>
 
-<label>
-Low Stock Alert
-</label>
+<label>Low Stock Alert</label>
 
 <input
 id="plow"
 type="number"
+min="0"
 value="${existing?.low_stock_level||5}">
+</div>
+
+<div>
+
+<label>Expiry Date</label>
+
+<input
+id="pexpiry"
+type="date"
+value="${existing?.expiry_date||""}">
+</div>
+
+<div>
+
+<label>Expiry Reminder (Days Before)</label>
+
+<input
+id="pexpirydays"
+type="number"
+min="0"
+value="${existing?.expiry_alert_days||30}">
+</div>
 
 </div>
+
+<div class="infoBox">
+
+<strong>Example:</strong>
+
+If one carton contains 24 bottles,
+enter <strong>Pieces Per Pack = 12</strong>
+and <strong>Packs Per Carton = 2</strong>.
+
+SalesPro will then know that:
+
+<br>
+1 piece = 1 bottle
+<br>
+1 pack = 12 bottles
+<br>
+1 carton = 24 bottles
 
 </div>
 
@@ -2072,9 +1881,7 @@ Cancel
 
 <button
 onclick="saveProduct('${existing?.id||""}')">
-
 Save Product
-
 </button>
 
 ${existing?`
@@ -2082,9 +1889,7 @@ ${existing?`
 <button
 class="red"
 onclick="deleteProduct('${existing.id}')">
-
 Delete
-
 </button>
 
 `:""}
@@ -2100,11 +1905,9 @@ async function saveProduct(existing){
 
 const product={
 
-business_id:
-currentProfile.business_id,
+business_id:currentProfile.business_id,
 
-name:
-document.getElementById("pname").value.trim(),
+name:document.getElementById("pname").value.trim(),
 
 barcode:
 document.getElementById("pbarcode").value.trim()||null,
@@ -2118,20 +1921,45 @@ document.getElementById("pbrand").value.trim(),
 unit:
 document.getElementById("punit").value,
 
-cost_price:
-Number(document.getElementById("pcost").value||0),
+cost_price:Number(
+document.getElementById("pcost").value||0
+),
 
-retail_price:
-Number(document.getElementById("pretail").value||0),
+retail_price:Number(
+document.getElementById("pretail").value||0
+),
 
-wholesale_price:
-Number(document.getElementById("pwholesale").value||0),
+wholesale_price:Number(
+document.getElementById("pwholesale").value||0
+),
 
-stock:
-Number(document.getElementById("pstock").value||0),
+pieces_per_pack:Math.max(
+1,
+Number(document.getElementById("ppack").value||1)
+),
 
-low_stock_level:
-Number(document.getElementById("plow").value||0),
+packs_per_carton:Math.max(
+1,
+Number(document.getElementById("pcarton").value||1)
+),
+
+stock:Math.max(
+0,
+Number(document.getElementById("pstock").value||0)
+),
+
+low_stock_level:Math.max(
+0,
+Number(document.getElementById("plow").value||0)
+),
+
+expiry_date:
+document.getElementById("pexpiry").value||null,
+
+expiry_alert_days:Math.max(
+0,
+Number(document.getElementById("pexpirydays").value||30)
+),
 
 active:true
 
@@ -2139,10 +1967,7 @@ active:true
 
 if(!product.name){
 
-alert(
-"Enter product name."
-);
-
+alert("Enter product name.");
 return;
 
 }
@@ -2158,9 +1983,7 @@ await supabaseClient
 .from("products")
 .update(product)
 .eq("id",existing)
-.eq(
-"business_id",
-currentProfile.business_id);
+.eq("business_id",currentProfile.business_id);
 
 }else{
 
@@ -2171,11 +1994,7 @@ await supabaseClient
 
 }
 
-if(result.error){
-
-throw result.error;
-
-}
+if(result.error)throw result.error;
 
 closeModal();
 
@@ -2186,8 +2005,7 @@ await render();
 console.error(error);
 
 alert(
-"Could not save product:\n"+
-error.message
+"Could not save product:\n"+error.message
 );
 
 }
@@ -2195,21 +2013,19 @@ error.message
 }
 
 
-async function editProduct(productId){
+async function editProduct(id){
 
-const {
-data,
-error
-}=await supabaseClient
+const {data,error}=
+await supabaseClient
 .from("products")
 .select("*")
-.eq("id",productId)
+.eq("id",id)
+.eq("business_id",currentProfile.business_id)
 .single();
 
 if(error){
 
 alert(error.message);
-
 return;
 
 }
@@ -2219,46 +2035,33 @@ newProduct(data);
 }
 
 
-async function deleteProduct(productId){
+async function deleteProduct(id){
 
-if(!confirm(
-"Delete this product?"
-))return;
+if(!confirm("Delete this product?"))return;
 
-const {
-error
-}=await supabaseClient
+const {error}=
+await supabaseClient
 .from("products")
-.update({
-active:false
-})
-.eq("id",productId)
-.eq(
-"business_id",
-currentProfile.business_id
-);
+.update({active:false})
+.eq("id",id)
+.eq("business_id",currentProfile.business_id);
 
 if(error){
 
 alert(error.message);
-
 return;
 
 }
 
 closeModal();
-
 await render();
 
 }
 
 
-/* =====================================================
-   BARCODE SCANNER
-   ===================================================== */
-
-let barcodeTargetId="pbarcode";
-
+/* =========================================================
+BARCODE
+========================================================= */
 
 function openBarcodeForField(fieldId){
 
@@ -2271,16 +2074,9 @@ openBarcodeScanner();
 
 function barcodeStatus(message){
 
-const box=
-document.getElementById(
-"barcodeStatus"
-);
+const box=document.getElementById("barcodeStatus");
 
-if(box){
-
-box.innerHTML=message;
-
-}
+if(box)box.innerHTML=message;
 
 }
 
@@ -2293,57 +2089,38 @@ document
 .getElementById("barcodeModal")
 .classList.add("show");
 
-barcodeStatus(
-"📷 Preparing camera..."
-);
+barcodeStatus("📷 Preparing camera...");
 
-setTimeout(
-startBarcodeScanner,
-400
-);
+setTimeout(startBarcodeScanner,400);
 
 }
 
 
 async function startBarcodeScanner(){
 
-if(
-barcodeStarting||
-barcodeRunning
-)return;
+if(barcodeStarting||barcodeRunning)return;
 
 barcodeStarting=true;
 
 await stopBarcodeScanner();
 
-const reader=
-document.getElementById(
-"barcodeReader"
-);
+const reader=document.getElementById("barcodeReader");
 
 reader.innerHTML="";
 
 try{
 
 barcodeScanner=
-new Html5Qrcode(
-"barcodeReader"
-);
+new Html5Qrcode("barcodeReader");
 
 const formats=[
 
 Html5QrcodeSupportedFormats.EAN_13,
-
 Html5QrcodeSupportedFormats.EAN_8,
-
 Html5QrcodeSupportedFormats.UPC_A,
-
 Html5QrcodeSupportedFormats.UPC_E,
-
 Html5QrcodeSupportedFormats.CODE_128,
-
 Html5QrcodeSupportedFormats.CODE_39,
-
 Html5QrcodeSupportedFormats.ITF
 
 ];
@@ -2356,15 +2133,9 @@ qrbox:function(width,height){
 
 return{
 
-width:Math.min(
-300,
-Math.floor(width*.82)
-),
+width:Math.min(300,Math.floor(width*.82)),
 
-height:Math.min(
-160,
-Math.floor(height*.35)
-)
+height:Math.min(160,Math.floor(height*.35))
 
 };
 
@@ -2376,12 +2147,9 @@ formatsToSupport:formats
 
 };
 
-
 await barcodeScanner.start(
 
-{
-facingMode:"environment"
-},
+{facingMode:"environment"},
 
 config,
 
@@ -2391,9 +2159,8 @@ handleScannedBarcode(code);
 
 },
 
-function(){
+function(){}
 
-}
 );
 
 barcodeRunning=true;
@@ -2404,10 +2171,7 @@ barcodeStatus(
 
 }catch(error){
 
-console.error(
-"Barcode camera error:",
-error
-);
+console.error(error);
 
 barcodeStatus(
 "⚠️ Live camera could not start.<br><br>"+
@@ -2426,32 +2190,22 @@ barcodeStarting=false;
 
 function handleScannedBarcode(code){
 
-code=
-String(code||"").trim();
+code=String(code||"").trim();
 
 if(!code)return;
 
-const input=
-document.getElementById(
-barcodeTargetId
-);
+const input=document.getElementById(barcodeTargetId);
 
 if(input){
 
 input.value=code;
 
 input.dispatchEvent(
-new Event(
-"input",
-{bubbles:true}
-)
+new Event("input",{bubbles:true})
 );
 
 input.dispatchEvent(
-new Event(
-"change",
-{bubbles:true}
-)
+new Event("change",{bubbles:true})
 );
 
 }
@@ -2464,18 +2218,14 @@ esc(code)+
 
 stopBarcodeScanner();
 
-setTimeout(
-closeBarcodeScanner,
-700
-);
+setTimeout(closeBarcodeScanner,700);
 
 }
 
 
 async function scanBarcodePhoto(event){
 
-const file=
-event.target.files?.[0];
+const file=event.target.files?.[0];
 
 if(!file)return;
 
@@ -2488,20 +2238,13 @@ await stopBarcodeScanner();
 try{
 
 const scanner=
-new Html5Qrcode(
-"barcodeReader"
-);
+new Html5Qrcode("barcodeReader");
 
 const result=
-await scanner.scanFile(
-file,
-true
-);
+await scanner.scanFile(file,true);
 
 try{
-
 await scanner.clear();
-
 }catch(e){}
 
 handleScannedBarcode(result);
@@ -2512,7 +2255,7 @@ console.error(error);
 
 barcodeStatus(
 "❌ Barcode could not be read from this photo.<br><br>"+
-"Take a clear photo with the barcode straight and well lit."
+"Take a clear, well-lit photo with the barcode straight."
 );
 
 }
@@ -2524,20 +2267,12 @@ event.target.value="";
 
 function useManualBarcode(){
 
-const input=
-document.getElementById(
-"manualBarcode"
-);
-
 const code=
-input.value.trim();
+document.getElementById("manualBarcode").value.trim();
 
 if(!code){
 
-alert(
-"Enter a barcode first."
-);
-
+alert("Enter a barcode first.");
 return;
 
 }
@@ -2552,39 +2287,26 @@ async function stopBarcodeScanner(){
 if(!barcodeScanner){
 
 barcodeRunning=false;
-
 return;
 
 }
 
-const old=
-barcodeScanner;
+const old=barcodeScanner;
 
 barcodeScanner=null;
 
 try{
 
-if(barcodeRunning){
-
+if(barcodeRunning)
 await old.stop();
 
-}
-
-}catch(e){
-
-console.log(e);
-
-}
+}catch(e){}
 
 try{
 
 await old.clear();
 
-}catch(e){
-
-console.log(e);
-
-}
+}catch(e){}
 
 barcodeRunning=false;
 
@@ -2606,36 +2328,25 @@ document
 }
 
 
-/* =====================================================
-   SALES
-   ===================================================== */
+/* =========================================================
+SALES
+========================================================= */
 
 async function getSales(){
 
-const {
-data,
-error
-}=await supabaseClient
+const {data,error}=
+await supabaseClient
 .from("sales")
 .select(`
 *,
 sale_items(*)
 `)
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
+.eq("business_id",currentProfile.business_id)
+.order("created_at",{ascending:false});
 
 if(error){
 
 console.error(error);
-
 return [];
 
 }
@@ -2647,12 +2358,28 @@ return data||[];
 
 async function salesPage(){
 
-const sales=
-await getSales();
+const sales=await getSales();
 
 return`
 
 <h1>Sales</h1>
+
+<div class="infoBox">
+
+<strong>🧊 RETAIL — SINGLE / COLD PIECE</strong>
+
+<br>
+Use this when a customer buys one cold bottle, can,
+yoghurt, water, malt, beer, Coke, Fanta, etc.
+
+<br><br>
+
+<strong>📦 WHOLESALE — PACK / CARTON</strong>
+
+<br>
+Use this when selling complete packs or cartons.
+
+</div>
 
 <div class="toolbar">
 
@@ -2674,11 +2401,9 @@ function salesTable(sales){
 if(!sales.length){
 
 return`
-
 <div class="card empty">
 No sales recorded yet.
 </div>
-
 `;
 
 }
@@ -2690,48 +2415,37 @@ return`
 <table>
 
 <tr>
-
 <th>Date</th>
-
 <th>Invoice</th>
-
 <th>Customer</th>
-
 <th>Type</th>
-
 <th>Payment</th>
-
 <th>Total</th>
-
 </tr>
 
 ${sales.map(s=>`
 
 <tr>
 
-<td>
-${esc(s.sale_date||"")}
-</td>
+<td>${esc(s.sale_date||"")}</td>
+
+<td>${esc(s.invoice_number||"")}</td>
+
+<td>${esc(s.customer_name||"Walk-in")}</td>
 
 <td>
-${esc(s.invoice_number||"")}
-</td>
 
-<td>
-${esc(s.customer_name||"Walk-in")}
-</td>
+<span class="badge">
 
-<td>
 ${esc(s.sale_type||"")}
+
+</span>
+
 </td>
 
-<td>
-${esc(s.payment_method||"")}
-</td>
+<td>${esc(s.payment_method||"")}</td>
 
-<td class="money">
-${money(s.total)}
-</td>
+<td class="money">${money(s.total)}</td>
 
 </tr>
 
@@ -2746,23 +2460,22 @@ ${money(s.total)}
 }
 
 
-/* =====================================================
-   NEW SALE
-   ===================================================== */
+/* =========================================================
+NEW SALE
+========================================================= */
 
-let saleRows=[];
+let salesProducts=[];
+let salesCustomers=[];
 
 
 async function newSale(){
 
-const products=
-await getProducts();
+salesProducts=await getProducts();
+salesCustomers=await getCustomers();
 
-if(!products.length){
+if(!salesProducts.length){
 
-alert(
-"Please add products first."
-);
+alert("Please add products first.");
 
 go("products");
 
@@ -2770,19 +2483,26 @@ return;
 
 }
 
-saleRows=[];
-
 openModal(`
 
-<h2>New Sale</h2>
+<h2>🛒 New Sale</h2>
+
+<div class="saleTypeCard selected">
+
+<strong>🧊 RETAIL — SINGLE / COLD PIECE</strong>
+
+<small>
+Sell individual bottles, cans, yoghurt,
+water, malt, beer, Coke, Fanta and other single items.
+</small>
+
+</div>
 
 <div class="formgrid">
 
 <div>
 
-<label>
-Customer
-</label>
+<label>Customer</label>
 
 <select id="saleCustomer">
 
@@ -2790,9 +2510,7 @@ Customer
 Walk-in Customer
 </option>
 
-${(
-await getCustomers()
-).map(c=>`
+${salesCustomers.map(c=>`
 
 <option value="${c.id}">
 ${esc(c.name)}
@@ -2806,20 +2524,21 @@ ${esc(c.name)}
 
 <div>
 
-<label>
-Sale Type
-</label>
+<label>Sale Type</label>
 
-<select
-id="saleType"
+<select id="saleType"
 onchange="refreshSaleRows()">
 
 <option value="Retail">
-Retail - Single Piece
+🧊 Retail — Single / Cold Piece
 </option>
 
-<option value="Wholesale">
-Wholesale - Pack/Carton
+<option value="Wholesale-Pack">
+📦 Wholesale — Pack
+</option>
+
+<option value="Wholesale-Carton">
+📦 Wholesale — Carton
 </option>
 
 </select>
@@ -2828,27 +2547,14 @@ Wholesale - Pack/Carton
 
 <div>
 
-<label>
-Payment Method
-</label>
+<label>Payment Method</label>
 
 <select id="salePayment">
 
-<option>
-Cash
-</option>
-
-<option>
-Transfer
-</option>
-
-<option>
-POS
-</option>
-
-<option>
-Credit
-</option>
+<option>Cash</option>
+<option>Transfer</option>
+<option>POS</option>
+<option>Credit</option>
 
 </select>
 
@@ -2856,9 +2562,7 @@ Credit
 
 <div>
 
-<label>
-Sale Date
-</label>
+<label>Sale Date</label>
 
 <input
 id="saleDate"
@@ -2871,9 +2575,7 @@ value="${today()}">
 
 <hr>
 
-<div
-id="saleItems">
-</div>
+<div id="saleItems"></div>
 
 <button
 class="secondary"
@@ -2887,9 +2589,7 @@ onclick="addSaleRow()">
 
 <strong>
 Total:
-<span id="saleTotal">
-₦0.00
-</span>
+<span id="saleTotal">₦0.00</span>
 </strong>
 
 </div>
@@ -2899,17 +2599,13 @@ Total:
 <button
 class="secondary"
 onclick="closeModal()">
-
 Cancel
-
 </button>
 
 <button
 class="green"
 onclick="completeSale()">
-
 Complete Sale
-
 </button>
 
 </div>
@@ -2923,16 +2619,11 @@ addSaleRow();
 
 function addSaleRow(){
 
-const box=
-document.getElementById(
-"saleItems"
-);
+const box=document.getElementById("saleItems");
 
-const productsCache=
-window.salesProducts||[];
+if(!box)return;
 
-const div=
-document.createElement("div");
+const div=document.createElement("div");
 
 div.className="saleItem";
 
@@ -2942,26 +2633,20 @@ div.innerHTML=`
 
 <div>
 
-<label>
-Product
-</label>
+<label>Product</label>
 
-<select
-class="saleProduct"
+<select class="saleProduct"
 onchange="refreshSaleRows()">
 
 <option value="">
 Select Product
 </option>
 
-${productsCache.map(p=>`
+${salesProducts.map(p=>`
 
 <option value="${p.id}">
-
 ${esc(p.name)}
--
-Stock ${p.stock}
-
+— Stock ${Number(p.stock||0).toLocaleString()} pcs
 </option>
 
 `).join("")}
@@ -2972,9 +2657,7 @@ Stock ${p.stock}
 
 <div>
 
-<label>
-Quantity
-</label>
+<label>Quantity</label>
 
 <input
 class="saleQty"
@@ -2987,6 +2670,10 @@ oninput="refreshSaleRows()">
 
 </div>
 
+<div class="stockBox">
+Select a product to see available stock.
+</div>
+
 <div class="saleItemPrice">
 Price:
 <span>₦0.00</span>
@@ -2996,39 +2683,465 @@ Price:
 
 box.appendChild(div);
 
+refreshSaleRows();
+
 }
 
 
-/*
- Load products before adding first row.
-*/
+function refreshSaleRows(){
 
-const oldNewSale=
-newSale;
+const type=
+document.getElementById("saleType")?.value||
+"Retail";
+
+let total=0;
+
+document
+.querySelectorAll(".saleItem")
+.forEach(row=>{
+
+const productId=
+row.querySelector(".saleProduct").value;
+
+const qty=
+Number(
+row.querySelector(".saleQty").value||0
+);
+
+const product=
+salesProducts.find(
+p=>p.id===productId
+);
+
+const priceBox=
+row.querySelector(".saleItemPrice span");
+
+const stockBox=
+row.querySelector(".stockBox");
+
+if(!product){
+
+priceBox.textContent="₦0.00";
+
+stockBox.innerHTML=
+"Select a product to see available stock.";
+
+return;
+
+}
+
+let price=0;
+let pieces=qty;
+let label="piece";
+
+if(type==="Retail"){
+
+price=Number(product.retail_price||0);
+
+pieces=qty;
+
+label=
+qty===1?
+"piece":
+"pieces";
+
+}
+
+else if(type==="Wholesale-Pack"){
+
+price=Number(product.wholesale_price||0);
+
+pieces=
+qty*
+Number(product.pieces_per_pack||1);
+
+label=
+qty===1?
+"pack":
+"packs";
+
+}
+
+else if(type==="Wholesale-Carton"){
+
+price=Number(product.wholesale_price||0);
+
+pieces=
+qty*
+Number(product.pieces_per_pack||1)*
+Number(product.packs_per_carton||1);
+
+label=
+qty===1?
+"carton":
+"cartons";
+
+}
+
+const lineTotal=price*qty;
+
+total+=lineTotal;
+
+priceBox.textContent=
+money(price)+" / "+label;
+
+stockBox.innerHTML=`
+
+Available stock:
+<strong>
+${Number(product.stock||0).toLocaleString()} pieces
+</strong>
+
+<br>
+
+This sale will deduct:
+<strong>
+${pieces.toLocaleString()} pieces
+</strong>
+
+`;
+
+if(pieces>Number(product.stock||0)){
+
+stockBox.classList.add("bad");
+
+}else{
+
+stockBox.classList.remove("bad");
+
+}
+
+});
+
+const totalBox=
+document.getElementById("saleTotal");
+
+if(totalBox)
+totalBox.textContent=money(total);
+
+}
 
 
-/* =====================================================
-   CUSTOMERS
-   ===================================================== */
+/* =========================================================
+COMPLETE SALE
+========================================================= */
 
-async function getCustomers(){
+async function completeSale(){
+
+const type=
+document.getElementById("saleType").value;
+
+const rows=
+document.querySelectorAll(".saleItem");
+
+const items=[];
+
+let total=0;
+
+for(const row of rows){
+
+const productId=
+row.querySelector(".saleProduct").value;
+
+const quantity=
+Number(
+row.querySelector(".saleQty").value||0
+);
+
+if(!productId||quantity<=0)continue;
+
+const product=
+salesProducts.find(
+p=>p.id===productId
+);
+
+if(!product)continue;
+
+let piecesDeducted=quantity;
+
+let unitPrice=0;
+
+let sellingUnit="piece";
+
+if(type==="Retail"){
+
+unitPrice=
+Number(product.retail_price||0);
+
+piecesDeducted=quantity;
+
+sellingUnit="piece";
+
+}
+
+else if(type==="Wholesale-Pack"){
+
+unitPrice=
+Number(product.wholesale_price||0);
+
+piecesDeducted=
+quantity*
+Number(product.pieces_per_pack||1);
+
+sellingUnit="pack";
+
+}
+
+else if(type==="Wholesale-Carton"){
+
+unitPrice=
+Number(product.wholesale_price||0);
+
+piecesDeducted=
+quantity*
+Number(product.pieces_per_pack||1)*
+Number(product.packs_per_carton||1);
+
+sellingUnit="carton";
+
+}
+
+if(
+piecesDeducted>
+Number(product.stock||0)
+){
+
+alert(
+"Not enough stock for "+
+product.name+
+".\n\nAvailable: "+
+product.stock+
+" pieces\nRequired: "+
+piecesDeducted+
+" pieces"
+);
+
+return;
+
+}
+
+const lineTotal=
+unitPrice*quantity;
+
+items.push({
+
+product_id:product.id,
+
+product_name:product.name,
+
+barcode:product.barcode,
+
+quantity:quantity,
+
+unit_price:unitPrice,
+
+cost_price:
+Number(product.cost_price||0),
+
+total:lineTotal,
+
+pieces_deducted:piecesDeducted,
+
+selling_unit:sellingUnit
+
+});
+
+total+=lineTotal;
+
+}
+
+if(!items.length){
+
+alert("Add at least one product.");
+
+return;
+
+}
+
+const customerId=
+document.getElementById("saleCustomer").value||null;
+
+const customer=
+salesCustomers.find(
+c=>c.id===customerId
+);
+
+const invoice=
+"INV-"+Date.now();
+
+const sale={
+
+business_id:
+currentProfile.business_id,
+
+invoice_number:invoice,
+
+customer_id:customerId,
+
+user_id:currentUser.id,
+
+sale_type:
+type==="Retail"
+?"Retail - Single Piece":
+type==="Wholesale-Pack"
+?"Wholesale - Pack":
+"Wholesale - Carton",
+
+subtotal:total,
+
+discount:0,
+
+total:total,
+
+amount_paid:
+document.getElementById("salePayment").value==="Credit"
+?0:
+total,
+
+balance:
+document.getElementById("salePayment").value==="Credit"
+?total:
+0,
+
+payment_method:
+document.getElementById("salePayment").value,
+
+status:"completed",
+
+sale_date:
+document.getElementById("saleDate").value,
+
+customer_name:
+customer?.name||
+"Walk-in Customer",
+
+created_by:currentUser.id
+
+};
+
+try{
 
 const {
 data,
 error
-}=await supabaseClient
+}=
+await supabaseClient
+.from("sales")
+.insert(sale)
+.select()
+.single();
+
+if(error)throw error;
+
+const saleItems=
+items.map(item=>({
+
+sale_id:data.id,
+
+product_id:item.product_id,
+
+product_name:item.product_name,
+
+barcode:item.barcode,
+
+quantity:item.quantity,
+
+unit_price:item.unit_price,
+
+cost_price:item.cost_price,
+
+total:item.total
+
+}));
+
+const {
+error:itemError
+}=
+await supabaseClient
+.from("sale_items")
+.insert(saleItems);
+
+if(itemError)throw itemError;
+
+
+/*
+UPDATE STOCK
+*/
+
+for(const item of items){
+
+const product=
+salesProducts.find(
+p=>p.id===item.product_id
+);
+
+const newStock=
+Number(product.stock||0)-
+Number(item.pieces_deducted||0);
+
+const {
+error:stockError
+}=
+await supabaseClient
+.from("products")
+.update({
+
+stock:newStock,
+
+updated_at:
+new Date().toISOString()
+
+})
+.eq("id",item.product_id)
+.eq("business_id",currentProfile.business_id);
+
+if(stockError){
+
+console.error(stockError);
+
+}
+
+}
+
+closeModal();
+
+await render();
+
+alert(
+"✅ Sale completed successfully.\n\n"+
+"Invoice: "+invoice
+);
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Sale could not be completed:\n"+
+error.message
+);
+
+}
+
+}
+
+
+/* =========================================================
+CUSTOMERS
+========================================================= */
+
+async function getCustomers(){
+
+const {data,error}=
+await supabaseClient
 .from("customers")
 .select("*")
-.eq(
-"business_id",
-currentProfile.business_id
-)
+.eq("business_id",currentProfile.business_id)
 .order("name");
 
 if(error){
 
 console.error(error);
-
 return [];
 
 }
@@ -3040,8 +3153,7 @@ return data||[];
 
 async function customersPage(){
 
-const customers=
-await getCustomers();
+const customers=await getCustomers();
 
 return`
 
@@ -3055,26 +3167,21 @@ return`
 
 </div>
 
-${customers.length?`
+${customers.length?
+
+`
 
 <div class="table">
 
 <table>
 
 <tr>
-
 <th>Name</th>
-
 <th>Phone</th>
-
 <th>Email</th>
-
 <th>Type</th>
-
 <th>Balance</th>
-
 <th>Action</th>
-
 </tr>
 
 ${customers.map(c=>`
@@ -3096,9 +3203,7 @@ ${customers.map(c=>`
 <button
 class="secondary"
 onclick="editCustomer('${c.id}')">
-
 Edit
-
 </button>
 
 </td>
@@ -3111,13 +3216,19 @@ Edit
 
 </div>
 
-`:`
+`
+
+:
+
+`
 
 <div class="card empty">
 No customers yet.
 </div>
 
-`}
+`
+
+}
 
 `;
 
@@ -3152,21 +3263,21 @@ value="${esc(existing?.email||"")}">
 
 <label>Address</label>
 
-<textarea id="caddress">
-${esc(existing?.address||"")}
-</textarea>
+<textarea id="caddress">${esc(existing?.address||"")}</textarea>
 
 <label>Customer Type</label>
 
 <select id="ctype">
 
-<option
-${existing?.customer_type==="Retail"?"selected":""}>
+<option ${
+existing?.customer_type==="Retail"?"selected":""
+}>
 Retail
 </option>
 
-<option
-${existing?.customer_type==="Wholesale"?"selected":""}>
+<option ${
+existing?.customer_type==="Wholesale"?"selected":""
+}>
 Wholesale
 </option>
 
@@ -3189,9 +3300,7 @@ Cancel
 
 <button
 onclick="saveCustomer('${existing?.id||""}')">
-
 Save
-
 </button>
 
 </div>
@@ -3223,8 +3332,7 @@ document.getElementById("caddress").value.trim(),
 customer_type:
 document.getElementById("ctype").value,
 
-balance:
-Number(
+balance:Number(
 document.getElementById("cbalance").value||0
 )
 
@@ -3232,10 +3340,7 @@ document.getElementById("cbalance").value||0
 
 if(!customer.name){
 
-alert(
-"Enter customer name."
-);
-
+alert("Enter customer name.");
 return;
 
 }
@@ -3249,10 +3354,7 @@ await supabaseClient
 .from("customers")
 .update(customer)
 .eq("id",existing)
-.eq(
-"business_id",
-currentProfile.business_id
-);
+.eq("business_id",currentProfile.business_id);
 
 }else{
 
@@ -3266,24 +3368,20 @@ await supabaseClient
 if(result.error){
 
 alert(result.error.message);
-
 return;
 
 }
 
 closeModal();
-
-render();
+await render();
 
 }
 
 
 async function editCustomer(id){
 
-const {
-data,
-error
-}=await supabaseClient
+const {data,error}=
+await supabaseClient
 .from("customers")
 .select("*")
 .eq("id",id)
@@ -3292,7 +3390,6 @@ error
 if(error){
 
 alert(error.message);
-
 return;
 
 }
@@ -3302,31 +3399,22 @@ newCustomer(data);
 }
 
 
-/* =====================================================
-   EXPENSES
-   ===================================================== */
+/* =========================================================
+EXPENSES
+========================================================= */
 
 async function getExpenses(){
 
-const {
-data,
-error
-}=await supabaseClient
+const {data,error}=
+await supabaseClient
 .from("expenses")
 .select("*")
-.eq(
-"business_id",
-currentProfile.business_id
-)
-.order(
-"date",
-{ascending:false}
-);
+.eq("business_id",currentProfile.business_id)
+.order("date",{ascending:false});
 
 if(error){
 
 console.error(error);
-
 return [];
 
 }
@@ -3338,8 +3426,7 @@ return data||[];
 
 async function expensesPage(){
 
-const expenses=
-await getExpenses();
+const expenses=await getExpenses();
 
 const total=
 expenses.reduce(
@@ -3373,22 +3460,19 @@ ${money(total)}
 
 </div>
 
-${expenses.length?`
+${expenses.length?
+
+`
 
 <div class="table">
 
 <table>
 
 <tr>
-
 <th>Date</th>
-
 <th>Description</th>
-
 <th>Category</th>
-
 <th>Amount</th>
-
 </tr>
 
 ${expenses.map(e=>`
@@ -3411,13 +3495,19 @@ ${expenses.map(e=>`
 
 </div>
 
-`:`
+`
+
+:
+
+`
 
 <div class="card empty">
 No expenses recorded.
 </div>
 
-`}
+`
+
+}
 
 `;
 
@@ -3497,8 +3587,7 @@ document.getElementById("edesc").value.trim(),
 category:
 document.getElementById("ecat").value,
 
-amount:
-Number(
+amount:Number(
 document.getElementById("eamount").value||0
 )
 
@@ -3506,46 +3595,38 @@ document.getElementById("eamount").value||0
 
 if(!expense.description||!expense.amount){
 
-alert(
-"Enter description and amount."
-);
-
+alert("Enter description and amount.");
 return;
 
 }
 
-const {
-error
-}=await supabaseClient
+const {error}=
+await supabaseClient
 .from("expenses")
 .insert(expense);
 
 if(error){
 
 alert(error.message);
-
 return;
 
 }
 
 closeModal();
-
-render();
+await render();
 
 }
 
 
-/* =====================================================
-   REPORTS
-   ===================================================== */
+/* =========================================================
+DASHBOARD
+========================================================= */
 
-async function reportsPage(){
+async function dashboard(){
 
-const sales=
-await getSales();
-
-const expenses=
-await getExpenses();
+const products=await getProducts();
+const sales=await getSales();
+const expenses=await getExpenses();
 
 const revenue=
 sales.reduce(
@@ -3573,11 +3654,381 @@ expenses.reduce(
 0
 );
 
-const gross=
-revenue-cost;
+const profit=
+revenue-cost-expenseTotal;
 
-const net=
-gross-expenseTotal;
+const stockValue=
+products.reduce(
+(a,b)=>
+a+
+Number(b.stock||0)*
+Number(b.cost_price||0),
+0
+);
+
+const low=
+products.filter(
+p=>
+Number(p.stock||0)<=
+Number(p.low_stock_level||0)
+);
+
+const expired=
+products.filter(
+p=>isExpired(p.expiry_date)
+);
+
+const expiring=
+products.filter(
+p=>isExpiringSoon(p)
+);
+
+return`
+
+<h1>Dashboard</h1>
+
+${expired.length?
+
+`
+
+<div class="alertBox red">
+
+<strong>🔴 Expired Products: ${expired.length}</strong>
+
+<br>
+You have products that have passed their expiry date.
+
+</div>
+
+`:""}
+
+${expiring.length?
+
+`
+
+<div class="alertBox orange">
+
+<strong>⚠️ Expiring Soon: ${expiring.length}</strong>
+
+<br>
+Some products are approaching their expiry date.
+
+</div>
+
+`:""}
+
+<div class="grid">
+
+<div class="card stat">
+Total Sales
+<strong>${money(revenue)}</strong>
+</div>
+
+<div class="card stat">
+Net Profit
+<strong class="${profit>=0?"good":"bad"}">
+${money(profit)}
+</strong>
+</div>
+
+<div class="card stat">
+Products
+<strong>${products.length}</strong>
+</div>
+
+<div class="card stat">
+Stock Value
+<strong>${money(stockValue)}</strong>
+</div>
+
+</div>
+
+<div class="toolbar">
+
+<button onclick="newSale()">
+🛒 New Sale
+</button>
+
+<button
+class="secondary"
+onclick="newProduct()">
++ Add Product
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>📉 Low Stock</h2>
+
+${lowStockTable(products)}
+
+</div>
+
+<div class="card">
+
+<h2>📅 Expiry Watch</h2>
+
+${expiryTable(products)}
+
+</div>
+
+<div class="card">
+
+<h2>Recent Sales</h2>
+
+${recentSales(sales)}
+
+</div>
+
+<div class="footer">
+
+SalesPro •
+${esc(
+currentBusiness?.name||
+"KC Integrated Global Services"
+)}
+
+</div>
+
+`;
+
+}
+
+
+function lowStockTable(products){
+
+const low=
+products.filter(
+p=>
+Number(p.stock||0)<=
+Number(p.low_stock_level||0)
+);
+
+if(!low.length){
+
+return`
+<div class="alertBox green">
+✅ No low-stock products.
+</div>
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+<th>Product</th>
+<th>Stock</th>
+<th>Alert Level</th>
+</tr>
+
+${low.map(p=>`
+
+<tr class="lowStock">
+
+<td>
+<strong>${esc(p.name)}</strong>
+</td>
+
+<td class="bad">
+${Number(p.stock||0).toLocaleString()}
+pieces
+</td>
+
+<td>
+${Number(p.low_stock_level||0).toLocaleString()}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+function expiryTable(products){
+
+const list=
+products
+.filter(
+p=>p.expiry_date
+)
+.sort(
+(a,b)=>
+daysUntil(a.expiry_date)-
+daysUntil(b.expiry_date)
+)
+.slice(0,10);
+
+if(!list.length){
+
+return`
+<div class="empty">
+No expiry dates entered yet.
+</div>
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+<th>Product</th>
+<th>Expiry</th>
+<th>Status</th>
+</tr>
+
+${list.map(p=>{
+
+const d=daysUntil(p.expiry_date);
+
+return`
+
+<tr class="${
+d<0?"expired":
+isExpiringSoon(p)?"expiring":""
+}">
+
+<td>${esc(p.name)}</td>
+
+<td>${esc(p.expiry_date)}</td>
+
+<td>
+
+<span class="badge ${
+d<0?"red":
+isExpiringSoon(p)?"orange":"green"
+}">
+
+${
+d<0
+?"Expired"
+:d===0
+?"Expires Today"
+:d+" days left"
+}
+
+</span>
+
+</td>
+
+</tr>
+
+`;
+
+}).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+function recentSales(sales){
+
+if(!sales.length){
+
+return`
+<div class="empty">
+No sales recorded yet.
+</div>
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Invoice</th>
+<th>Customer</th>
+<th>Total</th>
+</tr>
+
+${sales.slice(0,8).map(s=>`
+
+<tr>
+
+<td>${esc(s.sale_date||"")}</td>
+
+<td>${esc(s.invoice_number||"")}</td>
+
+<td>${esc(s.customer_name||"Walk-in")}</td>
+
+<td class="money">${money(s.total)}</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+REPORTS
+========================================================= */
+
+async function reportsPage(){
+
+const sales=await getSales();
+const expenses=await getExpenses();
+
+const revenue=
+sales.reduce(
+(a,b)=>a+Number(b.total||0),
+0
+);
+
+const cost=
+sales.reduce(
+(a,b)=>
+a+
+(b.sale_items||[]).reduce(
+(x,i)=>
+x+
+Number(i.quantity||0)*
+Number(i.cost_price||0),
+0
+),
+0
+);
+
+const expenseTotal=
+expenses.reduce(
+(a,b)=>a+Number(b.amount||0),
+0
+);
+
+const gross=revenue-cost;
+const net=gross-expenseTotal;
 
 return`
 
@@ -3587,29 +4038,22 @@ return`
 
 <div class="card stat">
 Sales Revenue
-<strong>
-${money(revenue)}
-</strong>
+<strong>${money(revenue)}</strong>
 </div>
 
 <div class="card stat">
 Cost of Goods
-<strong>
-${money(cost)}
-</strong>
+<strong>${money(cost)}</strong>
 </div>
 
 <div class="card stat">
 Gross Profit
-<strong>
-${money(gross)}
-</strong>
+<strong>${money(gross)}</strong>
 </div>
 
 <div class="card stat">
 Net Profit
-<strong
-class="${net>=0?"good":"bad"}">
+<strong class="${net>=0?"good":"bad"}">
 ${money(net)}
 </strong>
 </div>
@@ -3619,26 +4063,12 @@ ${money(net)}
 <div class="toolbar noPrint">
 
 <button onclick="window.print()">
-Print Report
+🖨️ Print Report
 </button>
 
 </div>
 
 <div class="card">
-
-<p>
-Transactions:
-<strong>
-${sales.length}
-</strong>
-</p>
-
-<p>
-Expenses:
-<strong>
-${money(expenseTotal)}
-</strong>
-</p>
 
 <h2>Payment Breakdown</h2>
 
@@ -3658,9 +4088,7 @@ return`
 
 <p>
 ${method}:
-<strong>
-${money(total)}
-</strong>
+<strong>${money(total)}</strong>
 </p>
 
 `;
@@ -3674,9 +4102,9 @@ ${money(total)}
 }
 
 
-/* =====================================================
-   BACKUP
-   ===================================================== */
+/* =========================================================
+BACKUP
+========================================================= */
 
 function backupPage(){
 
@@ -3689,27 +4117,20 @@ return`
 <h2>📱 Backup to Phone</h2>
 
 <p>
-
-SalesPro can save a complete backup file
-to your iPhone's Files app.
-
+SalesPro can export your business data as a backup
+file that you can save to your iPhone's Files app.
 </p>
 
 <div class="toolbar">
 
-<button
-onclick="downloadBackup()">
-
+<button onclick="downloadBackup()">
 📥 Export Backup
-
 </button>
 
 <button
 class="secondary"
 onclick="document.getElementById('restoreFile').click()">
-
 📤 Restore Backup
-
 </button>
 
 <input
@@ -3723,7 +4144,8 @@ onchange="restoreBackup(event)">
 
 <p>
 <strong>
-Always export a backup before installing a new SalesPro version.
+Always export a backup before replacing or updating
+your SalesPro HTML.
 </strong>
 </p>
 
@@ -3736,66 +4158,38 @@ Always export a backup before installing a new SalesPro version.
 
 async function downloadBackup(){
 
-const [
-products,
-sales,
-customers,
-expenses
-]=await Promise.all([
-
-getProducts(),
-
-getSales(),
-
-getCustomers(),
-
-getExpenses()
-
-]);
-
+const products=await getProducts();
+const sales=await getSales();
+const customers=await getCustomers();
+const expenses=await getExpenses();
 
 const backup={
 
-version:"SalesPro Cloud Backup V1",
+version:"SalesPro Backup V2",
 
-created_at:
-new Date().toISOString(),
+created_at:new Date().toISOString(),
 
-business:
-currentBusiness,
+business:currentBusiness,
 
 products,
-
 sales,
-
 customers,
-
 expenses
 
 };
 
-
-const blob=
-new Blob(
+const blob=new Blob(
 [
-JSON.stringify(
-backup,
-null,
-2
-)
+JSON.stringify(backup,null,2)
 ],
 {
 type:"application/json"
 }
 );
 
+const url=URL.createObjectURL(blob);
 
-const url=
-URL.createObjectURL(blob);
-
-
-const a=
-document.createElement("a");
+const a=document.createElement("a");
 
 a.href=url;
 
@@ -3815,9 +4209,9 @@ setTimeout(
 1000
 );
 
-
 alert(
-"Backup created. On iPhone, choose Save to Files and keep it somewhere safe."
+"✅ Backup created.\n\n"+
+"On iPhone, choose 'Save to Files' and store it somewhere safe."
 );
 
 }
@@ -3825,18 +4219,15 @@ alert(
 
 async function restoreBackup(event){
 
-const file=
-event.target.files?.[0];
+const file=event.target.files?.[0];
 
 if(!file)return;
 
 try{
 
-const text=
-await file.text();
+const text=await file.text();
 
-const backup=
-JSON.parse(text);
+const backup=JSON.parse(text);
 
 if(
 !backup.products||
@@ -3844,21 +4235,19 @@ if(
 !backup.customers
 ){
 
-throw new Error(
-"Invalid SalesPro backup."
-);
+throw new Error("Invalid backup");
 
 }
 
 alert(
-"Backup file verified. Cloud restore should be handled carefully to avoid duplicate records."
+"Backup file verified successfully.\n\n"+
+"Automatic cloud restoration is disabled in this version "+
+"to prevent duplicate sales and stock records."
 );
 
 }catch(error){
 
-alert(
-"Invalid SalesPro backup file."
-);
+alert("Invalid SalesPro backup file.");
 
 }
 
@@ -3867,9 +4256,9 @@ event.target.value="";
 }
 
 
-/* =====================================================
-   SETTINGS
-   ===================================================== */
+/* =========================================================
+SETTINGS
+========================================================= */
 
 function settingsPage(){
 
@@ -3881,62 +4270,55 @@ return`
 
 <h2>Business Information</h2>
 
-<label>
-Business Name
-</label>
+<label>Business Name</label>
 
 <input
 id="businessName"
 value="${esc(currentBusiness?.name||"")}">
 
-<label>
-Phone
-</label>
+<label>Phone</label>
 
 <input
 id="businessPhone"
 value="${esc(currentBusiness?.phone||"")}">
 
-<label>
-Email
-</label>
+<label>Email</label>
 
 <input
 id="businessEmail"
 value="${esc(currentBusiness?.email||"")}">
 
-<label>
-Address
-</label>
+<label>Address</label>
 
-<textarea id="businessAddress">
-${esc(currentBusiness?.address||"")}
-</textarea>
+<textarea id="businessAddress">${esc(currentBusiness?.address||"")}</textarea>
 
-<label>
-Logo URL
-</label>
+<label>Logo URL</label>
 
 <input
 id="businessLogoUrl"
 value="${esc(currentBusiness?.logo_url||"")}"
 placeholder="https://...">
 
+<div class="infoBox">
+
+<strong>Logo:</strong>
+
+Paste a direct image URL above.
+If the URL is valid, your business logo will appear
+at the top of SalesPro.
+
+</div>
+
 <div class="actions">
 
-<button
-onclick="saveBusinessSettings()">
-
+<button onclick="saveBusinessSettings()">
 Save Settings
-
 </button>
 
 <button
 class="red"
 onclick="logout()">
-
 Logout
-
 </button>
 
 </div>
@@ -3996,9 +4378,8 @@ document.getElementById("businessLogoUrl").value.trim()
 
 };
 
-const {
-error
-}=await supabaseClient
+const {error}=
+await supabaseClient
 .from("businesses")
 .update(updates)
 .eq(
@@ -4009,7 +4390,6 @@ currentProfile.business_id
 if(error){
 
 alert(error.message);
-
 return;
 
 }
@@ -4019,132 +4399,56 @@ currentBusiness={
 ...updates
 };
 
-alert(
-"Business settings saved."
-);
+alert("Business settings saved.");
 
 showApp();
 
 }
 
 
-/* =====================================================
-   MODAL
-   ===================================================== */
+/* =========================================================
+MODAL
+========================================================= */
 
 function openModal(html){
 
-document.getElementById(
-"sheet"
-).innerHTML=html;
+document.getElementById("sheet").innerHTML=html;
 
-document.getElementById(
-"modal"
-).classList.add("show");
+document
+.getElementById("modal")
+.classList.add("show");
 
 }
 
 
 function closeModal(){
 
-document.getElementById(
-"modal"
-).classList.remove("show");
+document
+.getElementById("modal")
+.classList.remove("show");
 
 }
 
 
-/* =====================================================
-   RECENT SALES
-   ===================================================== */
-
-function recentSales(sales){
-
-if(!sales.length){
-
-return`
-
-<div class="empty">
-No sales recorded yet.
-</div>
-
-`;
-
-}
-
-return`
-
-<div class="table">
-
-<table>
-
-<tr>
-
-<th>Date</th>
-
-<th>Invoice</th>
-
-<th>Customer</th>
-
-<th>Total</th>
-
-</tr>
-
-${sales.slice(0,8).map(s=>`
-
-<tr>
-
-<td>
-${esc(s.sale_date||"")}
-</td>
-
-<td>
-${esc(s.invoice_number||"")}
-</td>
-
-<td>
-${esc(s.customer_name||"Walk-in")}
-</td>
-
-<td class="money">
-${money(s.total)}
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
-
-`;
-
-}
-
-
-/* =====================================================
-   INITIALISE
-   ===================================================== */
-
-checkAuth();
-
-
-/* =====================================================
-   AUTH STATE LISTENER
-   ===================================================== */
+/* =========================================================
+AUTH STATE
+========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
 async(event,session)=>{
 
 if(event==="SIGNED_OUT"){
 
+currentUser=null;
+currentProfile=null;
+currentBusiness=null;
+
 showLogin();
 
 }
 
 if(
-event==="SIGNED_IN" &&
+event==="SIGNED_IN"&&
 session
 ){
 
@@ -4157,18 +4461,15 @@ await loadUserProfile();
 });
 
 
-/* =====================================================
-   CLEAN CAMERA WHEN PAGE IS HIDDEN
-   ===================================================== */
+/* =========================================================
+CAMERA CLEANUP
+========================================================= */
 
 document.addEventListener(
 "visibilitychange",
-function(){
+()=>{
 
-if(
-document.hidden &&
-barcodeRunning
-){
+if(document.hidden&&barcodeRunning){
 
 stopBarcodeScanner();
 
@@ -4179,535 +4480,18 @@ stopBarcodeScanner();
 
 window.addEventListener(
 "pagehide",
-function(){
+()=>{
 
 stopBarcodeScanner();
 
 });
 
 
-/* =====================================================
-   SALE PRODUCT LOADING
-   ===================================================== */
-
-const originalNewSale=
-window.newSale;
-
-
-/*
- Override newSale so products are loaded
- before the sale modal is created.
-*/
-
-window.newSale=async function(){
-
-const products=
-await getProducts();
-
-if(!products.length){
-
-alert(
-"Please add products first."
-);
-
-go("products");
-
-return;
-
-}
-
-window.salesProducts=products;
-
-saleRows=[];
-
-openModal(`
-
-<h2>New Sale</h2>
-
-<div class="formgrid">
-
-<div>
-
-<label>Customer</label>
-
-<select id="saleCustomer">
-
-<option value="">
-Walk-in Customer
-</option>
-
-${(
-await getCustomers()
-).map(c=>`
-
-<option value="${c.id}">
-${esc(c.name)}
-</option>
-
-`).join("")}
-
-</select>
-
-</div>
-
-<div>
-
-<label>Sale Type</label>
-
-<select
-id="saleType"
-onchange="refreshSaleRows()">
-
-<option value="Retail">
-Retail - Single Piece
-</option>
-
-<option value="Wholesale">
-Wholesale - Pack/Carton
-</option>
-
-</select>
-
-</div>
-
-<div>
-
-<label>Payment</label>
-
-<select id="salePayment">
-
-<option>Cash</option>
-<option>Transfer</option>
-<option>POS</option>
-<option>Credit</option>
-
-</select>
-
-</div>
-
-<div>
-
-<label>Date</label>
-
-<input
-id="saleDate"
-type="date"
-value="${today()}">
-
-</div>
-
-</div>
-
-<hr>
-
-<div id="saleItems"></div>
-
-<button
-class="secondary"
-onclick="addSaleRow()">
-
-+ Add Item
-
-</button>
-
-<div class="card">
-
-<strong>
-Total:
-<span id="saleTotal">
-₦0.00
-</span>
-</strong>
-
-</div>
-
-<div class="actions">
-
-<button
-class="secondary"
-onclick="closeModal()">
-Cancel
-</button>
-
-<button
-class="green"
-onclick="completeSale()">
-
-Complete Sale
-
-</button>
-
-</div>
-
-`);
-
-addSaleRow();
-
-};
-
-
-/* =====================================================
-   SALE ROW REFRESH
-   ===================================================== */
-
-window.refreshSaleRows=function(){
-
-let total=0;
-
-document
-.querySelectorAll(".saleItem")
-.forEach(row=>{
-
-const productId=
-row.querySelector(
-".saleProduct"
-).value;
-
-const qty=
-Number(
-row.querySelector(
-".saleQty"
-).value||0
-);
-
-const product=
-window.salesProducts?.find(
-p=>p.id===productId
-);
-
-const type=
-document.getElementById(
-"saleType"
-)?.value||
-"Retail";
-
-const price=
-product?
-(
-type==="Wholesale"
-?
-Number(product.wholesale_price||0)
-:
-Number(product.retail_price||0)
-):
-0;
-
-row.querySelector(
-".saleItemPrice span"
-).textContent=
-money(price);
-
-total+=price*qty;
-
-});
-
-const totalBox=
-document.getElementById(
-"saleTotal"
-);
-
-if(totalBox){
-
-totalBox.textContent=
-money(total);
-
-}
-
-};
-
-
-/* =====================================================
-   COMPLETE SALE
-   ===================================================== */
-
-window.completeSale=async function(){
-
-const rows=
-document.querySelectorAll(
-".saleItem"
-);
-
-const type=
-document.getElementById(
-"saleType"
-).value;
-
-const items=[];
-
-let total=0;
-
-
-for(const row of rows){
-
-const productId=
-row.querySelector(
-".saleProduct"
-).value;
-
-const quantity=
-Number(
-row.querySelector(
-".saleQty"
-).value||0
-);
-
-if(!productId||quantity<=0)
-continue;
-
-const product=
-window.salesProducts.find(
-p=>p.id===productId
-);
-
-if(!product)
-continue;
-
-if(
-quantity>
-Number(product.stock||0)
-){
-
-alert(
-"Not enough stock for "+
-product.name
-);
-
-return;
-
-}
-
-const unitPrice=
-type==="Wholesale"
-?
-Number(product.wholesale_price||0)
-:
-Number(product.retail_price||0);
-
-const lineTotal=
-unitPrice*quantity;
-
-items.push({
-
-product_id:
-product.id,
-
-product_name:
-product.name,
-
-barcode:
-product.barcode,
-
-quantity,
-
-unit_price:
-unitPrice,
-
-cost_price:
-Number(product.cost_price||0),
-
-total:
-lineTotal
-
-});
-
-total+=lineTotal;
-
-}
-
-
-if(!items.length){
-
-alert(
-"Add at least one product."
-);
-
-return;
-
-}
-
-
-const invoice=
-"INV-"+Date.now();
-
-const customerId=
-document.getElementById(
-"saleCustomer"
-).value||null;
-
-const customer=
-window.salesCustomers?.find(
-c=>c.id===customerId
-);
-
-
-const sale={
-
-business_id:
-currentProfile.business_id,
-
-invoice_number:
-invoice,
-
-customer_id:
-customerId,
-
-user_id:
-currentUser.id,
-
-sale_type:
-type,
-
-subtotal:
-total,
-
-discount:0,
-
-total:
-total,
-
-amount_paid:
-total,
-
-balance:0,
-
-payment_method:
-document.getElementById(
-"salePayment"
-).value,
-
-status:"completed",
-
-sale_date:
-document.getElementById(
-"saleDate"
-).value,
-
-customer_name:
-customer?.name||
-"Walk-in Customer",
-
-created_by:
-currentUser.id
-
-};
-
-
-try{
-
-const {
-data,
-error
-}=await supabaseClient
-.from("sales")
-.insert(sale)
-.select()
-.single();
-
-if(error){
-
-throw error;
-
-}
-
-
-const saleItems=
-items.map(item=>({
-
-...item,
-
-sale_id:
-data.id
-
-}));
-
-
-const {
-error:itemError
-}=await supabaseClient
-.from("sale_items")
-.insert(saleItems);
-
-if(itemError){
-
-throw itemError;
-
-}
-
-
-/*
- Update stock.
-*/
-
-for(const item of items){
-
-const product=
-window.salesProducts.find(
-p=>p.id===item.product_id
-);
-
-await supabaseClient
-.from("products")
-.update({
-
-stock:
-Number(product.stock)-
-Number(item.quantity),
-
-updated_at:
-new Date().toISOString()
-
-})
-.eq(
-"id",
-item.product_id
-)
-.eq(
-"business_id",
-currentProfile.business_id
-);
-
-}
-
-
-closeModal();
-
-await render();
-
-alert(
-"Sale completed successfully.\n"+
-"Invoice: "+
-invoice
-);
-
-}catch(error){
-
-console.error(error);
-
-alert(
-"Sale could not be completed:\n"+
-error.message
-);
-
-}
-
-};
-
-
-/* =====================================================
-   CUSTOMER CACHE
-   ===================================================== */
-
-const originalGetCustomers=
-getCustomers;
-
-window.salesCustomers=[];
-
-async function refreshCustomerCache(){
-
-window.salesCustomers=
-await getCustomers();
-
-}
+/* =========================================================
+START
+========================================================= */
+
+checkAuth();
 
 </script>
 
