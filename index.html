@@ -26,7 +26,27 @@
 
 *{box-sizing:border-box}
 
-body{
+body{<body>
+
+<!-- ================= SUPABASE CONNECTION ================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL =
+"https://olkugewqersskavvcrhm.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_35hM0m_Gy7HVDmgs-CoEvA_QcJMv3te";
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+</script>
+
+<!-- ================= BARCODE SCANNER ================= -->
 margin:0;
 background:var(--bg);
 color:var(--text);
