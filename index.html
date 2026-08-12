@@ -1,1474 +1,628 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="SalesPro">
-<meta name="theme-color" content="#0b2a52">
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta name="apple-mobile-web-app-capable"
+content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+content="default">
+
+<meta name="apple-mobile-web-app-title"
+content="SalesPro">
+
+<meta name="theme-color"
+content="#0b2a52">
 
 <title>SalesPro - KC Integrated Global Services</title>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- BARCODE LIBRARY -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
+
 :root{
- --navy:#0b2a52;
- --blue:#155fa0;
- --gold:#c6a15b;
- --bg:#f4f6f9;
- --white:#fff;
- --text:#172033;
- --muted:#667085;
- --green:#087443;
- --red:#b42318;
- --orange:#b54708;
- --border:#e2e6ec;
+--navy:#0b2a52;
+--blue:#155fa0;
+--gold:#c6a15b;
+--bg:#f4f6f9;
+--white:#fff;
+--text:#172033;
+--muted:#667085;
+--green:#087443;
+--red:#b42318;
+--border:#e2e6ec;
 }
 
-*{box-sizing:border-box}
+*{
+box-sizing:border-box;
+}
 
 body{
- margin:0;
- background:var(--bg);
- color:var(--text);
- font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,
+"Segoe UI",Arial,sans-serif;
 }
 
-button,input,select,textarea{font:inherit}
+button,
+input,
+select,
+textarea{
+font:inherit;
+}
 
 button{
- border:0;
- border-radius:11px;
- padding:11px 15px;
- font-weight:700;
- background:var(--navy);
- color:#fff;
- cursor:pointer;
+border:0;
+border-radius:11px;
+padding:11px 15px;
+font-weight:700;
+background:var(--navy);
+color:white;
+cursor:pointer;
 }
 
 button.secondary{
- background:#e8edf3;
- color:var(--navy);
+background:#e8edf3;
+color:var(--navy);
 }
 
-button.green{background:var(--green)}
-button.red{background:#fee4e2;color:var(--red)}
-button.orange{background:#fff0df;color:var(--orange)}
+button.green{
+background:var(--green);
+}
+
+button.red{
+background:#fee4e2;
+color:var(--red);
+}
 
 button:disabled{
- opacity:.55;
- cursor:not-allowed;
+opacity:.55;
+cursor:not-allowed;
 }
 
-.header{
- position:sticky;
- top:0;
- z-index:20;
- background:#fff;
- border-bottom:1px solid var(--border);
-}
-
-.brand{
- display:flex;
- align-items:center;
- gap:12px;
- padding:10px 14px;
-}
-
-.logo{
- width:52px;
- height:52px;
- border-radius:12px;
- background:#fff;
-}
-
-.brand strong{
- font-size:18px;
- display:block;
-}
-
-.brand small{color:var(--muted)}
-
-.nav{
- display:flex;
- overflow-x:auto;
- gap:7px;
- padding:0 12px 10px;
-}
-
-.nav button{
- white-space:nowrap;
- background:#edf2f7;
- color:var(--navy);
-}
-
-.nav button.active{
- background:var(--navy);
- color:#fff;
-}
-
-.container{
- max-width:1150px;
- margin:auto;
- padding:15px 12px 100px;
-}
-
-h1{
- font-size:25px;
- margin:18px 0 13px;
-}
-
-h2{font-size:20px}
-
-h3{margin-top:5px}
-
-.grid{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:12px;
-}
-
-.card{
- background:#fff;
- border:1px solid var(--border);
- border-radius:16px;
- padding:15px;
- box-shadow:0 2px 8px rgba(0,0,0,.04);
- margin-bottom:12px;
-}
-
-.stat{
- font-size:13px;
- color:var(--muted);
-}
-
-.stat strong{
- display:block;
- font-size:23px;
- color:var(--text);
- margin-top:5px;
-}
-
-.toolbar{
- display:flex;
- gap:8px;
- flex-wrap:wrap;
- margin:12px 0;
-}
-
-input,select,textarea{
- width:100%;
- border:1px solid #d0d5dd;
- border-radius:10px;
- padding:11px;
- background:#fff;
- outline:none;
+input,
+select,
+textarea{
+width:100%;
+border:1px solid #d0d5dd;
+border-radius:10px;
+padding:11px;
+background:white;
+outline:none;
 }
 
 textarea{
- min-height:90px;
- resize:vertical;
+min-height:90px;
+resize:vertical;
 }
 
 label{
- font-size:12px;
- font-weight:700;
- color:var(--muted);
- display:block;
- margin:8px 0 5px;
+font-size:12px;
+font-weight:700;
+color:var(--muted);
+display:block;
+margin:8px 0 5px;
+}
+
+.header{
+position:sticky;
+top:0;
+z-index:20;
+background:white;
+border-bottom:1px solid var(--border);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+padding:10px 14px;
+}
+
+.logo{
+width:52px;
+height:52px;
+border-radius:12px;
+object-fit:contain;
+background:white;
+border:1px solid #eee;
+}
+
+.brand strong{
+font-size:18px;
+display:block;
+}
+
+.brand small{
+color:var(--muted);
+}
+
+.nav{
+display:flex;
+overflow-x:auto;
+gap:7px;
+padding:0 12px 10px;
+}
+
+.nav button{
+white-space:nowrap;
+background:#edf2f7;
+color:var(--navy);
+}
+
+.nav button.active{
+background:var(--navy);
+color:white;
+}
+
+.container{
+max-width:1150px;
+margin:auto;
+padding:15px 12px 100px;
+}
+
+h1{
+font-size:25px;
+margin:18px 0 13px;
+}
+
+h2{
+font-size:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.card{
+background:white;
+border:1px solid var(--border);
+border-radius:16px;
+padding:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.04);
+margin-bottom:12px;
+}
+
+.stat{
+font-size:13px;
+color:var(--muted);
+}
+
+.stat strong{
+display:block;
+font-size:23px;
+color:var(--text);
+margin-top:5px;
+}
+
+.toolbar{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin:12px 0;
 }
 
 .formgrid{
- display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:10px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 
-.full{grid-column:1/-1}
+.full{
+grid-column:1/-1;
+}
 
 .table{
- overflow-x:auto;
- background:#fff;
- border:1px solid var(--border);
- border-radius:14px;
+overflow-x:auto;
+background:white;
+border:1px solid var(--border);
+border-radius:14px;
 }
 
 table{
- width:100%;
- border-collapse:collapse;
- min-width:850px;
+width:100%;
+border-collapse:collapse;
+min-width:750px;
 }
 
-th,td{
- padding:11px;
- border-bottom:1px solid #edf0f3;
- text-align:left;
+th,
+td{
+padding:11px;
+border-bottom:1px solid #edf0f3;
+text-align:left;
 }
 
 th{
- font-size:12px;
- background:#f8fafc;
+font-size:12px;
+background:#f8fafc;
 }
 
-.money{font-weight:800}
+.money{
+font-weight:800;
+}
 
-.good{color:var(--green)}
-.bad{color:var(--red)}
-.warning{color:var(--orange)}
+.good{
+color:var(--green);
+}
+
+.bad{
+color:var(--red);
+}
 
 .empty{
- padding:35px;
- text-align:center;
- color:var(--muted);
+padding:35px;
+text-align:center;
+color:var(--muted);
 }
 
 .badge{
- display:inline-block;
- padding:4px 8px;
- border-radius:20px;
- background:#edf2f7;
- font-size:12px;
-}
-
-.badge.good{
- background:#dcfae6;
- color:#087443;
-}
-
-.badge.warning{
- background:#fff0df;
- color:#b54708;
-}
-
-.badge.bad{
- background:#fee4e2;
- color:#b42318;
-}
-
-.modal{
- display:none;
- position:fixed;
- inset:0;
- background:rgba(0,0,0,.55);
- z-index:100;
- align-items:flex-end;
-}
-
-.modal.show{display:flex}
-
-.sheet{
- background:#fff;
- width:100%;
- max-height:94vh;
- overflow:auto;
- border-radius:22px 22px 0 0;
- padding:18px;
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#edf2f7;
+font-size:12px;
 }
 
 .actions{
- display:flex;
- gap:8px;
- justify-content:flex-end;
- flex-wrap:wrap;
- margin-top:15px;
+display:flex;
+gap:8px;
+justify-content:flex-end;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+z-index:100;
+align-items:flex-end;
+}
+
+.modal.show{
+display:flex;
+}
+
+.sheet{
+background:white;
+width:100%;
+max-height:94vh;
+overflow:auto;
+border-radius:22px 22px 0 0;
+padding:18px;
 }
 
 .footer{
- text-align:center;
- color:var(--muted);
- padding:30px 10px;
- font-size:12px;
+text-align:center;
+color:var(--muted);
+padding:30px 10px;
+font-size:12px;
 }
 
-/* LOGIN */
-
-#authScreen{
- min-height:100vh;
- display:flex;
- align-items:center;
- justify-content:center;
- padding:20px;
- background:var(--bg);
+.auth{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:linear-gradient(
+135deg,
+#0b2a52,
+#155fa0
+);
 }
 
-.authBox{
- width:100%;
- max-width:430px;
- background:#fff;
- border-radius:22px;
- padding:25px;
- box-shadow:0 8px 35px rgba(0,0,0,.1);
+.authCard{
+background:white;
+width:100%;
+max-width:430px;
+border-radius:22px;
+padding:25px;
+box-shadow:0 20px 60px rgba(0,0,0,.25);
 }
 
 .authLogo{
- text-align:center;
- margin-bottom:15px;
+width:80px;
+height:80px;
+display:block;
+margin:0 auto 12px;
+object-fit:contain;
 }
 
-.authLogo svg{
- width:80px;
- height:80px;
+.authCard h1{
+text-align:center;
+margin:5px 0;
 }
 
-.authBox h1{
- text-align:center;
- margin:5px 0;
-}
-
-.authBox p{
- text-align:center;
- color:var(--muted);
+.authBusiness{
+text-align:center;
+color:var(--muted);
+margin-bottom:20px;
 }
 
 .authLinks{
- text-align:center;
- margin-top:15px;
+text-align:center;
+margin-top:15px;
 }
 
 .authLinks button{
- background:none;
- color:var(--blue);
- padding:5px;
+background:none;
+color:var(--blue);
+padding:5px;
 }
 
-/* ALERTS */
-
-.alertBox{
- border-radius:14px;
- padding:14px;
- margin:10px 0;
+.error{
+background:#fee4e2;
+color:var(--red);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+font-size:13px;
 }
 
-.alertExpiry{
- background:#fff0df;
- border:1px solid #f5c48a;
+.success{
+background:#dcfae6;
+color:var(--green);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+font-size:13px;
 }
 
-.alertExpired{
- background:#fee4e2;
- border:1px solid #f3a5a0;
+.barcodeModal{
+display:none;
+position:fixed;
+inset:0;
+z-index:999999;
+background:rgba(0,0,0,.94);
+padding:12px;
+align-items:center;
+justify-content:center;
 }
 
-.alertStock{
- background:#fff0df;
- border:1px solid #f5c48a;
+.barcodeModal.show{
+display:flex;
 }
 
-<!-- =========================================================
-     SALESPRO PROFESSIONAL BARCODE SCANNER
-     ========================================================= -->
-
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-<style>
-
-#barcodeScannerModal{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:999999;
-    background:rgba(0,0,0,.92);
-    align-items:center;
-    justify-content:center;
-    padding:15px;
+.barcodeBox{
+width:100%;
+max-width:520px;
+max-height:96vh;
+overflow:auto;
+background:white;
+border-radius:22px;
+padding:18px;
 }
 
-#barcodeScannerModal.show{
-    display:flex;
+.barcodeHeader{
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
 
-.barcode-scanner-box{
-    width:100%;
-    max-width:520px;
-    background:#fff;
-    border-radius:22px;
-    padding:18px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
+.barcodeHeader h2{
+margin:0;
+color:var(--navy);
 }
 
-.barcode-scanner-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:8px;
-}
-
-.barcode-scanner-title h2{
-    margin:0;
-    color:#0b2a52;
-    font-size:20px;
-}
-
-.barcode-help{
-    color:#667085;
-    font-size:13px;
-    margin-bottom:12px;
+.barcodeInfo{
+background:#f4f6f9;
+border-radius:12px;
+padding:12px;
+font-size:13px;
+line-height:1.5;
+margin:12px 0;
 }
 
 #barcodeReader{
-    width:100%;
-    min-height:260px;
-    background:#111;
-    border-radius:15px;
-    overflow:hidden;
+width:100%;
+min-height:250px;
+background:#111;
+border-radius:15px;
+overflow:hidden;
 }
 
 #barcodeReader video{
-    width:100%!important;
-    height:auto!important;
-    object-fit:cover;
-    border-radius:15px;
+width:100%!important;
+height:auto!important;
+display:block;
+border-radius:15px;
 }
 
-.barcode-status{
-    margin:12px 0;
-    padding:10px;
-    background:#f4f6f9;
-    border-radius:10px;
-    text-align:center;
-    font-size:14px;
-    color:#172033;
+.barcodeStatus{
+margin-top:12px;
+padding:12px;
+background:#f4f6f9;
+border-radius:10px;
+text-align:center;
+font-size:14px;
 }
 
-.barcode-manual{
-    margin-top:12px;
-    display:flex;
-    gap:8px;
+.barcodeButtons{
+display:grid;
+grid-template-columns:1fr;
+gap:9px;
+margin-top:12px;
 }
 
-.barcode-manual input{
-    flex:1;
+.barcodeButtons button{
+width:100%;
 }
 
-.barcode-buttons{
-    display:flex;
-    gap:8px;
-    margin-top:12px;
+.barcodePhoto{
+background:var(--green);
 }
 
-.barcode-buttons button{
-    flex:1;
+.manualBarcode{
+display:flex;
+gap:8px;
+margin-top:10px;
 }
 
-.barcode-close{
-    background:#222!important;
+.manualBarcode input{
+flex:1;
 }
 
-</style>
-
-
-<!-- ================= SCANNER WINDOW ================= -->
-
-<div id="barcodeScannerModal">
-
-    <div class="barcode-scanner-box">
-
-        <div class="barcode-scanner-title">
-
-            <h2>📷 Scan Product Barcode</h2>
-
-        </div>
-
-        <div class="barcode-help">
-            Point the rear camera directly at the barcode.
-            Keep the barcode inside the scanning area.
-        </div>
-
-        <div id="barcodeReader"></div>
-
-        <div id="barcodeStatus" class="barcode-status">
-            Preparing camera...
-        </div>
-
-        <div class="barcode-manual">
-
-            <input
-                id="manualBarcodeInput"
-                type="text"
-                inputmode="numeric"
-                placeholder="Enter barcode manually"
-            >
-
-            <button
-                type="button"
-                onclick="useManualBarcode()"
-            >
-                Use
-            </button>
-
-        </div>
-
-        <div class="barcode-buttons">
-
-            <button
-                type="button"
-                class="barcode-close"
-                onclick="closeBarcodeScanner()"
-            >
-                Close
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script>
-
-(function(){
-
-"use strict";
-
-/* =========================================================
-   GLOBAL SCANNER STATE
-   ========================================================= */
-
-let salesProScanner = null;
-let scannerRunning = false;
-let scannerStarting = false;
-let lastScannedBarcode = "";
-let lastScanTime = 0;
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-function scannerStatus(message){
-
-    const box =
-        document.getElementById("barcodeStatus");
-
-    if(box){
-        box.innerHTML = message;
-    }
-
+.saleItem{
+border:1px solid var(--border);
+border-radius:14px;
+padding:12px;
+margin-bottom:10px;
 }
 
-
-/* =========================================================
-   FIND BARCODE INPUT
-   ========================================================= */
-
-function findBarcodeInput(){
-
-    const ids = [
-
-        "barcode",
-        "productBarcode",
-        "barcodeInput",
-        "product-barcode",
-        "product_code"
-
-    ];
-
-    for(const id of ids){
-
-        const input =
-            document.getElementById(id);
-
-        if(input){
-            return input;
-        }
-
-    }
-
-    return null;
-
+.saleItemHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
 }
 
-
-/* =========================================================
-   PUT BARCODE INTO INPUT
-   ========================================================= */
-
-function setBarcodeValue(code){
-
-    const input = findBarcodeInput();
-
-    if(input){
-
-        input.value = code;
-
-        input.dispatchEvent(
-            new Event("input", {
-                bubbles:true
-            })
-        );
-
-        input.dispatchEvent(
-            new Event("change", {
-                bubbles:true
-            })
-        );
-
-        input.focus();
-
-        return true;
-
-    }
-
-    return false;
-
+.saleItemPrice{
+font-weight:800;
+margin-top:8px;
 }
 
-
-/* =========================================================
-   HANDLE SUCCESSFUL SCAN
-   ========================================================= */
-
-function handleBarcode(code){
-
-    code = String(code || "").trim();
-
-    if(!code){
-        return;
-    }
-
-    const now = Date.now();
-
-    /* Prevent duplicate scans */
-    if(
-        code === lastScannedBarcode &&
-        now - lastScanTime < 2500
-    ){
-        return;
-    }
-
-    lastScannedBarcode = code;
-    lastScanTime = now;
-
-    scannerStatus(
-        "✅ Barcode detected: <strong>" +
-        escapeBarcode(code) +
-        "</strong>"
-    );
-
-    setBarcodeValue(code);
-
-    /* Stop camera immediately */
-    stopBarcodeScanner()
-        .finally(function(){
-
-            setTimeout(function(){
-
-                closeBarcodeScanner();
-
-            },500);
-
-        });
-
+.lowStock{
+background:#fff1f0;
 }
 
+@media(max-width:700px){
 
-/* =========================================================
-   ESCAPE BARCODE FOR DISPLAY
-   ========================================================= */
-
-function escapeBarcode(value){
-
-    return String(value)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-
+.grid{
+grid-template-columns:repeat(2,1fr);
 }
 
-
-/* =========================================================
-   OPEN SCANNER
-   ========================================================= */
-
-window.openBarcodeScanner = async function(){
-
-    const modal =
-        document.getElementById(
-            "barcodeScannerModal"
-        );
-
-    if(!modal){
-        alert("Barcode scanner window is missing.");
-        return;
-    }
-
-    /* Always stop an old scanner first */
-    await stopBarcodeScanner();
-
-    lastScannedBarcode = "";
-    lastScanTime = 0;
-
-    modal.classList.add("show");
-
-    scannerStatus(
-        "📷 Requesting rear camera..."
-    );
-
-    const reader =
-        document.getElementById("barcodeReader");
-
-    if(reader){
-        reader.innerHTML = "";
-    }
-
-    /*
-       Small delay prevents iPhone Safari
-       from trying to initialise the camera
-       before the modal is visible.
-    */
-
-    setTimeout(function(){
-
-        startBarcodeScanner();
-
-    },350);
-
-};
-
-
-/* =========================================================
-   START CAMERA
-   ========================================================= */
-
-async function startBarcodeScanner(){
-
-    if(scannerStarting || scannerRunning){
-        return;
-    }
-
-    scannerStarting = true;
-
-    try{
-
-        if(
-            !window.Html5Qrcode ||
-            !window.Html5QrcodeSupportedFormats
-        ){
-
-            throw new Error(
-                "Barcode scanner library failed to load."
-            );
-
-        }
-
-        salesProScanner =
-            new Html5Qrcode(
-                "barcodeReader"
-            );
-
-        const formats = [
-
-            Html5QrcodeSupportedFormats.EAN_13,
-
-            Html5QrcodeSupportedFormats.EAN_8,
-
-            Html5QrcodeSupportedFormats.UPC_A,
-
-            Html5QrcodeSupportedFormats.UPC_E,
-
-            Html5QrcodeSupportedFormats.CODE_128,
-
-            Html5QrcodeSupportedFormats.CODE_39,
-
-            Html5QrcodeSupportedFormats.ITF
-
-        ];
-
-        const config = {
-
-            fps:10,
-
-            qrbox:function(
-                width,
-                height
-            ){
-
-                const boxWidth =
-                    Math.floor(width * .85);
-
-                const boxHeight =
-                    Math.min(
-                        180,
-                        Math.floor(height * .35)
-                    );
-
-                return {
-
-                    width:boxWidth,
-
-                    height:boxHeight
-
-                };
-
-            },
-
-            aspectRatio:1.5,
-
-            formatsToSupport:formats,
-
-            rememberLastUsedCamera:true,
-
-            showTorchButtonIfSupported:true,
-
-            showZoomSliderIfSupported:true
-
-        };
-
-
-        /*
-           First try the rear camera.
-        */
-
-        await salesProScanner.start(
-
-            {
-                facingMode:{
-                    exact:"environment"
-                }
-            },
-
-            config,
-
-            function(decodedText){
-
-                handleBarcode(decodedText);
-
-            },
-
-            function(){
-
-                /*
-                   Normal scanning errors are ignored.
-                */
-
-            }
-
-        );
-
-        scannerRunning = true;
-
-        scannerStatus(
-            "📷 Camera ready — point at a barcode."
-        );
-
-
-    }catch(error){
-
-        console.log(
-            "Rear camera failed:",
-            error
-        );
-
-        /*
-           Some iPhones/browser versions don't accept
-           the exact environment constraint.
-
-           Try the normal environment request.
-        */
-
-        try{
-
-            if(salesProScanner){
-
-                try{
-                    await salesProScanner.clear();
-                }catch(e){}
-
-            }
-
-            salesProScanner =
-                new Html5Qrcode(
-                    "barcodeReader"
-                );
-
-            const config = {
-
-                fps:10,
-
-                qrbox:{
-                    width:280,
-                    height:140
-                },
-
-                aspectRatio:1.5,
-
-                formatsToSupport:[
-
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.ITF
-
-                ],
-
-                rememberLastUsedCamera:true
-
-            };
-
-            await salesProScanner.start(
-
-                {
-                    facingMode:"environment"
-                },
-
-                config,
-
-                function(decodedText){
-
-                    handleBarcode(decodedText);
-
-                },
-
-                function(){}
-
-            );
-
-            scannerRunning = true;
-
-            scannerStatus(
-                "📷 Camera ready — scan your barcode."
-            );
-
-        }catch(secondError){
-
-            console.log(
-                "Camera failed:",
-                secondError
-            );
-
-            scannerStatus(
-                "❌ Camera could not start.<br><br>" +
-
-                "Please make sure Safari has permission " +
-                "to use the camera.<br><br>" +
-
-                "You can also enter the barcode manually below."
-            );
-
-            scannerRunning = false;
-
-        }
-
-    }finally{
-
-        scannerStarting = false;
-
-    }
-
+.formgrid{
+grid-template-columns:1fr;
 }
 
-
-/* =========================================================
-   STOP SCANNER
-   ========================================================= */
-
-async function stopBarcodeScanner(){
-
-    scannerStarting = false;
-
-    if(!salesProScanner){
-        scannerRunning = false;
-        return;
-    }
-
-    try{
-
-        if(scannerRunning){
-
-            await salesProScanner.stop();
-
-        }
-
-    }catch(error){
-
-        console.log(
-            "Scanner stop:",
-            error
-        );
-
-    }
-
-    try{
-
-        await salesProScanner.clear();
-
-    }catch(error){
-
-        console.log(
-            "Scanner clear:",
-            error
-        );
-
-    }
-
-    salesProScanner = null;
-
-    scannerRunning = false;
-
+.full{
+grid-column:auto;
 }
 
-
-/* =========================================================
-   CLOSE SCANNER
-   ========================================================= */
-
-window.closeBarcodeScanner = async function(){
-
-    await stopBarcodeScanner();
-
-    const modal =
-        document.getElementById(
-            "barcodeScannerModal"
-        );
-
-    if(modal){
-
-        modal.classList.remove("show");
-
-    }
-
-    const reader =
-        document.getElementById(
-            "barcodeReader"
-        );
-
-    if(reader){
-
-        reader.innerHTML = "";
-
-    }
-
-    scannerStatus(
-        "Camera closed."
-    );
-
-};
-
-
-/* =========================================================
-   MANUAL BARCODE
-   ========================================================= */
-
-window.useManualBarcode = function(){
-
-    const input =
-        document.getElementById(
-            "manualBarcodeInput"
-        );
-
-    if(!input){
-        return;
-    }
-
-    const code =
-        input.value.trim();
-
-    if(!code){
-
-        alert(
-            "Please enter a barcode."
-        );
-
-        return;
-
-    }
-
-    setBarcodeValue(code);
-
-    closeBarcodeScanner();
-
-};
-
-
-/* =========================================================
-   CREATE SCAN BUTTON
-   ========================================================= */
-
-window.createBarcodeButton = function(){
-
-    if(
-        document.getElementById(
-            "scanBarcodeButton"
-        )
-    ){
-
-        return;
-
-    }
-
-    const barcodeInput =
-        findBarcodeInput();
-
-    if(!barcodeInput){
-
-        /*
-           Don't automatically inject the field into
-           random parts of the application.
-
-           This prevents the scanner from breaking
-           the SalesPro forms.
-        */
-
-        return;
-
-    }
-
-    const wrapper =
-        barcodeInput.parentElement;
-
-    if(!wrapper){
-        return;
-    }
-
-    const button =
-        document.createElement("button");
-
-    button.id =
-        "scanBarcodeButton";
-
-    button.type =
-        "button";
-
-    button.innerHTML =
-        "📷 Scan Barcode";
-
-    button.onclick =
-        function(){
-
-            openBarcodeScanner();
-
-        };
-
-    button.style.cssText = `
-
-        margin-top:8px;
-
-        width:100%;
-
-        padding:12px;
-
-        border:none;
-
-        border-radius:10px;
-
-        background:#0b2a52;
-
-        color:white;
-
-        font-weight:700;
-
-        cursor:pointer;
-
-    `;
-
-    wrapper.appendChild(button);
-
-};
-
-
-/* =========================================================
-   OBSERVE SALESPro FORM CHANGES
-   ========================================================= */
-
-const observer =
-    new MutationObserver(function(){
-
-        createBarcodeButton();
-
-    });
-
-observer.observe(
-    document.body,
-    {
-        childList:true,
-        subtree:true
-    }
-);
-
-
-/* =========================================================
-   INITIALISE
-   ========================================================= */
-
-if(
-    document.readyState === "loading"
-){
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function(){
-
-            setTimeout(
-                createBarcodeButton,
-                700
-            );
-
-        }
-    );
-
-}else{
-
-    setTimeout(
-        createBarcodeButton,
-        700
-    );
-
-}
-
-
-/* =========================================================
-   CLEAN CAMERA WHEN PAGE IS LEFT
-   ========================================================= */
-
-window.addEventListener(
-    "pagehide",
-    function(){
-
-        stopBarcodeScanner();
-
-    }
-);
-
-window.addEventListener(
-    "beforeunload",
-    function(){
-
-        stopBarcodeScanner();
-
-    }
-);
-
-
-/* =========================================================
-   PREVENT CAMERA FROM REMAINING ACTIVE WHEN TAB HIDES
-   ========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    function(){
-
-        if(
-            document.hidden &&
-            scannerRunning
-        ){
-
-            stopBarcodeScanner();
-
-        }
-
-    }
-);
-
-})();
-
-</script>
-
-<!-- =========================================================
-     END SALESPRO PROFESSIONAL BARCODE SCANNER
-     ========================================================= -->
-.saleTotal{
- font-size:22px;
- font-weight:800;
-}
-
-.quickScan{
- display:flex;
- gap:8px;
-}
-
-.quickScan input{flex:1}
-
-.quickScan button{
- white-space:nowrap;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:800px){
- .grid{grid-template-columns:repeat(2,1fr)}
-}
-
-@media(max-width:600px){
- .grid{grid-template-columns:1fr 1fr}
- .formgrid{grid-template-columns:1fr}
- .full{grid-column:auto}
- .brand strong{font-size:16px}
 }
 
 @media print{
- .header,
- .toolbar,
- .noPrint{
-  display:none!important;
- }
 
- .container{padding:0}
- .card{box-shadow:none}
+.header,
+.toolbar,
+.noPrint{
+display:none!important;
 }
+
+.container{
+padding:0;
+}
+
+.card{
+box-shadow:none;
+}
+
+}
+
 </style>
+
 </head>
 
 <body>
 
-<!-- =========================================================
-     AUTHENTICATION
-========================================================= -->
-
-<div id="authScreen">
-
-<div class="authBox">
-
-<div class="authLogo">
-
-<svg viewBox="0 0 100 100">
-<rect width="100" height="100" fill="white"/>
-<path d="M18 75V52l10-7v30H18z" fill="#123c70"/>
-<path d="M34 75V32l10-7v50H34z" fill="#123c70"/>
-<path d="M50 75V18l10-8v65H50z" fill="#123c70"/>
-<path d="M55 49l20-20h15L68 50l22 25H75L55 56z" fill="#123c70"/>
-<path d="M79 29c11 1 18 9 18 20 0 10-7 19-17 21 7-3 11-9 11-17 0-10-7-18-18-19z" fill="#7b8188"/>
-</svg>
-
-</div>
-
-<h1>SalesPro</h1>
-
-<p>KC Integrated Global Services</p>
-
-<div id="loginForm">
-
-<label>Email Address</label>
-<input id="loginEmail" type="email" autocomplete="email">
-
-<label>Password</label>
-<input id="loginPassword" type="password" autocomplete="current-password">
-
-<button style="width:100%;margin-top:15px"
-onclick="login()">
-🔐 Login
-</button>
-
-<div class="authLinks">
-New to SalesPro?
-<button onclick="showRegister()">Create Owner Account</button>
-</div>
-
-</div>
+<div id="root"></div>
 
 
-<div id="registerForm" style="display:none">
-
-<label>Full Name</label>
-<input id="registerName">
-
-<label>Email Address</label>
-<input id="registerEmail" type="email">
-
-<label>Password</label>
-<input id="registerPassword" type="password">
-
-<label>Confirm Password</label>
-<input id="registerPassword2" type="password">
-
-<button style="width:100%;margin-top:15px"
-onclick="registerOwner()">
-Create Owner Account
-</button>
-
-<div class="authLinks">
-<button onclick="showLogin()">← Back to Login</button>
-</div>
-
-</div>
-
-<div id="authMessage"
-style="margin-top:15px;text-align:center">
-</div>
-
-</div>
-</div>
-
-
-<!-- =========================================================
-     MAIN APP
-========================================================= -->
-
-<div id="mainApp" style="display:none">
-
-<header class="header">
-
-<div class="brand">
-
-<svg class="logo" viewBox="0 0 100 100">
-<rect width="100" height="100" fill="white"/>
-<path d="M18 75V52l10-7v30H18z" fill="#123c70"/>
-<path d="M34 75V32l10-7v50H34z" fill="#123c70"/>
-<path d="M50 75V18l10-8v65H50z" fill="#123c70"/>
-<path d="M55 49l20-20h15L68 50l22 25H75L55 56z" fill="#123c70"/>
-<path d="M79 29c11 1 18 9 18 20 0 10-7 19-17 21 7-3 11-9 11-17 0-10-7-18-18-19z" fill="#7b8188"/>
-</svg>
-
-<div>
-<strong>SalesPro</strong>
-<small>KC Integrated Global Services</small>
-</div>
-
-</div>
-
-<nav class="nav" id="nav"></nav>
-
-</header>
-
-<main class="container" id="app"></main>
-
-<div class="modal" id="modal">
-<div class="sheet" id="sheet"></div>
-</div>
-
-</div>
-
-
-<!-- =========================================================
+<!-- =====================================================
      BARCODE SCANNER
-========================================================= -->
+     ===================================================== -->
 
-<div id="barcodeScannerModal">
+<div id="barcodeModal" class="barcodeModal">
 
-<div class="barcode-box">
+<div class="barcodeBox">
 
-<h2>📷 Scan Product Barcode</h2>
+<div class="barcodeHeader">
 
-<div class="barcode-instruction">
-Place the barcode inside the scanning area.
-</div>
+<h2>📷 Scan Barcode</h2>
 
-<div id="reader"></div>
-
-<div id="barcodeStatus">
-Preparing camera...
-</div>
-
-<div id="barcodeButtons" class="barcodeButtons">
-
-<button class="secondary"
+<button
+type="button"
+class="secondary"
 onclick="closeBarcodeScanner()">
-Close
+✕
+</button>
+
+</div>
+
+<div class="barcodeInfo">
+
+<strong>Live scanner:</strong>
+Point the rear camera at the barcode.
+
+<br><br>
+
+If the live camera is black, use
+<strong>Take Barcode Photo</strong> below.
+
+</div>
+
+<div id="barcodeReader"></div>
+
+<div id="barcodeStatus"
+class="barcodeStatus">
+Preparing scanner...
+</div>
+
+<div class="barcodeButtons">
+
+<button
+type="button"
+onclick="startBarcodeScanner()">
+
+📷 Start Live Camera
+
 </button>
 
 <button
-onclick="restartBarcodeScanner()">
-🔄 Restart
+type="button"
+class="barcodePhoto"
+onclick="document.getElementById('barcodePhotoInput').click()">
+
+📸 Take Barcode Photo
+
+</button>
+
+</div>
+
+<input
+id="barcodePhotoInput"
+type="file"
+accept="image/*"
+capture="environment"
+style="display:none"
+onchange="scanBarcodePhoto(event)">
+
+<div class="manualBarcode">
+
+<input
+id="manualBarcode"
+type="text"
+inputmode="numeric"
+placeholder="Enter barcode manually">
+
+<button
+type="button"
+onclick="useManualBarcode()">
+Use
 </button>
 
 </div>
@@ -1480,9 +634,9 @@ onclick="restartBarcodeScanner()">
 
 <script>
 
-/* =========================================================
+/* =====================================================
    SUPABASE
-========================================================= */
+   ===================================================== */
 
 const SUPABASE_URL =
 "https://olkugewqersskavvcrhm.supabase.co";
@@ -1492,3927 +646,4068 @@ const SUPABASE_KEY =
 
 const supabaseClient =
 window.supabase.createClient(
- SUPABASE_URL,
- SUPABASE_KEY
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
 
-/* =========================================================
+/* =====================================================
    APPLICATION STATE
-========================================================= */
+   ===================================================== */
 
 let currentUser=null;
-let profile=null;
-let business=null;
-
-let products=[];
-let customers=[];
-let sales=[];
-let expenses=[];
+let currentProfile=null;
+let currentBusiness=null;
 
 let page="dashboard";
 
-let scanner=null;
-let scannerRunning=false;
-let scannerStarting=false;
+let barcodeScanner=null;
+let barcodeRunning=false;
+let barcodeStarting=false;
 
 
-/* =========================================================
-   UTILITY
-========================================================= */
+/* =====================================================
+   HELPERS
+   ===================================================== */
 
 function esc(value){
 
- return String(value ?? "")
- .replace(/&/g,"&amp;")
- .replace(/</g,"&lt;")
- .replace(/>/g,"&gt;")
- .replace(/"/g,"&quot;")
- .replace(/'/g,"&#039;");
+return String(value??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
 }
+
 
 function money(value){
 
- return "₦"+Number(value||0).toLocaleString(
- "en-NG",
- {
-  minimumFractionDigits:2,
-  maximumFractionDigits:2
- }
- );
+return "₦"+Number(value||0).toLocaleString(
+"en-NG",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+});
 
 }
+
 
 function today(){
 
- return new Date().toISOString().slice(0,10);
-
-}
-
-function uid(){
-
- return crypto.randomUUID();
-
-}
-
-function showMessage(message,type=""){
-
- const el=document.getElementById("authMessage");
-
- if(!el)return;
-
- el.innerHTML=
- `<div style="
- padding:10px;
- border-radius:10px;
- background:${type==="error"?"#fee4e2":"#dcfae6"};
- color:${type==="error"?"#b42318":"#087443"};
- ">
- ${esc(message)}
- </div>`;
-
-}
-
-function daysUntil(date){
-
- if(!date)return null;
-
- const now=new Date();
- const target=new Date(date+"T23:59:59");
-
- return Math.ceil(
-  (target-now)/(1000*60*60*24)
- );
+return new Date().toISOString().slice(0,10);
 
 }
 
 
-/* =========================================================
-   AUTH SCREEN
-========================================================= */
+function uuid(){
 
-function showLogin(){
-
- document.getElementById("loginForm").style.display="block";
- document.getElementById("registerForm").style.display="none";
-
-}
-
-function showRegister(){
-
- document.getElementById("loginForm").style.display="none";
- document.getElementById("registerForm").style.display="block";
+return crypto.randomUUID();
 
 }
 
 
-/* =========================================================
-   REGISTER
-========================================================= */
+/* =====================================================
+   AUTH
+   ===================================================== */
 
-async function registerOwner(){
+async function checkAuth(){
 
- const name=
- document.getElementById("registerName").value.trim();
+const {
+data:{
+session
+}
+}=await supabaseClient.auth.getSession();
 
- const email=
- document.getElementById("registerEmail").value.trim();
+if(!session){
 
- const password=
- document.getElementById("registerPassword").value;
+showLogin();
 
- const password2=
- document.getElementById("registerPassword2").value;
-
- if(!name||!email||!password){
-
-  showMessage(
-   "Please complete all fields.",
-   "error"
-  );
-
-  return;
-
- }
-
- if(password!==password2){
-
-  showMessage(
-   "Passwords do not match.",
-   "error"
-  );
-
-  return;
-
- }
-
- if(password.length<6){
-
-  showMessage(
-   "Password must contain at least 6 characters.",
-   "error"
-  );
-
-  return;
-
- }
-
- try{
-
-  const {data,error}=
-  await supabaseClient.auth.signUp({
-
-   email,
-   password,
-
-   options:{
-    data:{
-     full_name:name
-    }
-   }
-
-  });
-
-  if(error)throw error;
-
-  if(!data.user){
-
-   showMessage(
-    "Registration failed.",
-    "error"
-   );
-
-   return;
-
-  }
-
-
-  /*
-   BUSINESS + PROFILE CREATION
-
-   The database policies you've already fixed
-   allow the authenticated user to create these.
-  */
-
-  const {data:biz,error:bizError}=
-  await supabaseClient
-  .from("businesses")
-  .insert({
-
-   name:"KC Integrated Global Services"
-
-  })
-  .select()
-  .single();
-
-
-  if(bizError){
-
-   showMessage(
-    "Account created, but business setup failed: "+
-    bizError.message,
-    "error"
-   );
-
-   return;
-
-  }
-
-
-  const {error:profileError}=
-  await supabaseClient
-  .from("profiles")
-  .insert({
-
-   id:data.user.id,
-
-   full_name:name,
-
-   role:"owner",
-
-   business_id:biz.id,
-
-   active:true
-
-  });
-
-
-  if(profileError){
-
-   showMessage(
-    "Account created, but owner profile setup failed: "+
-    profileError.message,
-    "error"
-   );
-
-   return;
-
-  }
-
-
-  showMessage(
-   "Account created successfully. Check your email if verification is required."
-  );
-
-  showLogin();
-
-  document.getElementById("loginEmail").value=email;
-
- }catch(error){
-
-  showMessage(
-   error.message||"Registration failed.",
-   "error"
-  );
-
- }
+return;
 
 }
 
+currentUser=session.user;
 
-/* =========================================================
-   LOGIN
-========================================================= */
-
-async function login(){
-
- const email=
- document.getElementById("loginEmail").value.trim();
-
- const password=
- document.getElementById("loginPassword").value;
-
- if(!email||!password){
-
-  showMessage(
-   "Enter your email and password.",
-   "error"
-  );
-
-  return;
-
- }
-
- try{
-
-  const {data,error}=
-  await supabaseClient.auth.signInWithPassword({
-
-   email,
-   password
-
-  });
-
-  if(error)throw error;
-
-  currentUser=data.user;
-
-  await loadUserProfile();
-
- }catch(error){
-
-  showMessage(
-   error.message||"Login failed.",
-   "error"
-  );
-
- }
+await loadUserProfile();
 
 }
 
-
-/* =========================================================
-   LOAD PROFILE
-========================================================= */
 
 async function loadUserProfile(){
 
- const {data:p,error:pError}=
- await supabaseClient
- .from("profiles")
- .select("*")
- .eq("id",currentUser.id)
- .maybeSingle();
+const {
+data:profile,
+error
+}=await supabaseClient
+.from("profiles")
+.select("*")
+.eq("id",currentUser.id)
+.maybeSingle();
 
+if(error){
 
- if(pError){
+console.error(error);
 
-  showMessage(
-   pError.message,
-   "error"
-  );
+showError(
+"Unable to load your SalesPro profile."
+);
 
-  return;
+return;
 
- }
+}
 
+if(!profile){
 
- if(!p){
+showError(
+"Your login exists, but your SalesPro owner profile is missing. Please contact the system administrator."
+);
 
-  showMessage(
-   "Your login exists, but your SalesPro owner profile is missing.",
-   "error"
-  );
+return;
 
-  return;
+}
 
- }
+currentProfile=profile;
 
+const {
+data:business,
+error:businessError
+}=await supabaseClient
+.from("businesses")
+.select("*")
+.eq("id",profile.business_id)
+.maybeSingle();
 
- profile=p;
+if(businessError){
 
+console.error(businessError);
 
- if(!p.business_id){
+}
 
-  showMessage(
-   "Your profile is missing a business.",
-   "error"
-  );
+currentBusiness=business;
 
-  return;
-
- }
-
-
- const {data:b,error:bError}=
- await supabaseClient
- .from("businesses")
- .select("*")
- .eq("id",p.business_id)
- .maybeSingle();
-
-
- if(bError||!b){
-
-  showMessage(
-   "Your SalesPro business profile could not be loaded.",
-   "error"
-  );
-
-  return;
-
- }
-
-
- business=b;
-
- await openApp();
+showApp();
 
 }
 
 
-/* =========================================================
-   OPEN APP
-========================================================= */
+/* =====================================================
+   LOGIN SCREEN
+   ===================================================== */
 
-async function openApp(){
+function showLogin(){
 
- document.getElementById("authScreen").style.display="none";
- document.getElementById("mainApp").style.display="block";
+document.getElementById("root").innerHTML=`
 
- await loadAllData();
+<div class="auth">
 
- renderNav();
- render();
+<div class="authCard">
 
-}
+<div id="authMessage"></div>
 
+<div id="authLogo"></div>
 
-/* =========================================================
-   LOAD DATABASE
-========================================================= */
+<h1>SalesPro</h1>
 
-async function loadAllData(){
+<div class="authBusiness">
+KC Integrated Global Services
+</div>
 
- try{
+<div id="loginForm">
 
-  const [
-   productsResult,
-   customersResult,
-   salesResult,
-   expensesResult
-  ]=await Promise.all([
+<label>Email Address</label>
 
-   supabaseClient
-   .from("products")
-   .select("*")
-   .eq("business_id",business.id)
-   .order("name"),
+<input
+id="loginEmail"
+type="email"
+autocomplete="email"
+placeholder="Email Address">
 
-   supabaseClient
-   .from("customers")
-   .select("*")
-   .eq("business_id",business.id)
-   .order("name"),
+<label>Password</label>
 
-   supabaseClient
-   .from("sales")
-   .select("*")
-   .eq("business_id",business.id)
-   .order("created_at",{ascending:false}),
+<input
+id="loginPassword"
+type="password"
+autocomplete="current-password"
+placeholder="Password">
 
-   /*
-    Expenses table may not exist in some earlier
-    versions. We handle that gracefully.
-   */
+<button
+style="width:100%;margin-top:15px"
+onclick="loginUser()">
 
-   supabaseClient
-   .from("expenses")
-   .select("*")
-   .eq("business_id",business.id)
-   .order("created_at",{ascending:false})
+🔐 Login
 
-  ]);
+</button>
 
+<div class="authLinks">
 
-  if(productsResult.error)
-   throw productsResult.error;
+New to SalesPro?
 
-  if(customersResult.error)
-   throw customersResult.error;
+<button onclick="showRegister()">
+Create Owner Account
+</button>
 
-  if(salesResult.error)
-   throw salesResult.error;
+</div>
 
+</div>
 
-  products=productsResult.data||[];
-  customers=customersResult.data||[];
-  sales=salesResult.data||[];
+</div>
 
-  expenses=
-   expensesResult.error
-   ? []
-   : (expensesResult.data||[]);
-
-
- }catch(error){
-
-  alert(
-   "Could not load SalesPro data:\n\n"+
-   error.message
-  );
-
- }
+</div>
+`;
 
 }
 
 
-/* =========================================================
+function showRegister(){
+
+document.getElementById("root").innerHTML=`
+
+<div class="auth">
+
+<div class="authCard">
+
+<div id="authMessage"></div>
+
+<h1>Create Owner Account</h1>
+
+<div class="authBusiness">
+KC Integrated Global Services
+</div>
+
+<label>Full Name</label>
+
+<input
+id="regName"
+type="text"
+placeholder="Your full name">
+
+<label>Email Address</label>
+
+<input
+id="regEmail"
+type="email"
+placeholder="Email address">
+
+<label>Password</label>
+
+<input
+id="regPassword"
+type="password"
+placeholder="Minimum 6 characters">
+
+<hr>
+
+<h2>Business Information</h2>
+
+<label>Business Name</label>
+
+<input
+id="regBusiness"
+value="KC Integrated Global Services">
+
+<label>Phone</label>
+
+<input
+id="regPhone"
+placeholder="Business phone">
+
+<label>Email</label>
+
+<input
+id="regBusinessEmail"
+placeholder="Business email">
+
+<label>Address</label>
+
+<textarea
+id="regAddress"
+placeholder="Business address"></textarea>
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="showLogin()">
+Back
+</button>
+
+<button
+onclick="registerOwner()">
+Create Account
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+function authMessage(text,type="error"){
+
+const box=
+document.getElementById(
+"authMessage"
+);
+
+if(!box)return;
+
+box.innerHTML=
+`<div class="${type}">
+${esc(text)}
+</div>`;
+
+}
+
+
+/* =====================================================
+   REGISTER
+   ===================================================== */
+
+async function registerOwner(){
+
+const name=
+document.getElementById("regName").value.trim();
+
+const email=
+document.getElementById("regEmail").value.trim();
+
+const password=
+document.getElementById("regPassword").value;
+
+const businessName=
+document.getElementById("regBusiness").value.trim();
+
+const phone=
+document.getElementById("regPhone").value.trim();
+
+const businessEmail=
+document.getElementById("regBusinessEmail").value.trim();
+
+const address=
+document.getElementById("regAddress").value.trim();
+
+if(!name||!email||!password||!businessName){
+
+authMessage(
+"Please complete all required fields."
+);
+
+return;
+
+}
+
+if(password.length<6){
+
+authMessage(
+"Password must contain at least 6 characters."
+);
+
+return;
+
+}
+
+try{
+
+authMessage(
+"Creating your account...",
+"success"
+);
+
+
+/*
+ Create authentication user.
+*/
+
+const {
+data,
+error
+}=await supabaseClient.auth.signUp({
+
+email,
+password,
+
+options:{
+data:{
+full_name:name
+}
+}
+
+});
+
+
+if(error){
+
+throw error;
+
+}
+
+
+const user=data.user;
+
+if(!user){
+
+throw new Error(
+"Account could not be created."
+);
+
+}
+
+
+/*
+ The database triggers/RLS should create
+ the profile if configured.
+
+ We create business first only if
+ the session is available.
+*/
+
+if(data.session){
+
+const businessId=uuid();
+
+
+const {
+error:businessError
+}=await supabaseClient
+.from("businesses")
+.insert({
+
+id:businessId,
+
+name:businessName,
+
+phone:phone,
+
+email:businessEmail||email,
+
+address:address,
+
+logo_url:""
+
+});
+
+
+if(businessError){
+
+console.error(
+businessError
+);
+
+authMessage(
+"Account created, but the business profile could not be created: "+
+businessError.message
+);
+
+return;
+
+}
+
+
+/*
+ Create owner profile.
+*/
+
+const {
+error:profileError
+}=await supabaseClient
+.from("profiles")
+.upsert({
+
+id:user.id,
+
+full_name:name,
+
+role:"owner",
+
+business_id:businessId,
+
+active:true
+
+},{
+onConflict:"id"
+});
+
+
+if(profileError){
+
+console.error(
+profileError
+);
+
+authMessage(
+"Account created, but the owner profile could not be created: "+
+profileError.message
+);
+
+return;
+
+}
+
+
+authMessage(
+"Account created successfully. You can now login.",
+"success"
+);
+
+setTimeout(
+showLogin,
+1800
+);
+
+return;
+
+}
+
+
+/*
+ Email confirmation is enabled.
+*/
+
+authMessage(
+"Account created successfully. Please check your email and verify your account before logging in.",
+"success"
+);
+
+
+}catch(error){
+
+console.error(error);
+
+authMessage(
+error.message||"Registration failed."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   LOGIN
+   ===================================================== */
+
+async function loginUser(){
+
+const email=
+document.getElementById("loginEmail").value.trim();
+
+const password=
+document.getElementById("loginPassword").value;
+
+if(!email||!password){
+
+authMessage(
+"Enter your email and password."
+);
+
+return;
+
+}
+
+try{
+
+authMessage(
+"Signing in...",
+"success"
+);
+
+const {
+error
+}=await supabaseClient.auth.signInWithPassword({
+
+email,
+password
+
+});
+
+
+if(error){
+
+throw error;
+
+}
+
+await checkAuth();
+
+}catch(error){
+
+console.error(error);
+
+authMessage(
+error.message||"Login failed."
+);
+
+}
+
+}
+
+
+/* =====================================================
+   LOGOUT
+   ===================================================== */
+
+async function logout(){
+
+await supabaseClient.auth.signOut();
+
+currentUser=null;
+
+currentProfile=null;
+
+currentBusiness=null;
+
+showLogin();
+
+}
+
+
+/* =====================================================
+   APP
+   ===================================================== */
+
+function showApp(){
+
+document.getElementById("root").innerHTML=`
+
+<header class="header">
+
+<div class="brand">
+
+<div id="businessLogo"></div>
+
+<div>
+
+<strong>SalesPro</strong>
+
+<small>
+${esc(
+currentBusiness?.name||
+"KC Integrated Global Services"
+)}
+</small>
+
+</div>
+
+</div>
+
+<nav
+class="nav"
+id="nav">
+</nav>
+
+</header>
+
+<main
+class="container"
+id="app">
+</main>
+
+<div
+class="modal"
+id="modal">
+
+<div
+class="sheet"
+id="sheet">
+</div>
+
+</div>
+`;
+
+renderNav();
+
+render();
+
+loadBusinessLogo();
+
+}
+
+
+/* =====================================================
+   LOGO
+   ===================================================== */
+
+function loadBusinessLogo(){
+
+const box=
+document.getElementById(
+"businessLogo"
+);
+
+if(!box)return;
+
+if(currentBusiness?.logo_url){
+
+box.innerHTML=`
+
+<img
+class="logo"
+src="${esc(currentBusiness.logo_url)}"
+alt="Business Logo">
+
+`;
+
+}else{
+
+box.innerHTML=`
+
+<div
+class="logo"
+style="
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:800;
+color:#0b2a52;
+font-size:20px;
+">
+KC
+</div>
+
+`;
+
+}
+
+}
+
+
+/* =====================================================
    NAVIGATION
-========================================================= */
+   ===================================================== */
 
 const navItems=[
 
- ["dashboard","Dashboard"],
- ["sales","Sales"],
- ["products","Products"],
- ["customers","Customers"],
- ["expenses","Expenses"],
- ["reports","Reports"],
- ["backup","Backup"],
- ["settings","Settings"]
+["dashboard","Dashboard"],
+
+["sales","Sales"],
+
+["products","Products"],
+
+["customers","Customers"],
+
+["expenses","Expenses"],
+
+["reports","Reports"],
+
+["backup","Backup"],
+
+["settings","Settings"]
 
 ];
 
+
 function renderNav(){
 
- document.getElementById("nav").innerHTML=
+const nav=
+document.getElementById("nav");
 
- navItems.map(item=>`
+if(!nav)return;
 
- <button
- class="${page===item[0]?"active":""}"
- onclick="go('${item[0]}')">
+nav.innerHTML=
+navItems.map(item=>`
 
- ${item[1]}
+<button
+class="${page===item[0]?"active":""}"
+onclick="go('${item[0]}')">
 
- </button>
+${item[1]}
 
- `).join("");
+</button>
 
-}
-
-async function go(p){
-
- page=p;
-
- renderNav();
-
- render();
-
- window.scrollTo(0,0);
+`).join("");
 
 }
 
 
-/* =========================================================
-   RENDER
-========================================================= */
+function go(p){
 
-function render(){
+page=p;
 
- const app=document.getElementById("app");
+renderNav();
 
- if(page==="dashboard")
-  app.innerHTML=dashboardPage();
+render();
 
- if(page==="products")
-  app.innerHTML=productsPage();
-
- if(page==="sales")
-  app.innerHTML=salesPage();
-
- if(page==="customers")
-  app.innerHTML=customersPage();
-
- if(page==="expenses")
-  app.innerHTML=expensesPage();
-
- if(page==="reports")
-  app.innerHTML=reportsPage();
-
- if(page==="backup")
-  app.innerHTML=backupPage();
-
- if(page==="settings")
-  app.innerHTML=settingsPage();
+window.scrollTo(
+0,
+0
+);
 
 }
 
 
-/* =========================================================
-   EXPIRY STATUS
-========================================================= */
+async function render(){
 
-function expiryStatus(product){
+const app=
+document.getElementById("app");
 
- if(!product.expiry_date){
+if(!app)return;
 
-  return {
-   type:"none",
-   text:"No expiry date"
-  };
+if(page==="dashboard")
+app.innerHTML=
+await dashboard();
 
- }
+if(page==="sales")
+app.innerHTML=
+await salesPage();
 
- const days=
- daysUntil(product.expiry_date);
+if(page==="products")
+app.innerHTML=
+await productsPage();
 
- if(days<0){
+if(page==="customers")
+app.innerHTML=
+await customersPage();
 
-  return {
-   type:"expired",
-   text:"Expired"
-  };
+if(page==="expenses")
+app.innerHTML=
+await expensesPage();
 
- }
+if(page==="reports")
+app.innerHTML=
+await reportsPage();
 
- const reminder=
- Number(
-  product.expiry_reminder_days||30
- );
+if(page==="backup")
+app.innerHTML=
+backupPage();
 
- if(days<=reminder){
-
-  return {
-   type:"soon",
-   text:`Expires in ${days} day${days===1?"":"s"}`
-  };
-
- }
-
- return {
-  type:"good",
-  text:`${days} days remaining`
- };
+if(page==="settings")
+app.innerHTML=
+settingsPage();
 
 }
 
 
-/* =========================================================
+/* =====================================================
    DASHBOARD
-========================================================= */
+   ===================================================== */
 
-function dashboardPage(){
+async function dashboard(){
 
- const revenue=
- sales.reduce(
-  (sum,s)=>sum+Number(s.total||0),
-  0
- );
+const products=
+await getProducts();
 
- const lowStock=
- products.filter(
-  p=>Number(p.stock)<=Number(p.low_stock_level||0)
- );
+const sales=
+await getSales();
 
- const expired=
- products.filter(
-  p=>expiryStatus(p).type==="expired"
- );
+const expenses=
+await getExpenses();
 
- const expiring=
- products.filter(
-  p=>expiryStatus(p).type==="soon"
- );
+const revenue=
+sales.reduce(
+(a,b)=>a+Number(b.total||0),
+0
+);
 
- const stockValue=
- products.reduce(
-  (sum,p)=>
-   sum+
-   Number(p.stock||0)*
-   Number(p.cost_price||0),
-  0
- );
+const cost=
+sales.reduce(
+(a,b)=>
+a+
+(b.sale_items||[]).reduce(
+(x,i)=>
+x+
+Number(i.quantity||0)*
+Number(i.cost_price||0),
+0
+),
+0
+);
 
+const expenseTotal=
+expenses.reduce(
+(a,b)=>a+Number(b.amount||0),
+0
+);
 
- return`
+const profit=
+revenue-cost-expenseTotal;
 
- <h1>Dashboard</h1>
+const stockValue=
+products.reduce(
+(a,b)=>
+a+
+Number(b.stock||0)*
+Number(b.cost_price||0),
+0
+);
 
- <div class="grid">
+return`
 
- <div class="card stat">
- Total Sales
- <strong>${money(revenue)}</strong>
- </div>
+<h1>Dashboard</h1>
 
- <div class="card stat">
- Products
- <strong>${products.length}</strong>
- </div>
+<div class="grid">
 
- <div class="card stat">
- Stock Value
- <strong>${money(stockValue)}</strong>
- </div>
+<div class="card stat">
 
- <div class="card stat">
- Customers
- <strong>${customers.length}</strong>
- </div>
+Total Sales
 
- </div>
+<strong>
+${money(revenue)}
+</strong>
 
+</div>
 
- <div class="toolbar">
+<div class="card stat">
 
- <button onclick="newSale()">
- + New Sale
- </button>
+Net Profit
 
- <button class="secondary"
- onclick="newProduct()">
- + Add Product
- </button>
+<strong
+class="${profit>=0?"good":"bad"}">
 
- <button class="secondary"
- onclick="newCustomer()">
- + Customer
- </button>
+${money(profit)}
 
- </div>
+</strong>
 
+</div>
 
- ${expired.length?`
+<div class="card stat">
 
- <div class="alertBox alertExpired">
+Products
 
- <strong>🔴 Expired Products (${expired.length})</strong>
+<strong>
+${products.length}
+</strong>
 
- <ul>
+</div>
 
- ${expired.slice(0,5).map(p=>`
+<div class="card stat">
 
- <li>
- ${esc(p.name)}
- — ${p.stock} ${esc(p.stock_unit||"piece")}
- — ${esc(p.expiry_date)}
- </li>
+Stock Value
 
- `).join("")}
+<strong>
+${money(stockValue)}
+</strong>
 
- </ul>
+</div>
 
- </div>
+</div>
 
- `:""}
+<div class="toolbar">
 
+<button onclick="newSale()">
++ New Sale
+</button>
 
- ${expiring.length?`
+<button
+class="secondary"
+onclick="newProduct()">
++ Add Product
+</button>
 
- <div class="alertBox alertExpiry">
+</div>
 
- <strong>🟠 Expiring Soon (${expiring.length})</strong>
+<div class="card">
 
- <ul>
+<h2>Low Stock</h2>
 
- ${expiring.slice(0,5).map(p=>`
+${lowStockTable(products)}
 
- <li>
- ${esc(p.name)}
- — ${p.stock} ${esc(p.stock_unit||"piece")}
- — ${esc(p.expiry_date)}
- </li>
+</div>
 
- `).join("")}
+<div class="card">
 
- </ul>
+<h2>Recent Sales</h2>
 
- </div>
+${recentSales(sales)}
 
- `:""}
+</div>
 
+<div class="footer">
 
- ${lowStock.length?`
+SalesPro •
+${esc(
+currentBusiness?.name||
+"KC Integrated Global Services"
+)}
 
- <div class="alertBox alertStock">
+</div>
 
- <strong>⚠️ Low Stock (${lowStock.length})</strong>
-
- <ul>
-
- ${lowStock.slice(0,5).map(p=>`
-
- <li>
- ${esc(p.name)}
- — ${p.stock} ${esc(p.stock_unit||"piece")}
- </li>
-
- `).join("")}
-
- </ul>
-
- </div>
-
- `:""}
-
-
- <div class="card">
-
- <h2>Recent Sales</h2>
-
- ${recentSalesHTML()}
-
- </div>
-
-
- <div class="footer">
- SalesPro • ${esc(business.name)}
- </div>
-
- `;
+`;
 
 }
 
 
-function recentSalesHTML(){
+function lowStockTable(products){
 
- if(!sales.length){
+const low=
+products.filter(
+p=>
+Number(p.stock||0)<=
+Number(p.low_stock_level||0)
+);
 
-  return `<div class="empty">
-  No sales recorded yet.
-  </div>`;
+if(!low.length){
 
- }
+return `
+<div class="empty">
+No low-stock products.
+</div>
+`;
 
- return`
+}
 
- <div class="table">
+return `
 
- <table>
+<div class="table">
 
- <tr>
- <th>Date</th>
- <th>Invoice</th>
- <th>Customer</th>
- <th>Mode</th>
- <th>Payment</th>
- <th>Total</th>
- </tr>
+<table>
 
- ${sales.slice(0,8).map(s=>`
+<tr>
 
- <tr>
+<th>Product</th>
 
- <td>
- ${esc(s.sale_date||"")}
- </td>
+<th>Barcode</th>
 
- <td>
- ${esc(s.invoice_number||"")}
- </td>
+<th>Stock</th>
 
- <td>
- ${esc(s.customer_name||"Walk-in")}
- </td>
+<th>Alert Level</th>
 
- <td>
- ${esc(s.selling_mode||s.sale_type||"Retail")}
- </td>
+</tr>
 
- <td>
- ${esc(s.payment_method||"")}
- </td>
+${low.map(p=>`
 
- <td class="money">
- ${money(s.total)}
- </td>
+<tr class="lowStock">
 
- </tr>
+<td>
+<strong>${esc(p.name)}</strong>
+</td>
 
- `).join("")}
+<td>
+${esc(p.barcode||"-")}
+</td>
 
- </table>
+<td class="bad">
+${p.stock}
+</td>
 
- </div>
+<td>
+${p.low_stock_level}
+</td>
 
- `;
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
 
 }
 
 
-/* =========================================================
+/* =====================================================
    PRODUCTS
-========================================================= */
+   ===================================================== */
 
-function productsPage(){
+async function getProducts(){
 
- return`
+const {
+data,
+error
+}=await supabaseClient
+.from("products")
+.select("*")
+.eq("business_id",currentProfile.business_id)
+.eq("active",true)
+.order("name");
 
- <h1>Products & Inventory</h1>
+if(error){
 
- <div class="toolbar">
+console.error(error);
 
- <button onclick="newProduct()">
- + Add Product
- </button>
+return [];
 
- <input
- id="productSearch"
- style="max-width:320px"
- placeholder="Search name, barcode or brand..."
- oninput="filterProducts()">
+}
 
- </div>
-
- <div class="table" id="productTable">
-
- ${productTableHTML()}
-
- </div>
-
- `;
+return data||[];
 
 }
 
 
-function productTableHTML(search=""){
+async function productsPage(){
 
- const term=search.toLowerCase();
+const products=
+await getProducts();
 
- const list=products.filter(p=>
-  String(p.name||"").toLowerCase().includes(term)||
-  String(p.barcode||"").toLowerCase().includes(term)||
-  String(p.brand||"").toLowerCase().includes(term)
- );
+return`
 
- if(!list.length){
+<h1>Products & Inventory</h1>
 
-  return `<div class="empty">
-  No products found.
-  </div>`;
+<div class="toolbar">
 
- }
+<button onclick="newProduct()">
++ Add Product
+</button>
 
- return`
+<input
+style="max-width:330px"
+id="productSearch"
+placeholder="Search product or barcode..."
+oninput="filterProducts()">
 
- <table>
+</div>
 
- <tr>
+<div
+class="table"
+id="productTable">
 
- <th>Product</th>
- <th>Barcode</th>
- <th>Retail</th>
- <th>Wholesale</th>
- <th>Stock</th>
- <th>Expiry</th>
- <th>Action</th>
+${productTable(products)}
 
- </tr>
+</div>
 
- ${list.map(p=>{
-
-  const expiry=expiryStatus(p);
-
-  return`
-
-  <tr>
-
-  <td>
-  <strong>${esc(p.name)}</strong>
-  <br>
-  <small>${esc(p.brand||"")}</small>
-  </td>
-
-  <td>${esc(p.barcode||"-")}</td>
-
-  <td>${money(p.retail_price)}</td>
-
-  <td>
-  ${money(p.wholesale_price)}
-  <br>
-  <small>
-  per ${esc(p.wholesale_unit||"pack")}
-  </small>
-  </td>
-
-  <td class="${
-   Number(p.stock)<=Number(p.low_stock_level||0)
-   ?"bad":""
-  }">
-
-  ${Number(p.stock||0)}
-  ${esc(p.stock_unit||"piece")}
-
-  </td>
-
-  <td>
-
-  ${
-   expiry.type==="expired"
-   ?`<span class="badge bad">🔴 Expired</span>`
-   :
-   expiry.type==="soon"
-   ?`<span class="badge warning">🟠 ${expiry.text}</span>`
-   :
-   expiry.type==="good"
-   ?`<span class="badge good">🟢 ${expiry.text}</span>`
-   :
-   `<span class="badge">No expiry</span>`
-  }
-
-  </td>
-
-  <td>
-
-  <button class="secondary"
-  onclick="editProduct('${p.id}')">
-  Edit
-  </button>
-
-  </td>
-
-  </tr>
-
-  `;
-
- }).join("")}
-
- </table>
-
- `;
+`;
 
 }
 
 
-function filterProducts(){
+function productTable(products){
 
- const input=
- document.getElementById("productSearch");
+if(!products.length){
 
- document.getElementById("productTable")
- .innerHTML=
- productTableHTML(input.value);
+return `
+<div class="empty">
+No products yet.
+</div>
+`;
+
+}
+
+return`
+
+<table>
+
+<tr>
+
+<th>Product</th>
+
+<th>Barcode</th>
+
+<th>Category</th>
+
+<th>Retail</th>
+
+<th>Wholesale</th>
+
+<th>Stock</th>
+
+<th>Action</th>
+
+</tr>
+
+${products.map(p=>`
+
+<tr>
+
+<td>
+<strong>${esc(p.name)}</strong>
+</td>
+
+<td>
+${esc(p.barcode||"-")}
+</td>
+
+<td>
+${esc(p.category||"-")}
+</td>
+
+<td>
+${money(p.retail_price)}
+</td>
+
+<td>
+${money(p.wholesale_price)}
+</td>
+
+<td
+class="${Number(p.stock)<=Number(p.low_stock_level||0)?"bad":""}">
+
+${p.stock}
+
+</td>
+
+<td>
+
+<button
+class="secondary"
+onclick="editProduct('${p.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+`;
 
 }
 
 
-/* =========================================================
+async function filterProducts(){
+
+const search=
+document.getElementById(
+"productSearch"
+).value.toLowerCase();
+
+const products=
+await getProducts();
+
+const filtered=
+products.filter(p=>
+
+String(p.name||"")
+.toLowerCase()
+.includes(search)
+
+||
+
+String(p.barcode||"")
+.toLowerCase()
+.includes(search)
+
+);
+
+document.getElementById(
+"productTable"
+).innerHTML=
+productTable(filtered);
+
+}
+
+
+/* =====================================================
    PRODUCT FORM
-========================================================= */
+   ===================================================== */
 
-function newProduct(product=null){
+async function newProduct(existing=null){
 
- openModal(`
+openModal(`
 
- <h2>
- ${product?"Edit":"Add"} Product
- </h2>
+<h2>
+${existing?"Edit":"Add"} Product
+</h2>
 
- <div class="formgrid">
+<div class="formgrid">
 
- <div class="full">
+<div class="full">
 
- <label>Product Name</label>
+<label>
+Product Name
+</label>
 
- <input id="pname"
- value="${esc(product?.name||"")}">
+<input
+id="pname"
+value="${esc(existing?.name||"")}"
+placeholder="e.g. Fanta 60cl">
 
- </div>
+</div>
 
+<div>
 
- <div>
+<label>
+Barcode
+</label>
 
- <label>Barcode</label>
+<input
+id="pbarcode"
+value="${esc(existing?.barcode||"")}"
+placeholder="Scan or enter barcode">
 
- <div class="quickScan">
+<button
+type="button"
+style="width:100%;margin-top:7px"
+onclick="openBarcodeForField('pbarcode')">
 
- <input id="pbarcode"
- value="${esc(product?.barcode||"")}"
- placeholder="Enter or scan">
+📷 Scan Barcode
 
- <button type="button"
- onclick="scanForProductForm()">
- 📷 Scan
- </button>
+</button>
 
- </div>
+</div>
 
- </div>
+<div>
 
+<label>
+Category
+</label>
 
- <div>
+<input
+id="pcategory"
+value="${esc(existing?.category||"")}"
+placeholder="Drinks, Water, Malt...">
 
- <label>Brand</label>
+</div>
 
- <input id="pbrand"
- value="${esc(product?.brand||"")}">
+<div>
 
- </div>
+<label>
+Brand
+</label>
 
+<input
+id="pbrand"
+value="${esc(existing?.brand||"")}"
+placeholder="Coca-Cola, Pepsi...">
 
- <div>
+</div>
 
- <label>Category</label>
+<div>
 
- <input id="pcategory"
- value="${esc(product?.category||"")}">
+<label>
+Unit
+</label>
 
- </div>
+<select id="punit">
 
+<option value="piece"
+${existing?.unit==="piece"?"selected":""}>
+Piece
+</option>
 
- <div>
+<option value="pack"
+${existing?.unit==="pack"?"selected":""}>
+Pack
+</option>
 
- <label>Unit</label>
+<option value="carton"
+${existing?.unit==="carton"?"selected":""}>
+Carton
+</option>
 
- <input id="punit"
- value="${esc(product?.unit||"piece")}"
- placeholder="piece / bottle / sachet">
+</select>
 
- </div>
+</div>
 
+<div>
 
- <div>
+<label>
+Cost Price
+</label>
 
- <label>Stock Unit</label>
+<input
+id="pcost"
+type="number"
+step="0.01"
+value="${existing?.cost_price||0}">
 
- <input id="pstockunit"
- value="${esc(product?.stock_unit||"piece")}"
- placeholder="piece / bottle / pack">
+</div>
 
- </div>
+<div>
 
+<label>
+Retail Price - Single Piece
+</label>
 
- <div>
+<input
+id="pretail"
+type="number"
+step="0.01"
+value="${existing?.retail_price||0}">
 
- <label>Wholesale Unit</label>
+</div>
 
- <select id="pwholeunit">
+<div>
 
- <option value="pack"
- ${product?.wholesale_unit==="pack"?"selected":""}>
- Pack
- </option>
+<label>
+Wholesale Price
+</label>
 
- <option value="carton"
- ${product?.wholesale_unit==="carton"?"selected":""}>
- Carton
- </option>
+<input
+id="pwholesale"
+type="number"
+step="0.01"
+value="${existing?.wholesale_price||0}">
 
- <option value="crate"
- ${product?.wholesale_unit==="crate"?"selected":""}>
- Crate
- </option>
+</div>
 
- </select>
+<div>
 
- </div>
+<label>
+Opening Stock
+</label>
 
+<input
+id="pstock"
+type="number"
+step="1"
+value="${existing?.stock||0}">
 
- <div>
+</div>
 
- <label>Pieces per Wholesale Unit</label>
+<div>
 
- <input
- id="punits"
- type="number"
- min="1"
- value="${product?.units_per_wholesale||1}">
+<label>
+Low Stock Alert
+</label>
 
- </div>
+<input
+id="plow"
+type="number"
+value="${existing?.low_stock_level||5}">
 
+</div>
 
- <div>
+</div>
 
- <label>Cost Price</label>
+<div class="actions">
 
- <input
- id="pcost"
- type="number"
- min="0"
- value="${product?.cost_price||0}">
+<button
+class="secondary"
+onclick="closeModal()">
+Cancel
+</button>
 
- </div>
+<button
+onclick="saveProduct('${existing?.id||""}')">
 
+Save Product
 
- <div>
+</button>
 
- <label>Retail Price / Piece</label>
+${existing?`
 
- <input
- id="pretail"
- type="number"
- min="0"
- value="${product?.retail_price||0}">
+<button
+class="red"
+onclick="deleteProduct('${existing.id}')">
 
- </div>
+Delete
 
+</button>
 
- <div>
+`:""}
 
- <label>Wholesale Price / Pack/Carton</label>
+</div>
 
- <input
- id="pwhole"
- type="number"
- min="0"
- value="${product?.wholesale_price||0}">
-
- </div>
-
-
- <div>
-
- <label>Stock</label>
-
- <input
- id="pstock"
- type="number"
- min="0"
- value="${product?.stock||0}">
-
- </div>
-
-
- <div>
-
- <label>Low Stock Alert</label>
-
- <input
- id="plow"
- type="number"
- min="0"
- value="${product?.low_stock_level||5}">
-
- </div>
-
-
- <div>
-
- <label>Expiry Date</label>
-
- <input
- id="pexpiry"
- type="date"
- value="${product?.expiry_date||""}">
-
- </div>
-
-
- <div>
-
- <label>Batch Number</label>
-
- <input
- id="pbatch"
- value="${esc(product?.batch_number||"")}">
-
- </div>
-
-
- <div>
-
- <label>Expiry Reminder</label>
-
- <select id="preminder">
-
- <option value="30"
- ${Number(product?.expiry_reminder_days||30)===30?"selected":""}>
- 30 days
- </option>
-
- <option value="14"
- ${Number(product?.expiry_reminder_days)===14?"selected":""}>
- 14 days
- </option>
-
- <option value="7"
- ${Number(product?.expiry_reminder_days)===7?"selected":""}>
- 7 days
- </option>
-
- </select>
-
- </div>
-
- </div>
-
-
- <div class="actions">
-
- <button class="secondary"
- onclick="closeModal()">
- Cancel
- </button>
-
- <button
- onclick="saveProduct('${product?.id||""}')">
- Save Product
- </button>
-
- ${
-  product
-  ?`
-  <button class="red"
-  onclick="deleteProduct('${product.id}')">
-  Delete
-  </button>
-  `
-  :""
- }
-
- </div>
-
- `);
+`);
 
 }
 
 
 async function saveProduct(existing){
 
- const data={
+const product={
 
-  name:document.getElementById("pname").value.trim(),
+business_id:
+currentProfile.business_id,
 
-  barcode:document.getElementById("pbarcode").value.trim()||null,
+name:
+document.getElementById("pname").value.trim(),
 
-  brand:document.getElementById("pbrand").value.trim()||null,
+barcode:
+document.getElementById("pbarcode").value.trim()||null,
 
-  category:document.getElementById("pcategory").value.trim()||null,
+category:
+document.getElementById("pcategory").value.trim(),
 
-  unit:document.getElementById("punit").value.trim()||"piece",
+brand:
+document.getElementById("pbrand").value.trim(),
 
-  stock_unit:document.getElementById("pstockunit").value.trim()||"piece",
+unit:
+document.getElementById("punit").value,
 
-  wholesale_unit:
-   document.getElementById("pwholeunit").value,
+cost_price:
+Number(document.getElementById("pcost").value||0),
 
-  units_per_wholesale:
-   Number(document.getElementById("punits").value||1),
+retail_price:
+Number(document.getElementById("pretail").value||0),
 
-  cost_price:
-   Number(document.getElementById("pcost").value||0),
+wholesale_price:
+Number(document.getElementById("pwholesale").value||0),
 
-  retail_price:
-   Number(document.getElementById("pretail").value||0),
+stock:
+Number(document.getElementById("pstock").value||0),
 
-  wholesale_price:
-   Number(document.getElementById("pwhole").value||0),
+low_stock_level:
+Number(document.getElementById("plow").value||0),
 
-  stock:
-   Number(document.getElementById("pstock").value||0),
+active:true
 
-  low_stock_level:
-   Number(document.getElementById("plow").value||0),
+};
 
-  expiry_date:
-   document.getElementById("pexpiry").value||null,
+if(!product.name){
 
-  batch_number:
-   document.getElementById("pbatch").value.trim()||null,
+alert(
+"Enter product name."
+);
 
-  expiry_reminder_days:
-   Number(document.getElementById("preminder").value||30),
+return;
 
-  business_id:business.id,
+}
 
-  active:true
+try{
 
- };
+let result;
 
+if(existing){
 
- if(!data.name){
+result=
+await supabaseClient
+.from("products")
+.update(product)
+.eq("id",existing)
+.eq(
+"business_id",
+currentProfile.business_id);
 
-  alert("Enter product name.");
+}else{
 
-  return;
+result=
+await supabaseClient
+.from("products")
+.insert(product);
 
- }
+}
 
+if(result.error){
 
- try{
+throw result.error;
 
-  let result;
+}
 
-  if(existing){
+closeModal();
 
-   result=
-   await supabaseClient
-   .from("products")
-   .update(data)
-   .eq("id",existing)
-   .eq("business_id",business.id);
+await render();
 
-  }else{
+}catch(error){
 
-   result=
-   await supabaseClient
-   .from("products")
-   .insert(data);
+console.error(error);
 
-  }
+alert(
+"Could not save product:\n"+
+error.message
+);
 
-
-  if(result.error)
-   throw result.error;
-
-
-  await loadAllData();
-
-  closeModal();
-
-  render();
-
- }catch(error){
-
-  alert(
-   "Could not save product:\n\n"+
-   error.message
-  );
-
- }
+}
 
 }
 
 
-function editProduct(id){
+async function editProduct(productId){
 
- const p=
- products.find(x=>x.id===id);
+const {
+data,
+error
+}=await supabaseClient
+.from("products")
+.select("*")
+.eq("id",productId)
+.single();
 
- if(p)newProduct(p);
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+newProduct(data);
 
 }
 
 
-async function deleteProduct(id){
+async function deleteProduct(productId){
 
- if(!confirm(
-  "Delete this product?"
- ))return;
+if(!confirm(
+"Delete this product?"
+))return;
 
- const {error}=
- await supabaseClient
- .from("products")
- .delete()
- .eq("id",id)
- .eq("business_id",business.id);
+const {
+error
+}=await supabaseClient
+.from("products")
+.update({
+active:false
+})
+.eq("id",productId)
+.eq(
+"business_id",
+currentProfile.business_id
+);
 
- if(error){
+if(error){
 
-  alert(error.message);
+alert(error.message);
 
-  return;
+return;
 
- }
+}
 
- await loadAllData();
+closeModal();
 
- closeModal();
-
- render();
+await render();
 
 }
 
 
-/* =========================================================
-   SALES
-========================================================= */
-
-let saleRows=[];
-
-function salesPage(){
-
- return`
-
- <h1>Sales</h1>
-
- <div class="toolbar">
-
- <button onclick="newSale()">
- + New Sale
- </button>
-
- </div>
-
- ${salesTableHTML()}
-
- `;
-
-}
-
-
-function salesTableHTML(){
-
- if(!sales.length){
-
-  return`
-  <div class="card empty">
-  No sales recorded.
-  </div>
-  `;
-
- }
-
- return`
-
- <div class="table">
-
- <table>
-
- <tr>
-
- <th>Date</th>
- <th>Invoice</th>
- <th>Customer</th>
- <th>Mode</th>
- <th>Payment</th>
- <th>Total</th>
-
- </tr>
-
- ${sales.map(s=>`
-
- <tr>
-
- <td>${esc(s.sale_date||"")}</td>
-
- <td>${esc(s.invoice_number||"")}</td>
-
- <td>${esc(s.customer_name||"Walk-in")}</td>
-
- <td>${esc(s.selling_mode||s.sale_type||"Retail")}</td>
-
- <td>${esc(s.payment_method||"")}</td>
-
- <td class="money">${money(s.total)}</td>
-
- </tr>
-
- `).join("")}
-
- </table>
-
- </div>
-
- `;
-
-}
-
-
-/* =========================================================
-   NEW SALE
-========================================================= */
-
-function newSale(){
-
- if(!products.length){
-
-  alert(
-   "Please add products first."
-  );
-
-  go("products");
-
-  return;
-
- }
-
- saleRows=[];
-
- openModal(`
-
- <h2>New Sale</h2>
-
-
- <div class="formgrid">
-
- <div>
-
- <label>Customer</label>
-
- <select id="saleCustomer">
-
- <option value="">
- Walk-in Customer
- </option>
-
- ${customers.map(c=>`
-
- <option value="${c.id}">
- ${esc(c.name)}
- </option>
-
- `).join("")}
-
- </select>
-
- </div>
-
-
- <div>
-
- <label>Selling Mode</label>
-
- <select id="saleMode"
- onchange="refreshSaleRows()">
-
- <option value="retail">
- Retail / Single Piece
- </option>
-
- <option value="wholesale">
- Wholesale / Pack / Carton
- </option>
-
- </select>
-
- </div>
-
-
- <div>
-
- <label>Payment Method</label>
-
- <select id="salePayment">
-
- <option>Cash</option>
- <option>Transfer</option>
- <option>POS</option>
- <option>Credit</option>
-
- </select>
-
- </div>
-
-
- <div>
-
- <label>Date</label>
-
- <input
- id="saleDate"
- type="date"
- value="${today()}">
-
- </div>
-
- </div>
-
-
- <div class="card">
-
- <label>Quick Barcode Scan</label>
-
- <div class="quickScan">
-
- <input
- id="saleBarcode"
- placeholder="Scan or enter barcode">
-
- <button
- type="button"
- onclick="scanForSale()">
- 📷 Scan
- </button>
-
- </div>
-
- </div>
-
-
- <div id="saleItems"></div>
-
-
- <button
- class="secondary"
- onclick="addSaleRow()">
- + Add Item
- </button>
-
-
- <div class="card">
-
- <div>
- Items:
- <strong id="saleItemCount">0</strong>
- </div>
-
- <div class="saleTotal">
- Total:
- <span id="saleTotal">₦0.00</span>
- </div>
-
- </div>
-
-
- <div class="actions">
-
- <button
- class="secondary"
- onclick="closeModal()">
- Cancel
- </button>
-
- <button
- class="green"
- onclick="completeSale()">
- Complete Sale
- </button>
-
- </div>
-
- `);
-
- addSaleRow();
-
-}
-
-
-function addSaleRow(productId=""){
-
- const row={
-  id:uid(),
-  productId:productId,
-  quantity:1
- };
-
- saleRows.push(row);
-
- renderSaleRows();
-
-}
-
-
-function renderSaleRows(){
-
- const box=
- document.getElementById("saleItems");
-
- if(!box)return;
-
- const mode=
- document.getElementById("saleMode")?.value||"retail";
-
-
- box.innerHTML=
- saleRows.map((row,index)=>{
-
-  const product=
-   products.find(
-    p=>p.id===row.productId
-   );
-
-  const unitLabel=
-   mode==="retail"
-   ?(product?.stock_unit||"piece")
-   :(product?.wholesale_unit||"pack");
-
-  const price=
-   mode==="retail"
-   ?Number(product?.retail_price||0)
-   :Number(product?.wholesale_price||0);
-
-  const multiplier=
-   mode==="retail"
-   ?1
-   :Number(product?.units_per_wholesale||1);
-
-  const stockAvailable=
-   product
-   ?Number(product.stock||0)
-   :0;
-
-  const maximum=
-   mode==="retail"
-   ?stockAvailable
-   :Math.floor(stockAvailable/multiplier);
-
-
-  return`
-
-  <div class="saleRow">
-
-  <div class="saleRowHeader">
-
-  <strong>
-  Item ${index+1}
-  </strong>
-
-  ${
-   saleRows.length>1
-   ?`
-   <button
-   class="red"
-   onclick="removeSaleRow('${row.id}')">
-   Remove
-   </button>
-   `
-   :""
-  }
-
-  </div>
-
-
-  <label>Product</label>
-
-  <select
-  onchange="changeSaleProduct('${row.id}',this.value)">
-
-  <option value="">
-  Select Product
-  </option>
-
-  ${products.map(p=>`
-
-  <option
-  value="${p.id}"
-  ${p.id===row.productId?"selected":""}>
-
-  ${esc(p.name)}
-  — ${p.stock} ${esc(p.stock_unit||"piece")}
-
-  </option>
-
-  `).join("")}
-
-  </select>
-
-
-  ${
-   product
-   ?`
-
-   <div class="scannedProduct">
-
-   <strong>${esc(product.name)}</strong>
-
-   <br>
-
-   Barcode:
-   ${esc(product.barcode||"No barcode")}
-
-   <br>
-
-   Available:
-   <strong>
-   ${product.stock}
-   ${esc(product.stock_unit||"piece")}
-   </strong>
-
-   <br>
-
-   ${
-    expiryStatus(product).type==="expired"
-    ?`<span class="badge bad">🔴 EXPIRED</span>`
-    :
-    expiryStatus(product).type==="soon"
-    ?`<span class="badge warning">🟠 ${expiryStatus(product).text}</span>`
-    :""
-   }
-
-   </div>
-
-   <div class="formgrid">
-
-   <div>
-
-   <label>
-   Quantity (${esc(unitLabel)})
-   </label>
-
-   <input
-   type="number"
-   min="1"
-   max="${maximum}"
-   value="${row.quantity}"
-   oninput="changeSaleQuantity('${row.id}',this.value)">
-
-   </div>
-
-   <div>
-
-   <label>Price</label>
-
-   <input
-   value="${money(price)}"
-   readonly>
-
-   </div>
-
-   </div>
-
-   <p>
-   Stock deducted:
-   <strong>
-   ${Number(row.quantity||0)*multiplier}
-   ${esc(product.stock_unit||"piece")}
-   </strong>
-   </p>
-
-   <p>
-   Line Total:
-   <strong>
-   ${money(
-    Number(row.quantity||0)*price
-   )}
-   </strong>
-   </p>
-
-   `
-   :""
-
-  }
-
-  </div>
-
-  `;
-
- }).join("");
-
-
- updateSaleTotal();
-
-}
-
-
-function changeSaleProduct(id,productId){
-
- const row=
- saleRows.find(x=>x.id===id);
-
- if(row){
-
-  row.productId=productId;
-
-  row.quantity=1;
-
- }
-
- renderSaleRows();
-
-}
-
-
-function changeSaleQuantity(id,value){
-
- const row=
- saleRows.find(x=>x.id===id);
-
- if(row){
-
-  row.quantity=
-   Math.max(1,Number(value||1));
-
- }
-
- updateSaleTotal();
-
-}
-
-
-function removeSaleRow(id){
-
- saleRows=
- saleRows.filter(x=>x.id!==id);
-
- renderSaleRows();
-
-}
-
-
-function refreshSaleRows(){
-
- renderSaleRows();
-
-}
-
-
-function updateSaleTotal(){
-
- const mode=
- document.getElementById("saleMode")?.value||"retail";
-
- let total=0;
- let count=0;
-
- saleRows.forEach(row=>{
-
-  const p=
-   products.find(
-    x=>x.id===row.productId
-   );
-
-  if(!p)return;
-
-  const price=
-   mode==="retail"
-   ?Number(p.retail_price||0)
-   :Number(p.wholesale_price||0);
-
-  total+=
-   Number(row.quantity||0)*price;
-
-  count+=
-   Number(row.quantity||0);
-
- });
-
- const totalEl=
- document.getElementById("saleTotal");
-
- const countEl=
- document.getElementById("saleItemCount");
-
- if(totalEl)
-  totalEl.textContent=money(total);
-
- if(countEl)
-  countEl.textContent=count;
-
-}
-
-
-/* =========================================================
-   COMPLETE SALE
-========================================================= */
-
-async function completeSale(){
-
- const mode=
- document.getElementById("saleMode").value;
-
- const payment=
- document.getElementById("salePayment").value;
-
- const customerId=
- document.getElementById("saleCustomer").value||null;
-
- const customer=
- customers.find(
-  c=>c.id===customerId
- );
-
- const saleDate=
- document.getElementById("saleDate").value;
-
-
- if(!saleRows.length){
-
-  alert("Add at least one item.");
-
-  return;
-
- }
-
-
- const items=[];
- let subtotal=0;
-
-
- for(const row of saleRows){
-
-  const p=
-   products.find(
-    x=>x.id===row.productId
-   );
-
-  if(!p){
-
-   alert("Select a product for every row.");
-
-   return;
-
-  }
-
-
-  const quantity=
-   Number(row.quantity||0);
-
-
-  if(quantity<=0){
-
-   alert("Quantity must be at least 1.");
-
-   return;
-
-  }
-
-
-  const multiplier=
-   mode==="retail"
-   ?1
-   :Number(p.units_per_wholesale||1);
-
-
-  const stockNeeded=
-   quantity*multiplier;
-
-
-  if(stockNeeded>Number(p.stock||0)){
-
-   alert(
-    `${p.name} does not have enough stock.\n\n`+
-    `Available: ${p.stock} ${p.stock_unit||"piece"}\n`+
-    `Required: ${stockNeeded} ${p.stock_unit||"piece"}`
-   );
-
-   return;
-
-  }
-
-
-  const status=
-   expiryStatus(p);
-
-
-  if(status.type==="expired"){
-
-   const proceed=
-   confirm(
-    `${p.name} is EXPIRED.\n\n`+
-    `Expiry date: ${p.expiry_date}\n\n`+
-    `Do you still want to sell it?`
-   );
-
-   if(!proceed)return;
-
-  }
-
-
-  const unitPrice=
-   mode==="retail"
-   ?Number(p.retail_price||0)
-   :Number(p.wholesale_price||0);
-
-
-  const lineTotal=
-   quantity*unitPrice;
-
-
-  subtotal+=lineTotal;
-
-
-  items.push({
-
-   product_id:p.id,
-
-   product_name:p.name,
-
-   barcode:p.barcode||null,
-
-   quantity:quantity,
-
-   unit_price:unitPrice,
-
-   cost_price:Number(p.cost_price||0),
-
-   total:lineTotal,
-
-   selling_unit:
-    mode==="retail"
-    ?(p.stock_unit||"piece")
-    :(p.wholesale_unit||"pack"),
-
-   unit_multiplier:multiplier
-
-  });
-
- }
-
-
- const invoice=
- "INV-"+Date.now();
-
-
- try{
-
-  /*
-   Create sale first.
-  */
-
-  const saleData={
-
-   business_id:business.id,
-
-   invoice_number:invoice,
-
-   customer_id:customerId,
-
-   user_id:currentUser.id,
-
-   created_by:currentUser.id,
-
-   sale_type:
-    mode==="retail"
-    ?"Retail"
-    :"Wholesale",
-
-   selling_mode:mode,
-
-   subtotal:subtotal,
-
-   discount:0,
-
-   total:subtotal,
-
-   amount_paid:
-    payment==="Credit"
-    ?0
-    :subtotal,
-
-   balance:
-    payment==="Credit"
-    ?subtotal
-    :0,
-
-   payment_method:payment,
-
-   status:
-    payment==="Credit"
-    ?"credit"
-    :"completed",
-
-   sale_date:saleDate,
-
-   customer_name:
-    customer?.name||"Walk-in Customer"
-
-  };
-
-
-  const {data:sale,error:saleError}=
-  await supabaseClient
-  .from("sales")
-  .insert(saleData)
-  .select()
-  .single();
-
-
-  if(saleError)
-   throw saleError;
-
-
-  /*
-   Add sale items.
-  */
-
-  const saleItems=
-  items.map(item=>({
-
-   sale_id:sale.id,
-
-   product_id:item.product_id,
-
-   product_name:item.product_name,
-
-   barcode:item.barcode,
-
-   quantity:item.quantity,
-
-   unit_price:item.unit_price,
-
-   cost_price:item.cost_price,
-
-   total:item.total,
-
-   selling_unit:item.selling_unit,
-
-   unit_multiplier:item.unit_multiplier
-
-  }));
-
-
-  const {error:itemError}=
-  await supabaseClient
-  .from("sale_items")
-  .insert(saleItems);
-
-
-  if(itemError){
-
-   /*
-    Don't silently leave a sale without its items.
-   */
-
-   throw itemError;
-
-  }
-
-
-  /*
-   Update inventory.
-  */
-
-  for(const item of items){
-
-   const p=
-    products.find(
-     x=>x.id===item.product_id
-    );
-
-   const newStock=
-    Number(p.stock||0)-
-    Number(item.quantity)*
-    Number(item.unit_multiplier||1);
-
-
-   const {error:stockError}=
-   await supabaseClient
-   .from("products")
-   .update({
-    stock:newStock,
-    updated_at:new Date().toISOString()
-   })
-   .eq("id",p.id)
-   .eq("business_id",business.id);
-
-
-   if(stockError)
-    throw stockError;
-
-  }
-
-
-  alert(
-   "Sale completed successfully.\n\n"+
-   "Invoice: "+invoice+
-   "\nTotal: "+money(subtotal)
-  );
-
-
-  await loadAllData();
-
-  closeModal();
-
-  render();
-
-
- }catch(error){
-
-  alert(
-   "Could not complete sale:\n\n"+
-   error.message
-  );
-
- }
-
-}
-
-
-/* =========================================================
+/* =====================================================
    BARCODE SCANNER
-========================================================= */
+   ===================================================== */
 
-function openBarcodeScanner(callback){
+let barcodeTargetId="pbarcode";
 
- window.barcodeCallback=
-  callback||null;
 
- const modal=
-  document.getElementById(
-   "barcodeScannerModal"
-  );
+function openBarcodeForField(fieldId){
 
- const status=
-  document.getElementById(
-   "barcodeStatus"
-  );
+barcodeTargetId=fieldId;
 
- modal.classList.add("show");
+openBarcodeScanner();
 
- status.innerHTML=
-  "📷 Starting camera...";
+}
 
- setTimeout(
-  startBarcodeScanner,
-  250
- );
+
+function barcodeStatus(message){
+
+const box=
+document.getElementById(
+"barcodeStatus"
+);
+
+if(box){
+
+box.innerHTML=message;
+
+}
+
+}
+
+
+async function openBarcodeScanner(){
+
+await stopBarcodeScanner();
+
+document
+.getElementById("barcodeModal")
+.classList.add("show");
+
+barcodeStatus(
+"📷 Preparing camera..."
+);
+
+setTimeout(
+startBarcodeScanner,
+400
+);
 
 }
 
 
 async function startBarcodeScanner(){
 
- if(scannerStarting||scannerRunning)
-  return;
+if(
+barcodeStarting||
+barcodeRunning
+)return;
 
- scannerStarting=true;
+barcodeStarting=true;
 
- const reader=
-  document.getElementById("reader");
+await stopBarcodeScanner();
 
- const status=
-  document.getElementById("barcodeStatus");
+const reader=
+document.getElementById(
+"barcodeReader"
+);
 
- reader.innerHTML="";
+reader.innerHTML="";
 
- try{
+try{
 
-  if(typeof Html5Qrcode==="undefined")
-   throw new Error(
-    "Barcode scanner library failed to load."
-   );
+barcodeScanner=
+new Html5Qrcode(
+"barcodeReader"
+);
 
+const formats=[
 
-  scanner=
-   new Html5Qrcode("reader");
+Html5QrcodeSupportedFormats.EAN_13,
 
+Html5QrcodeSupportedFormats.EAN_8,
 
-  const config={
+Html5QrcodeSupportedFormats.UPC_A,
 
-   fps:12,
+Html5QrcodeSupportedFormats.UPC_E,
 
-   qrbox:function(
-    width,
-    height
-   ){
+Html5QrcodeSupportedFormats.CODE_128,
 
-    const boxWidth=
-     Math.floor(width*.88);
+Html5QrcodeSupportedFormats.CODE_39,
 
-    const boxHeight=
-     Math.floor(
-      Math.min(
-       Math.max(height*.28,110),
-       180
-      )
-     );
+Html5QrcodeSupportedFormats.ITF
 
-    return{
-     width:boxWidth,
-     height:boxHeight
-    };
+];
 
-   },
+const config={
 
-   aspectRatio:1.777,
+fps:10,
 
-   rememberLastUsedCamera:true,
+qrbox:function(width,height){
 
-   formatsToSupport:[
+return{
 
-    Html5QrcodeSupportedFormats.EAN_13,
+width:Math.min(
+300,
+Math.floor(width*.82)
+),
 
-    Html5QrcodeSupportedFormats.EAN_8,
+height:Math.min(
+160,
+Math.floor(height*.35)
+)
 
-    Html5QrcodeSupportedFormats.UPC_A,
+};
 
-    Html5QrcodeSupportedFormats.UPC_E,
+},
 
-    Html5QrcodeSupportedFormats.CODE_128,
+aspectRatio:1.5,
 
-    Html5QrcodeSupportedFormats.CODE_39,
+formatsToSupport:formats
 
-    Html5QrcodeSupportedFormats.ITF,
-
-    Html5QrcodeSupportedFormats.CODABAR
-
-   ]
-
-  };
+};
 
 
-  /*
-   Prefer the rear camera.
-  */
+await barcodeScanner.start(
 
-  let cameraConfig={
-   facingMode:"environment"
-  };
+{
+facingMode:"environment"
+},
 
+config,
 
-  await scanner.start(
+function(code){
 
-   cameraConfig,
+handleScannedBarcode(code);
 
-   config,
+},
 
-   function(decodedText){
+function(){
 
-    handleBarcodeScan(
-     decodedText
-    );
+}
+);
 
-   },
+barcodeRunning=true;
 
-   function(){
+barcodeStatus(
+"📷 Camera ready — point it at the barcode."
+);
 
-    /*
-     Normal frame scanning errors
-     are intentionally ignored.
-    */
+}catch(error){
 
-   }
+console.error(
+"Barcode camera error:",
+error
+);
 
-  );
+barcodeStatus(
+"⚠️ Live camera could not start.<br><br>"+
+"Use <strong>Take Barcode Photo</strong> "+
+"or enter the barcode manually."
+);
 
+}finally{
 
-  scannerRunning=true;
-  scannerStarting=false;
+barcodeStarting=false;
 
-  status.innerHTML=
-   "📷 Camera ready — scan a barcode.";
-
-
- }catch(error){
-
-  console.error(error);
-
-  scannerStarting=false;
-  scannerRunning=false;
-
-  status.innerHTML=
-   "❌ Camera could not start.<br><br>"+
-   "Please allow camera access and tap Restart.";
-
- }
+}
 
 }
 
 
-async function handleBarcodeScan(code){
+function handleScannedBarcode(code){
 
- if(!code)return;
+code=
+String(code||"").trim();
 
- code=
-  String(code).trim();
+if(!code)return;
 
+const input=
+document.getElementById(
+barcodeTargetId
+);
 
- if(!code)return;
+if(input){
 
+input.value=code;
 
- /*
-  Prevent duplicate callbacks.
- */
+input.dispatchEvent(
+new Event(
+"input",
+{bubbles:true}
+)
+);
 
- if(window.lastScannedBarcode===code){
+input.dispatchEvent(
+new Event(
+"change",
+{bubbles:true}
+)
+);
 
-  return;
+}
 
- }
+barcodeStatus(
+"✅ Barcode captured: <strong>"+
+esc(code)+
+"</strong>"
+);
 
- window.lastScannedBarcode=code;
+stopBarcodeScanner();
 
-
- const status=
-  document.getElementById(
-   "barcodeStatus"
-  );
-
- status.innerHTML=
-  "✅ Barcode detected: <strong>"+
-  esc(code)+
-  "</strong>";
-
-
- /*
-  Pass barcode to the requested form.
- */
-
- if(typeof window.barcodeCallback==="function"){
-
-  const callback=
-   window.barcodeCallback;
-
-  await stopBarcodeScanner();
-
-  closeBarcodeScanner();
-
-  callback(code);
-
-  setTimeout(function(){
-   window.lastScannedBarcode=null;
-  },1500);
-
-  return;
-
- }
-
-
- /*
-  Default: sale scanner
- */
-
- const input=
-  document.getElementById("saleBarcode");
-
- if(input){
-
-  input.value=code;
-
- }
-
-
- await stopBarcodeScanner();
-
- closeBarcodeScanner();
-
- await findProductByBarcode(code);
-
- setTimeout(function(){
-  window.lastScannedBarcode=null;
- },1500);
+setTimeout(
+closeBarcodeScanner,
+700
+);
 
 }
 
 
-async function findProductByBarcode(code){
+async function scanBarcodePhoto(event){
 
- /*
-  Search local list first.
- */
+const file=
+event.target.files?.[0];
 
- let product=
-  products.find(
-   p=>String(p.barcode||"").trim()===code
-  );
+if(!file)return;
 
+barcodeStatus(
+"🔎 Reading barcode from photo..."
+);
 
- /*
-  Search Supabase if not found locally.
- */
+await stopBarcodeScanner();
 
- if(!product){
+try{
 
-  const {data,error}=
-  await supabaseClient
-  .from("products")
-  .select("*")
-  .eq("business_id",business.id)
-  .eq("barcode",code)
-  .maybeSingle();
+const scanner=
+new Html5Qrcode(
+"barcodeReader"
+);
 
+const result=
+await scanner.scanFile(
+file,
+true
+);
 
-  if(error){
+try{
 
-   alert(
-    "Barcode search failed:\n\n"+
-    error.message
-   );
+await scanner.clear();
 
-   return;
+}catch(e){}
 
-  }
+handleScannedBarcode(result);
 
-  product=data;
+}catch(error){
 
- }
+console.error(error);
 
+barcodeStatus(
+"❌ Barcode could not be read from this photo.<br><br>"+
+"Take a clear photo with the barcode straight and well lit."
+);
 
- if(!product){
+}
 
-  const create=
-   confirm(
-    "Barcode "+code+
-    " was not found.\n\n"+
-    "Would you like to add this as a new product?"
-   );
-
-  if(create){
-
-   newProduct();
-
-   setTimeout(function(){
-
-    const input=
-     document.getElementById("pbarcode");
-
-    if(input)
-     input.value=code;
-
-   },100);
-
-  }
-
-  return;
-
- }
-
-
- /*
-  Add product automatically to sale.
- */
-
- const existing=
-  saleRows.find(
-   r=>r.productId===product.id
-  );
-
-
- if(existing){
-
-  existing.quantity+=1;
-
- }else{
-
-  saleRows.push({
-
-   id:uid(),
-
-   productId:product.id,
-
-   quantity:1
-
-  });
-
- }
-
-
- renderSaleRows();
-
-
- /*
-  Scroll sale items into view.
- */
-
- setTimeout(function(){
-
-  const items=
-   document.getElementById(
-    "saleItems"
-   );
-
-  if(items)
-   items.scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-   });
-
- },150);
+event.target.value="";
 
 }
 
 
-/* =========================================================
-   SCANNER BUTTONS
-========================================================= */
+function useManualBarcode(){
 
-function scanForSale(){
+const input=
+document.getElementById(
+"manualBarcode"
+);
 
- openBarcodeScanner();
+const code=
+input.value.trim();
 
-}
+if(!code){
 
+alert(
+"Enter a barcode first."
+);
 
-function scanForProductForm(){
-
- openBarcodeScanner(
-  function(code){
-
-   const input=
-    document.getElementById(
-     "pbarcode"
-    );
-
-   if(input){
-
-    input.value=code;
-
-    input.dispatchEvent(
-     new Event(
-      "input",
-      {bubbles:true}
-     )
-    );
-
-   }
-
-  }
- );
+return;
 
 }
 
-
-async function restartBarcodeScanner(){
-
- await stopBarcodeScanner();
-
- const status=
-  document.getElementById(
-   "barcodeStatus"
-  );
-
- status.innerHTML=
-  "🔄 Restarting camera...";
-
- setTimeout(
-  startBarcodeScanner,
-  400
- );
+handleScannedBarcode(code);
 
 }
 
 
 async function stopBarcodeScanner(){
 
- if(!scanner)
-  return;
+if(!barcodeScanner){
 
- try{
+barcodeRunning=false;
 
-  if(scannerRunning)
-   await scanner.stop();
+return;
 
- }catch(e){
-  console.log(e);
- }
+}
 
- try{
+const old=
+barcodeScanner;
 
-  await scanner.clear();
+barcodeScanner=null;
 
- }catch(e){
-  console.log(e);
- }
+try{
 
- scanner=null;
- scannerRunning=false;
- scannerStarting=false;
+if(barcodeRunning){
+
+await old.stop();
+
+}
+
+}catch(e){
+
+console.log(e);
+
+}
+
+try{
+
+await old.clear();
+
+}catch(e){
+
+console.log(e);
+
+}
+
+barcodeRunning=false;
 
 }
 
 
 async function closeBarcodeScanner(){
 
- await stopBarcodeScanner();
+await stopBarcodeScanner();
 
- const modal=
-  document.getElementById(
-   "barcodeScannerModal"
-  );
+document
+.getElementById("barcodeModal")
+.classList.remove("show");
 
- modal.classList.remove("show");
-
- const reader=
-  document.getElementById("reader");
-
- reader.innerHTML="";
+document
+.getElementById("barcodeReader")
+.innerHTML="";
 
 }
 
 
-/* =========================================================
+/* =====================================================
+   SALES
+   ===================================================== */
+
+async function getSales(){
+
+const {
+data,
+error
+}=await supabaseClient
+.from("sales")
+.select(`
+*,
+sale_items(*)
+`)
+.eq(
+"business_id",
+currentProfile.business_id
+)
+.order(
+"created_at",
+{
+ascending:false
+}
+);
+
+if(error){
+
+console.error(error);
+
+return [];
+
+}
+
+return data||[];
+
+}
+
+
+async function salesPage(){
+
+const sales=
+await getSales();
+
+return`
+
+<h1>Sales</h1>
+
+<div class="toolbar">
+
+<button onclick="newSale()">
++ New Sale
+</button>
+
+</div>
+
+${salesTable(sales)}
+
+`;
+
+}
+
+
+function salesTable(sales){
+
+if(!sales.length){
+
+return`
+
+<div class="card empty">
+No sales recorded yet.
+</div>
+
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Date</th>
+
+<th>Invoice</th>
+
+<th>Customer</th>
+
+<th>Type</th>
+
+<th>Payment</th>
+
+<th>Total</th>
+
+</tr>
+
+${sales.map(s=>`
+
+<tr>
+
+<td>
+${esc(s.sale_date||"")}
+</td>
+
+<td>
+${esc(s.invoice_number||"")}
+</td>
+
+<td>
+${esc(s.customer_name||"Walk-in")}
+</td>
+
+<td>
+${esc(s.sale_type||"")}
+</td>
+
+<td>
+${esc(s.payment_method||"")}
+</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   NEW SALE
+   ===================================================== */
+
+let saleRows=[];
+
+
+async function newSale(){
+
+const products=
+await getProducts();
+
+if(!products.length){
+
+alert(
+"Please add products first."
+);
+
+go("products");
+
+return;
+
+}
+
+saleRows=[];
+
+openModal(`
+
+<h2>New Sale</h2>
+
+<div class="formgrid">
+
+<div>
+
+<label>
+Customer
+</label>
+
+<select id="saleCustomer">
+
+<option value="">
+Walk-in Customer
+</option>
+
+${(
+await getCustomers()
+).map(c=>`
+
+<option value="${c.id}">
+${esc(c.name)}
+</option>
+
+`).join("")}
+
+</select>
+
+</div>
+
+<div>
+
+<label>
+Sale Type
+</label>
+
+<select
+id="saleType"
+onchange="refreshSaleRows()">
+
+<option value="Retail">
+Retail - Single Piece
+</option>
+
+<option value="Wholesale">
+Wholesale - Pack/Carton
+</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>
+Payment Method
+</label>
+
+<select id="salePayment">
+
+<option>
+Cash
+</option>
+
+<option>
+Transfer
+</option>
+
+<option>
+POS
+</option>
+
+<option>
+Credit
+</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>
+Sale Date
+</label>
+
+<input
+id="saleDate"
+type="date"
+value="${today()}">
+
+</div>
+
+</div>
+
+<hr>
+
+<div
+id="saleItems">
+</div>
+
+<button
+class="secondary"
+onclick="addSaleRow()">
+
++ Add Item
+
+</button>
+
+<div class="card">
+
+<strong>
+Total:
+<span id="saleTotal">
+₦0.00
+</span>
+</strong>
+
+</div>
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+
+Cancel
+
+</button>
+
+<button
+class="green"
+onclick="completeSale()">
+
+Complete Sale
+
+</button>
+
+</div>
+
+`);
+
+addSaleRow();
+
+}
+
+
+function addSaleRow(){
+
+const box=
+document.getElementById(
+"saleItems"
+);
+
+const productsCache=
+window.salesProducts||[];
+
+const div=
+document.createElement("div");
+
+div.className="saleItem";
+
+div.innerHTML=`
+
+<div class="formgrid">
+
+<div>
+
+<label>
+Product
+</label>
+
+<select
+class="saleProduct"
+onchange="refreshSaleRows()">
+
+<option value="">
+Select Product
+</option>
+
+${productsCache.map(p=>`
+
+<option value="${p.id}">
+
+${esc(p.name)}
+-
+Stock ${p.stock}
+
+</option>
+
+`).join("")}
+
+</select>
+
+</div>
+
+<div>
+
+<label>
+Quantity
+</label>
+
+<input
+class="saleQty"
+type="number"
+min="1"
+value="1"
+oninput="refreshSaleRows()">
+
+</div>
+
+</div>
+
+<div class="saleItemPrice">
+Price:
+<span>₦0.00</span>
+</div>
+
+`;
+
+box.appendChild(div);
+
+}
+
+
+/*
+ Load products before adding first row.
+*/
+
+const oldNewSale=
+newSale;
+
+
+/* =====================================================
    CUSTOMERS
-========================================================= */
+   ===================================================== */
 
-function customersPage(){
+async function getCustomers(){
 
- return`
+const {
+data,
+error
+}=await supabaseClient
+.from("customers")
+.select("*")
+.eq(
+"business_id",
+currentProfile.business_id
+)
+.order("name");
 
- <h1>Customers</h1>
+if(error){
 
- <div class="toolbar">
+console.error(error);
 
- <button onclick="newCustomer()">
- + Add Customer
- </button>
+return [];
 
- </div>
+}
 
- ${
- customers.length
- ?`
-
- <div class="table">
-
- <table>
-
- <tr>
- <th>Name</th>
- <th>Phone</th>
- <th>Email</th>
- <th>Balance</th>
- <th>Action</th>
- </tr>
-
- ${customers.map(c=>`
-
- <tr>
-
- <td>${esc(c.name)}</td>
-
- <td>${esc(c.phone||"-")}</td>
-
- <td>${esc(c.email||"-")}</td>
-
- <td>${money(c.balance||0)}</td>
-
- <td>
-
- <button class="secondary"
- onclick="editCustomer('${c.id}')">
- Edit
- </button>
-
- </td>
-
- </tr>
-
- `).join("")}
-
- </table>
-
- </div>
-
- `
- :`
- <div class="card empty">
- No customers yet.
- </div>
- `
- }
-
- `;
+return data||[];
 
 }
 
 
-function newCustomer(customer=null){
+async function customersPage(){
 
- openModal(`
+const customers=
+await getCustomers();
 
- <h2>
- ${customer?"Edit":"Add"} Customer
- </h2>
+return`
 
- <label>Name</label>
+<h1>Customers</h1>
 
- <input id="cname"
- value="${esc(customer?.name||"")}">
+<div class="toolbar">
 
- <label>Phone</label>
+<button onclick="newCustomer()">
++ Add Customer
+</button>
 
- <input id="cphone"
- value="${esc(customer?.phone||"")}">
+</div>
 
- <label>Email</label>
+${customers.length?`
 
- <input id="cemail"
- value="${esc(customer?.email||"")}">
+<div class="table">
 
- <label>Address</label>
+<table>
 
- <textarea id="caddress">${esc(customer?.address||"")}</textarea>
+<tr>
 
- <label>Customer Type</label>
+<th>Name</th>
 
- <select id="ctype">
+<th>Phone</th>
 
- <option
- ${customer?.customer_type==="Retail"?"selected":""}>
- Retail
- </option>
+<th>Email</th>
 
- <option
- ${customer?.customer_type==="Wholesale"?"selected":""}>
- Wholesale
- </option>
+<th>Type</th>
 
- </select>
+<th>Balance</th>
 
- <div class="actions">
+<th>Action</th>
 
- <button class="secondary"
- onclick="closeModal()">
- Cancel
- </button>
+</tr>
 
- <button onclick="saveCustomer('${customer?.id||""}')">
- Save
- </button>
+${customers.map(c=>`
 
- ${
-  customer
-  ?`
-  <button class="red"
-  onclick="deleteCustomer('${customer.id}')">
-  Delete
-  </button>
-  `
-  :""
- }
+<tr>
 
- </div>
+<td>${esc(c.name)}</td>
 
- `);
+<td>${esc(c.phone||"-")}</td>
+
+<td>${esc(c.email||"-")}</td>
+
+<td>${esc(c.customer_type||"Retail")}</td>
+
+<td>${money(c.balance)}</td>
+
+<td>
+
+<button
+class="secondary"
+onclick="editCustomer('${c.id}')">
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`:`
+
+<div class="card empty">
+No customers yet.
+</div>
+
+`}
+
+`;
+
+}
+
+
+async function newCustomer(existing=null){
+
+openModal(`
+
+<h2>
+${existing?"Edit":"Add"} Customer
+</h2>
+
+<label>Name</label>
+
+<input
+id="cname"
+value="${esc(existing?.name||"")}">
+
+<label>Phone</label>
+
+<input
+id="cphone"
+value="${esc(existing?.phone||"")}">
+
+<label>Email</label>
+
+<input
+id="cemail"
+value="${esc(existing?.email||"")}">
+
+<label>Address</label>
+
+<textarea id="caddress">
+${esc(existing?.address||"")}
+</textarea>
+
+<label>Customer Type</label>
+
+<select id="ctype">
+
+<option
+${existing?.customer_type==="Retail"?"selected":""}>
+Retail
+</option>
+
+<option
+${existing?.customer_type==="Wholesale"?"selected":""}>
+Wholesale
+</option>
+
+</select>
+
+<label>Balance</label>
+
+<input
+id="cbalance"
+type="number"
+value="${existing?.balance||0}">
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+Cancel
+</button>
+
+<button
+onclick="saveCustomer('${existing?.id||""}')">
+
+Save
+
+</button>
+
+</div>
+
+`);
 
 }
 
 
 async function saveCustomer(existing){
 
- const data={
+const customer={
 
-  name:
-   document.getElementById("cname").value.trim(),
+business_id:
+currentProfile.business_id,
 
-  phone:
-   document.getElementById("cphone").value.trim()||null,
+name:
+document.getElementById("cname").value.trim(),
 
-  email:
-   document.getElementById("cemail").value.trim()||null,
+phone:
+document.getElementById("cphone").value.trim(),
 
-  address:
-   document.getElementById("caddress").value.trim()||null,
+email:
+document.getElementById("cemail").value.trim(),
 
-  customer_type:
-   document.getElementById("ctype").value,
+address:
+document.getElementById("caddress").value.trim(),
 
-  business_id:business.id
+customer_type:
+document.getElementById("ctype").value,
 
- };
+balance:
+Number(
+document.getElementById("cbalance").value||0
+)
 
+};
 
- if(!data.name){
+if(!customer.name){
 
-  alert("Enter customer name.");
+alert(
+"Enter customer name."
+);
 
-  return;
+return;
 
- }
+}
 
+let result;
 
- try{
+if(existing){
 
-  let result;
+result=
+await supabaseClient
+.from("customers")
+.update(customer)
+.eq("id",existing)
+.eq(
+"business_id",
+currentProfile.business_id
+);
 
-  if(existing){
+}else{
 
-   result=
-   await supabaseClient
-   .from("customers")
-   .update(data)
-   .eq("id",existing)
-   .eq("business_id",business.id);
+result=
+await supabaseClient
+.from("customers")
+.insert(customer);
 
-  }else{
+}
 
-   result=
-   await supabaseClient
-   .from("customers")
-   .insert(data);
+if(result.error){
 
-  }
+alert(result.error.message);
 
+return;
 
-  if(result.error)
-   throw result.error;
+}
 
+closeModal();
 
-  await loadAllData();
-
-  closeModal();
-
-  render();
-
- }catch(error){
-
-  alert(error.message);
-
- }
+render();
 
 }
 
 
-function editCustomer(id){
+async function editCustomer(id){
 
- const c=
-  customers.find(x=>x.id===id);
+const {
+data,
+error
+}=await supabaseClient
+.from("customers")
+.select("*")
+.eq("id",id)
+.single();
 
- if(c)newCustomer(c);
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+newCustomer(data);
 
 }
 
 
-async function deleteCustomer(id){
-
- if(!confirm("Delete customer?"))
-  return;
-
- const {error}=
- await supabaseClient
- .from("customers")
- .delete()
- .eq("id",id)
- .eq("business_id",business.id);
-
- if(error){
-
-  alert(error.message);
-
-  return;
-
- }
-
- await loadAllData();
-
- closeModal();
-
- render();
-
-}
-
-
-/* =========================================================
+/* =====================================================
    EXPENSES
-========================================================= */
+   ===================================================== */
 
-function expensesPage(){
+async function getExpenses(){
 
- const total=
-  expenses.reduce(
-   (sum,e)=>
-    sum+Number(e.amount||0),
-   0
-  );
+const {
+data,
+error
+}=await supabaseClient
+.from("expenses")
+.select("*")
+.eq(
+"business_id",
+currentProfile.business_id
+)
+.order(
+"date",
+{ascending:false}
+);
 
- return`
+if(error){
 
- <h1>Expenses</h1>
+console.error(error);
 
- <div class="grid">
+return [];
 
- <div class="card stat">
+}
 
- Total Expenses
-
- <strong>
- ${money(total)}
- </strong>
-
- </div>
-
- </div>
-
- <div class="toolbar">
-
- <button onclick="newExpense()">
- + Add Expense
- </button>
-
- </div>
-
- ${
-  expenses.length
-  ?`
-
-  <div class="table">
-
-  <table>
-
-  <tr>
-  <th>Date</th>
-  <th>Description</th>
-  <th>Category</th>
-  <th>Amount</th>
-  <th>Action</th>
-  </tr>
-
-  ${expenses.map(e=>`
-
-  <tr>
-
-  <td>${esc(e.date||"")}</td>
-
-  <td>${esc(e.description||"")}</td>
-
-  <td>${esc(e.category||"")}</td>
-
-  <td>${money(e.amount)}</td>
-
-  <td>
-
-  <button class="red"
-  onclick="deleteExpense('${e.id}')">
-  Delete
-  </button>
-
-  </td>
-
-  </tr>
-
-  `).join("")}
-
-  </table>
-
-  </div>
-
-  `
-  :`
-  <div class="card empty">
-  No expenses recorded.
-  </div>
-  `
- }
-
- `;
+return data||[];
 
 }
 
 
-function newExpense(){
+async function expensesPage(){
 
- openModal(`
+const expenses=
+await getExpenses();
 
- <h2>Add Expense</h2>
+const total=
+expenses.reduce(
+(a,b)=>a+Number(b.amount||0),
+0
+);
 
- <label>Date</label>
+return`
 
- <input id="edate"
- type="date"
- value="${today()}">
+<h1>Expenses</h1>
 
- <label>Description</label>
+<div class="grid">
 
- <input id="edesc">
+<div class="card stat">
 
- <label>Category</label>
+Total Expenses
 
- <select id="ecat">
+<strong>
+${money(total)}
+</strong>
 
- <option>Transport</option>
- <option>Rent</option>
- <option>Electricity</option>
- <option>Salary</option>
- <option>Shopping</option>
- <option>Maintenance</option>
- <option>Other</option>
+</div>
 
- </select>
+</div>
 
- <label>Amount</label>
+<div class="toolbar">
 
- <input id="eamount"
- type="number"
- min="0">
+<button onclick="newExpense()">
++ Add Expense
+</button>
 
- <div class="actions">
+</div>
 
- <button class="secondary"
- onclick="closeModal()">
- Cancel
- </button>
+${expenses.length?`
 
- <button onclick="saveExpense()">
- Save Expense
- </button>
+<div class="table">
 
- </div>
+<table>
 
- `);
+<tr>
+
+<th>Date</th>
+
+<th>Description</th>
+
+<th>Category</th>
+
+<th>Amount</th>
+
+</tr>
+
+${expenses.map(e=>`
+
+<tr>
+
+<td>${esc(e.date||"")}</td>
+
+<td>${esc(e.description||"")}</td>
+
+<td>${esc(e.category||"")}</td>
+
+<td>${money(e.amount)}</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`:`
+
+<div class="card empty">
+No expenses recorded.
+</div>
+
+`}
+
+`;
+
+}
+
+
+async function newExpense(){
+
+openModal(`
+
+<h2>Add Expense</h2>
+
+<label>Date</label>
+
+<input
+id="edate"
+type="date"
+value="${today()}">
+
+<label>Description</label>
+
+<input id="edesc">
+
+<label>Category</label>
+
+<select id="ecat">
+
+<option>Transport</option>
+<option>Rent</option>
+<option>Electricity</option>
+<option>Salary</option>
+<option>Shopping</option>
+<option>Maintenance</option>
+<option>Other</option>
+
+</select>
+
+<label>Amount</label>
+
+<input
+id="eamount"
+type="number">
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+Cancel
+</button>
+
+<button
+onclick="saveExpense()">
+Save Expense
+</button>
+
+</div>
+
+`);
 
 }
 
 
 async function saveExpense(){
 
- const data={
+const expense={
 
-  business_id:business.id,
+business_id:
+currentProfile.business_id,
 
-  date:
-   document.getElementById("edate").value,
+date:
+document.getElementById("edate").value,
 
-  description:
-   document.getElementById("edesc").value.trim(),
+description:
+document.getElementById("edesc").value.trim(),
 
-  category:
-   document.getElementById("ecat").value,
+category:
+document.getElementById("ecat").value,
 
-  amount:
-   Number(
-    document.getElementById("eamount").value||0
-   )
+amount:
+Number(
+document.getElementById("eamount").value||0
+)
 
- };
+};
 
+if(!expense.description||!expense.amount){
 
- if(!data.description||!data.amount){
+alert(
+"Enter description and amount."
+);
 
-  alert(
-   "Enter description and amount."
-  );
+return;
 
-  return;
+}
 
- }
+const {
+error
+}=await supabaseClient
+.from("expenses")
+.insert(expense);
 
+if(error){
 
- const {error}=
- await supabaseClient
- .from("expenses")
- .insert(data);
+alert(error.message);
 
+return;
 
- if(error){
+}
 
-  alert(
-   "Could not save expense:\n\n"+
-   error.message
-  );
+closeModal();
 
-  return;
-
- }
-
-
- await loadAllData();
-
- closeModal();
-
- render();
+render();
 
 }
 
 
-async function deleteExpense(id){
-
- if(!confirm("Delete this expense?"))
-  return;
-
- const {error}=
- await supabaseClient
- .from("expenses")
- .delete()
- .eq("id",id)
- .eq("business_id",business.id);
-
- if(error){
-
-  alert(error.message);
-
-  return;
-
- }
-
- await loadAllData();
-
- render();
-
-}
-
-
-/* =========================================================
+/* =====================================================
    REPORTS
-========================================================= */
+   ===================================================== */
 
-function reportsPage(){
+async function reportsPage(){
 
- const revenue=
-  sales.reduce(
-   (sum,s)=>sum+Number(s.total||0),
-   0
-  );
+const sales=
+await getSales();
 
- const expensesTotal=
-  expenses.reduce(
-   (sum,e)=>sum+Number(e.amount||0),
-   0
-  );
+const expenses=
+await getExpenses();
 
+const revenue=
+sales.reduce(
+(a,b)=>a+Number(b.total||0),
+0
+);
 
- return`
+const cost=
+sales.reduce(
+(a,b)=>
+a+
+(b.sale_items||[]).reduce(
+(x,i)=>
+x+
+Number(i.quantity||0)*
+Number(i.cost_price||0),
+0
+),
+0
+);
 
- <h1>Reports</h1>
+const expenseTotal=
+expenses.reduce(
+(a,b)=>a+Number(b.amount||0),
+0
+);
 
- <div class="grid">
+const gross=
+revenue-cost;
 
- <div class="card stat">
+const net=
+gross-expenseTotal;
 
- Sales Revenue
+return`
 
- <strong>
- ${money(revenue)}
- </strong>
+<h1>Reports</h1>
 
- </div>
+<div class="grid">
 
- <div class="card stat">
+<div class="card stat">
+Sales Revenue
+<strong>
+${money(revenue)}
+</strong>
+</div>
 
- Expenses
+<div class="card stat">
+Cost of Goods
+<strong>
+${money(cost)}
+</strong>
+</div>
 
- <strong>
- ${money(expensesTotal)}
- </strong>
+<div class="card stat">
+Gross Profit
+<strong>
+${money(gross)}
+</strong>
+</div>
 
- </div>
+<div class="card stat">
+Net Profit
+<strong
+class="${net>=0?"good":"bad"}">
+${money(net)}
+</strong>
+</div>
 
- <div class="card stat">
+</div>
 
- Estimated Net
+<div class="toolbar noPrint">
 
- <strong class="${
-  revenue-expensesTotal>=0
-  ?"good":"bad"
- }">
+<button onclick="window.print()">
+Print Report
+</button>
 
- ${money(revenue-expensesTotal)}
+</div>
 
- </strong>
+<div class="card">
 
- </div>
+<p>
+Transactions:
+<strong>
+${sales.length}
+</strong>
+</p>
 
- <div class="card stat">
+<p>
+Expenses:
+<strong>
+${money(expenseTotal)}
+</strong>
+</p>
 
- Transactions
+<h2>Payment Breakdown</h2>
 
- <strong>
- ${sales.length}
- </strong>
+${["Cash","Transfer","POS","Credit"].map(method=>{
 
- </div>
+const total=
+sales
+.filter(
+s=>s.payment_method===method
+)
+.reduce(
+(a,b)=>a+Number(b.total||0),
+0
+);
 
- </div>
+return`
 
+<p>
+${method}:
+<strong>
+${money(total)}
+</strong>
+</p>
 
- <div class="toolbar noPrint">
+`;
 
- <button onclick="window.print()">
- Print Report
- </button>
+}).join("")}
 
- </div>
+</div>
 
-
- <div class="card">
-
- <h2>Expiration Report</h2>
-
- ${expirationReportHTML()}
-
- </div>
-
-
- <div class="card">
-
- <h2>Payment Breakdown</h2>
-
- ${paymentReportHTML()}
-
- </div>
-
- `;
+`;
 
 }
 
 
-function expirationReportHTML(){
-
- const list=
-  products.filter(
-   p=>p.expiry_date
-  );
-
-
- if(!list.length){
-
-  return`
-  <div class="empty">
-  No products have expiry dates.
-  </div>
-  `;
-
- }
-
-
- return`
-
- <div class="table">
-
- <table>
-
- <tr>
-
- <th>Product</th>
- <th>Batch</th>
- <th>Stock</th>
- <th>Expiry Date</th>
- <th>Status</th>
-
- </tr>
-
- ${list.map(p=>{
-
-  const s=
-   expiryStatus(p);
-
-  return`
-
-  <tr>
-
-  <td>${esc(p.name)}</td>
-
-  <td>${esc(p.batch_number||"-")}</td>
-
-  <td>
-  ${p.stock}
-  ${esc(p.stock_unit||"piece")}
-  </td>
-
-  <td>${esc(p.expiry_date)}</td>
-
-  <td>
-
-  ${
-   s.type==="expired"
-   ?`<span class="badge bad">Expired</span>`
-   :
-   s.type==="soon"
-   ?`<span class="badge warning">${s.text}</span>`
-   :
-   `<span class="badge good">${s.text}</span>`
-  }
-
-  </td>
-
-  </tr>
-
-  `;
-
- }).join("")}
-
- </table>
-
- </div>
-
- `;
-
-}
-
-
-function paymentReportHTML(){
-
- const methods=[
-  "Cash",
-  "Transfer",
-  "POS",
-  "Credit"
- ];
-
- return methods.map(method=>{
-
-  const total=
-   sales
-   .filter(
-    s=>s.payment_method===method
-   )
-   .reduce(
-    (sum,s)=>sum+Number(s.total||0),
-    0
-   );
-
-  return`
-
-  <p>
-
-  ${method}:
-
-  <strong>
-  ${money(total)}
-  </strong>
-
-  </p>
-
-  `;
-
- }).join("");
-
-}
-
-
-/* =========================================================
+/* =====================================================
    BACKUP
-========================================================= */
+   ===================================================== */
 
 function backupPage(){
 
- return`
+return`
 
- <h1>Backup & Data Protection</h1>
+<h1>Backup & Data Protection</h1>
 
- <div class="card">
+<div class="card">
 
- <h2>📱 Phone Backup</h2>
+<h2>📱 Backup to Phone</h2>
 
- <p>
- SalesPro can create a backup file that you can save
- directly to your iPhone or Android phone.
- </p>
+<p>
 
- <div class="toolbar">
+SalesPro can save a complete backup file
+to your iPhone's Files app.
 
- <button onclick="downloadBackup()">
- 💾 Save Backup to Phone
- </button>
+</p>
 
- <button class="secondary"
- onclick="document.getElementById('backupFile').click()">
- ♻️ Restore Backup
- </button>
+<div class="toolbar">
 
- <input
- id="backupFile"
- type="file"
- accept=".json,application/json"
- style="display:none"
- onchange="restoreBackup(event)">
+<button
+onclick="downloadBackup()">
 
- </div>
+📥 Export Backup
 
- <hr>
+</button>
 
- <p>
- Products:
- <strong>${products.length}</strong>
- </p>
+<button
+class="secondary"
+onclick="document.getElementById('restoreFile').click()">
 
- <p>
- Sales:
- <strong>${sales.length}</strong>
- </p>
+📤 Restore Backup
 
- <p>
- Customers:
- <strong>${customers.length}</strong>
- </p>
+</button>
 
- <p>
- Expenses:
- <strong>${expenses.length}</strong>
- </p>
+<input
+id="restoreFile"
+type="file"
+accept=".json"
+style="display:none"
+onchange="restoreBackup(event)">
 
- </div>
+</div>
 
+<p>
+<strong>
+Always export a backup before installing a new SalesPro version.
+</strong>
+</p>
 
- <div class="card">
+</div>
 
- <h2>Important</h2>
-
- <p>
- Your main records are stored in Supabase.
- The phone backup is an additional safety copy.
- </p>
-
- <p>
- Before a major SalesPro upgrade, save a backup first.
- </p>
-
- </div>
-
- `;
+`;
 
 }
 
 
 async function downloadBackup(){
 
- const backup={
+const [
+products,
+sales,
+customers,
+expenses
+]=await Promise.all([
 
-  exported_at:new Date().toISOString(),
+getProducts(),
 
-  business:business,
+getSales(),
 
-  products:products,
+getCustomers(),
 
-  customers:customers,
+getExpenses()
 
-  sales:sales,
-
-  expenses:expenses
-
- };
-
-
- const blob=
- new Blob(
-  [JSON.stringify(backup,null,2)],
-  {
-   type:"application/json"
-  }
- );
+]);
 
 
- const url=
- URL.createObjectURL(blob);
+const backup={
+
+version:"SalesPro Cloud Backup V1",
+
+created_at:
+new Date().toISOString(),
+
+business:
+currentBusiness,
+
+products,
+
+sales,
+
+customers,
+
+expenses
+
+};
 
 
- const a=
- document.createElement("a");
-
- a.href=url;
-
- a.download=
- "SalesPro_Backup_"+
- today()+
- ".json";
-
- document.body.appendChild(a);
-
- a.click();
-
- a.remove();
-
- setTimeout(
-  ()=>URL.revokeObjectURL(url),
-  1000
- );
+const blob=
+new Blob(
+[
+JSON.stringify(
+backup,
+null,
+2
+)
+],
+{
+type:"application/json"
+}
+);
 
 
- alert(
-  "Backup file created. Use your phone's Save/Download option to store it."
- );
+const url=
+URL.createObjectURL(blob);
+
+
+const a=
+document.createElement("a");
+
+a.href=url;
+
+a.download=
+"SalesPro_Backup_"+
+today()+
+".json";
+
+document.body.appendChild(a);
+
+a.click();
+
+a.remove();
+
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
+
+
+alert(
+"Backup created. On iPhone, choose Save to Files and keep it somewhere safe."
+);
 
 }
 
 
-function restoreBackup(event){
+async function restoreBackup(event){
 
- const file=
- event.target.files[0];
+const file=
+event.target.files?.[0];
 
- if(!file)return;
+if(!file)return;
 
+try{
 
- const reader=
- new FileReader();
+const text=
+await file.text();
 
+const backup=
+JSON.parse(text);
 
- reader.onload=
- async function(){
+if(
+!backup.products||
+!backup.sales||
+!backup.customers
+){
 
-  try{
+throw new Error(
+"Invalid SalesPro backup."
+);
 
-   const backup=
-    JSON.parse(reader.result);
+}
 
+alert(
+"Backup file verified. Cloud restore should be handled carefully to avoid duplicate records."
+);
 
-   if(
-    !backup.products||
-    !backup.sales||
-    !backup.customers
-   ){
+}catch(error){
 
-    throw new Error(
-     "Invalid SalesPro backup."
-    );
+alert(
+"Invalid SalesPro backup file."
+);
 
-   }
+}
 
-
-   alert(
-    "This backup viewer is for safety/export purposes. "+
-    "Your Supabase database remains the master record. "+
-    "Contact the system administrator before importing an old backup."
-   );
-
-
-  }catch(error){
-
-   alert(
-    "Invalid backup file."
-   );
-
-  }
-
- };
-
-
- reader.readAsText(file);
+event.target.value="";
 
 }
 
 
-/* =========================================================
+/* =====================================================
    SETTINGS
-========================================================= */
+   ===================================================== */
 
 function settingsPage(){
 
- return`
+return`
 
- <h1>Business Settings</h1>
+<h1>Business Settings</h1>
 
- <div class="card">
+<div class="card">
 
- <h2>${esc(business.name)}</h2>
+<h2>Business Information</h2>
 
- <p>
- Email:
- ${esc(business.email||"Not set")}
- </p>
+<label>
+Business Name
+</label>
 
- <p>
- Phone:
- ${esc(business.phone||"Not set")}
- </p>
+<input
+id="businessName"
+value="${esc(currentBusiness?.name||"")}">
 
- <p>
- Address:
- ${esc(business.address||"Not set")}
- </p>
+<label>
+Phone
+</label>
 
- </div>
+<input
+id="businessPhone"
+value="${esc(currentBusiness?.phone||"")}">
 
+<label>
+Email
+</label>
 
- <div class="card">
+<input
+id="businessEmail"
+value="${esc(currentBusiness?.email||"")}">
 
- <h2>Account</h2>
+<label>
+Address
+</label>
 
- <p>
- Logged in as:
- <strong>
- ${esc(profile.full_name||currentUser.email)}
- </strong>
- </p>
+<textarea id="businessAddress">
+${esc(currentBusiness?.address||"")}
+</textarea>
 
- <p>
- Role:
- <strong>
- ${esc(profile.role||"user")}
- </strong>
- </p>
+<label>
+Logo URL
+</label>
 
- <button
- class="red"
- onclick="logout()">
- 🔐 Logout
- </button>
+<input
+id="businessLogoUrl"
+value="${esc(currentBusiness?.logo_url||"")}"
+placeholder="https://...">
 
- </div>
+<div class="actions">
 
- `;
+<button
+onclick="saveBusinessSettings()">
+
+Save Settings
+
+</button>
+
+<button
+class="red"
+onclick="logout()">
+
+Logout
+
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Account</h2>
+
+<p>
+Name:
+<strong>
+${esc(currentProfile?.full_name||"")}
+</strong>
+</p>
+
+<p>
+Role:
+<strong>
+${esc(currentProfile?.role||"")}
+</strong>
+</p>
+
+<p>
+Email:
+<strong>
+${esc(currentUser?.email||"")}
+</strong>
+</p>
+
+</div>
+
+`;
 
 }
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+async function saveBusinessSettings(){
 
-async function logout(){
+const updates={
 
- await supabaseClient.auth.signOut();
+name:
+document.getElementById("businessName").value.trim(),
 
- location.reload();
+phone:
+document.getElementById("businessPhone").value.trim(),
+
+email:
+document.getElementById("businessEmail").value.trim(),
+
+address:
+document.getElementById("businessAddress").value.trim(),
+
+logo_url:
+document.getElementById("businessLogoUrl").value.trim()
+
+};
+
+const {
+error
+}=await supabaseClient
+.from("businesses")
+.update(updates)
+.eq(
+"id",
+currentProfile.business_id
+);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+currentBusiness={
+...currentBusiness,
+...updates
+};
+
+alert(
+"Business settings saved."
+);
+
+showApp();
 
 }
 
 
-/* =========================================================
+/* =====================================================
    MODAL
-========================================================= */
+   ===================================================== */
 
 function openModal(html){
 
- document.getElementById("sheet")
- .innerHTML=html;
+document.getElementById(
+"sheet"
+).innerHTML=html;
 
- document.getElementById("modal")
- .classList.add("show");
+document.getElementById(
+"modal"
+).classList.add("show");
 
 }
 
 
 function closeModal(){
 
- document.getElementById("modal")
- .classList.remove("show");
+document.getElementById(
+"modal"
+).classList.remove("show");
 
 }
 
 
-document.getElementById("modal")
-.addEventListener(
- "click",
- function(e){
+/* =====================================================
+   RECENT SALES
+   ===================================================== */
 
-  if(e.target===this)
-   closeModal();
+function recentSales(sales){
 
- }
+if(!sales.length){
+
+return`
+
+<div class="empty">
+No sales recorded yet.
+</div>
+
+`;
+
+}
+
+return`
+
+<div class="table">
+
+<table>
+
+<tr>
+
+<th>Date</th>
+
+<th>Invoice</th>
+
+<th>Customer</th>
+
+<th>Total</th>
+
+</tr>
+
+${sales.slice(0,8).map(s=>`
+
+<tr>
+
+<td>
+${esc(s.sale_date||"")}
+</td>
+
+<td>
+${esc(s.invoice_number||"")}
+</td>
+
+<td>
+${esc(s.customer_name||"Walk-in")}
+</td>
+
+<td class="money">
+${money(s.total)}
+</td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   INITIALISE
+   ===================================================== */
+
+checkAuth();
+
+
+/* =====================================================
+   AUTH STATE LISTENER
+   ===================================================== */
+
+supabaseClient.auth.onAuthStateChange(
+async(event,session)=>{
+
+if(event==="SIGNED_OUT"){
+
+showLogin();
+
+}
+
+if(
+event==="SIGNED_IN" &&
+session
+){
+
+currentUser=session.user;
+
+await loadUserProfile();
+
+}
+
+});
+
+
+/* =====================================================
+   CLEAN CAMERA WHEN PAGE IS HIDDEN
+   ===================================================== */
+
+document.addEventListener(
+"visibilitychange",
+function(){
+
+if(
+document.hidden &&
+barcodeRunning
+){
+
+stopBarcodeScanner();
+
+}
+
+});
+
+
+window.addEventListener(
+"pagehide",
+function(){
+
+stopBarcodeScanner();
+
+});
+
+
+/* =====================================================
+   SALE PRODUCT LOADING
+   ===================================================== */
+
+const originalNewSale=
+window.newSale;
+
+
+/*
+ Override newSale so products are loaded
+ before the sale modal is created.
+*/
+
+window.newSale=async function(){
+
+const products=
+await getProducts();
+
+if(!products.length){
+
+alert(
+"Please add products first."
+);
+
+go("products");
+
+return;
+
+}
+
+window.salesProducts=products;
+
+saleRows=[];
+
+openModal(`
+
+<h2>New Sale</h2>
+
+<div class="formgrid">
+
+<div>
+
+<label>Customer</label>
+
+<select id="saleCustomer">
+
+<option value="">
+Walk-in Customer
+</option>
+
+${(
+await getCustomers()
+).map(c=>`
+
+<option value="${c.id}">
+${esc(c.name)}
+</option>
+
+`).join("")}
+
+</select>
+
+</div>
+
+<div>
+
+<label>Sale Type</label>
+
+<select
+id="saleType"
+onchange="refreshSaleRows()">
+
+<option value="Retail">
+Retail - Single Piece
+</option>
+
+<option value="Wholesale">
+Wholesale - Pack/Carton
+</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Payment</label>
+
+<select id="salePayment">
+
+<option>Cash</option>
+<option>Transfer</option>
+<option>POS</option>
+<option>Credit</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Date</label>
+
+<input
+id="saleDate"
+type="date"
+value="${today()}">
+
+</div>
+
+</div>
+
+<hr>
+
+<div id="saleItems"></div>
+
+<button
+class="secondary"
+onclick="addSaleRow()">
+
++ Add Item
+
+</button>
+
+<div class="card">
+
+<strong>
+Total:
+<span id="saleTotal">
+₦0.00
+</span>
+</strong>
+
+</div>
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeModal()">
+Cancel
+</button>
+
+<button
+class="green"
+onclick="completeSale()">
+
+Complete Sale
+
+</button>
+
+</div>
+
+`);
+
+addSaleRow();
+
+};
+
+
+/* =====================================================
+   SALE ROW REFRESH
+   ===================================================== */
+
+window.refreshSaleRows=function(){
+
+let total=0;
+
+document
+.querySelectorAll(".saleItem")
+.forEach(row=>{
+
+const productId=
+row.querySelector(
+".saleProduct"
+).value;
+
+const qty=
+Number(
+row.querySelector(
+".saleQty"
+).value||0
+);
+
+const product=
+window.salesProducts?.find(
+p=>p.id===productId
+);
+
+const type=
+document.getElementById(
+"saleType"
+)?.value||
+"Retail";
+
+const price=
+product?
+(
+type==="Wholesale"
+?
+Number(product.wholesale_price||0)
+:
+Number(product.retail_price||0)
+):
+0;
+
+row.querySelector(
+".saleItemPrice span"
+).textContent=
+money(price);
+
+total+=price*qty;
+
+});
+
+const totalBox=
+document.getElementById(
+"saleTotal"
+);
+
+if(totalBox){
+
+totalBox.textContent=
+money(total);
+
+}
+
+};
+
+
+/* =====================================================
+   COMPLETE SALE
+   ===================================================== */
+
+window.completeSale=async function(){
+
+const rows=
+document.querySelectorAll(
+".saleItem"
+);
+
+const type=
+document.getElementById(
+"saleType"
+).value;
+
+const items=[];
+
+let total=0;
+
+
+for(const row of rows){
+
+const productId=
+row.querySelector(
+".saleProduct"
+).value;
+
+const quantity=
+Number(
+row.querySelector(
+".saleQty"
+).value||0
+);
+
+if(!productId||quantity<=0)
+continue;
+
+const product=
+window.salesProducts.find(
+p=>p.id===productId
+);
+
+if(!product)
+continue;
+
+if(
+quantity>
+Number(product.stock||0)
+){
+
+alert(
+"Not enough stock for "+
+product.name
+);
+
+return;
+
+}
+
+const unitPrice=
+type==="Wholesale"
+?
+Number(product.wholesale_price||0)
+:
+Number(product.retail_price||0);
+
+const lineTotal=
+unitPrice*quantity;
+
+items.push({
+
+product_id:
+product.id,
+
+product_name:
+product.name,
+
+barcode:
+product.barcode,
+
+quantity,
+
+unit_price:
+unitPrice,
+
+cost_price:
+Number(product.cost_price||0),
+
+total:
+lineTotal
+
+});
+
+total+=lineTotal;
+
+}
+
+
+if(!items.length){
+
+alert(
+"Add at least one product."
+);
+
+return;
+
+}
+
+
+const invoice=
+"INV-"+Date.now();
+
+const customerId=
+document.getElementById(
+"saleCustomer"
+).value||null;
+
+const customer=
+window.salesCustomers?.find(
+c=>c.id===customerId
 );
 
 
-/* =========================================================
-   AUTH SESSION
-========================================================= */
+const sale={
 
-async function initialise(){
+business_id:
+currentProfile.business_id,
 
- const {
-  data:{
-   session
-  }
- }=
- await supabaseClient.auth.getSession();
+invoice_number:
+invoice,
+
+customer_id:
+customerId,
+
+user_id:
+currentUser.id,
+
+sale_type:
+type,
+
+subtotal:
+total,
+
+discount:0,
+
+total:
+total,
+
+amount_paid:
+total,
+
+balance:0,
+
+payment_method:
+document.getElementById(
+"salePayment"
+).value,
+
+status:"completed",
+
+sale_date:
+document.getElementById(
+"saleDate"
+).value,
+
+customer_name:
+customer?.name||
+"Walk-in Customer",
+
+created_by:
+currentUser.id
+
+};
 
 
- if(session){
+try{
 
-  currentUser=session.user;
+const {
+data,
+error
+}=await supabaseClient
+.from("sales")
+.insert(sale)
+.select()
+.single();
 
-  await loadUserProfile();
+if(error){
 
- }
+throw error;
 
 }
 
 
-supabaseClient.auth.onAuthStateChange(
- async function(event,session){
+const saleItems=
+items.map(item=>({
 
-  if(
-   event==="SIGNED_IN" &&
-   session
-  ){
+...item,
 
-   currentUser=session.user;
+sale_id:
+data.id
 
-   await loadUserProfile();
-
-  }
-
- });
+}));
 
 
-/* =========================================================
-   START
-========================================================= */
+const {
+error:itemError
+}=await supabaseClient
+.from("sale_items")
+.insert(saleItems);
 
-initialise();
+if(itemError){
+
+throw itemError;
+
+}
+
+
+/*
+ Update stock.
+*/
+
+for(const item of items){
+
+const product=
+window.salesProducts.find(
+p=>p.id===item.product_id
+);
+
+await supabaseClient
+.from("products")
+.update({
+
+stock:
+Number(product.stock)-
+Number(item.quantity),
+
+updated_at:
+new Date().toISOString()
+
+})
+.eq(
+"id",
+item.product_id
+)
+.eq(
+"business_id",
+currentProfile.business_id
+);
+
+}
+
+
+closeModal();
+
+await render();
+
+alert(
+"Sale completed successfully.\n"+
+"Invoice: "+
+invoice
+);
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Sale could not be completed:\n"+
+error.message
+);
+
+}
+
+};
+
+
+/* =====================================================
+   CUSTOMER CACHE
+   ===================================================== */
+
+const originalGetCustomers=
+getCustomers;
+
+window.salesCustomers=[];
+
+async function refreshCustomerCache(){
+
+window.salesCustomers=
+await getCustomers();
+
+}
 
 </script>
 
