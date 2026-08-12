@@ -45,7 +45,209 @@ window.supabase.createClient(
     SUPABASE_KEY
 );
 </script>
+<!-- ================= SALESPRO LOGIN ================= -->
 
+<style>
+#authScreen{
+    position:fixed;
+    inset:0;
+    z-index:999999;
+    background:#f4f6f9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    overflow:auto;
+}
+
+.authBox{
+    width:100%;
+    max-width:430px;
+    background:white;
+    border-radius:22px;
+    padding:25px;
+    box-shadow:0 10px 40px rgba(0,0,0,.12);
+}
+
+.authBox h1{
+    text-align:center;
+    color:#0b2a52;
+    margin:5px 0;
+}
+
+.authBox p{
+    text-align:center;
+    color:#667085;
+}
+
+.authBox label{
+    display:block;
+    margin-top:14px;
+    font-size:13px;
+    font-weight:700;
+    color:#667085;
+}
+
+.authBox input{
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    border:1px solid #d0d5dd;
+    border-radius:10px;
+}
+
+.authBox button{
+    width:100%;
+    margin-top:15px;
+}
+
+.authLogo{
+    width:75px;
+    height:75px;
+    display:block;
+    margin:0 auto 10px;
+}
+
+.authSwitch{
+    text-align:center;
+    margin-top:18px;
+    font-size:14px;
+}
+
+.authSwitch button{
+    width:auto;
+    background:none;
+    color:#155fa0;
+    padding:0;
+    margin:0;
+}
+
+.authMessage{
+    margin-top:12px;
+    padding:10px;
+    border-radius:10px;
+    display:none;
+    font-size:14px;
+}
+
+.authMessage.error{
+    display:block;
+    background:#fee4e2;
+    color:#b42318;
+}
+
+.authMessage.success{
+    display:block;
+    background:#dcfae6;
+    color:#087443;
+}
+</style>
+
+<div id="authScreen">
+
+<div class="authBox">
+
+<svg class="authLogo" viewBox="0 0 100 100">
+<rect width="100" height="100" fill="white"/>
+<path d="M18 75V52l10-7v30H18z" fill="#123c70"/>
+<path d="M34 75V32l10-7v50H34z" fill="#123c70"/>
+<path d="M50 75V18l10-8v65H50z" fill="#123c70"/>
+<path d="M55 49l20-20h15L68 50l22 25H75L55 56z" fill="#123c70"/>
+<path d="M79 29c11 1 18 9 18 20 0 10-7 19-17 21 7-3 11-9 11-17 0-10-7-18-18-19z" fill="#7b8188"/>
+</svg>
+
+<h1>SalesPro</h1>
+
+<p>KC Integrated Global Services</p>
+
+<div id="loginForm">
+
+<label>Email Address</label>
+
+<input
+id="loginEmail"
+type="email"
+placeholder="Enter your email"
+autocomplete="email"
+>
+
+<label>Password</label>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="Enter your password"
+autocomplete="current-password"
+>
+
+<button onclick="salesProLogin()">
+🔐 Login
+</button>
+
+<div class="authSwitch">
+New to SalesPro?
+
+<button onclick="showRegister()">
+Create Owner Account
+</button>
+
+</div>
+
+</div>
+
+
+<div id="registerForm" style="display:none">
+
+<label>Full Name</label>
+
+<input
+id="registerName"
+type="text"
+placeholder="Your full name"
+autocomplete="name"
+>
+
+<label>Email Address</label>
+
+<input
+id="registerEmail"
+type="email"
+placeholder="Your email"
+autocomplete="email"
+>
+
+<label>Password</label>
+
+<input
+id="registerPassword"
+type="password"
+placeholder="At least 6 characters"
+autocomplete="new-password"
+>
+
+<button onclick="registerOwner()">
+👑 Create Owner Account
+</button>
+
+<div class="authSwitch">
+
+Already registered?
+
+<button onclick="showLogin()">
+Login
+</button>
+
+</div>
+
+</div>
+
+<div id="authMessage" class="authMessage"></div>
+
+</div>
+
+</div>
+
+<!-- ================= END SALESPRO LOGIN ================= -->
 <!-- ================= BARCODE SCANNER ================= -->
 margin:0;
 background:var(--bg);
