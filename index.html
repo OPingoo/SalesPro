@@ -1,3009 +1,4260 @@
+<?php
+/*
+==========================================================
+ KCIGS-SALESPRO
+ Sales • Inventory • POS • Customers • Reports
+ Version 1.0
+==========================================================
+
+ REQUIREMENT:
+ PHP 7.4+ recommended
+
+ The application automatically creates:
+    kcis_salespro.sqlite
+
+ Default login:
+    Owner
+    Username: owner
+    Password: owner123
+
+ Change the password immediately after installation.
+==========================================================
+*/
+
+declare(strict_types=1);
+
+session_start();
+
+/* ========================================================
+   DATABASE
+======================================================== */
+
+$dbFile = __DIR__ . '/kcis_salespro.sqlite';
+
+try {
+    $db = new PDO('sqlite:' . $dbFile);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    die(
+        '<h2>KCIGS-SALESPRO Database Error</h2>
+         <p>Please make sure PHP SQLite/PDO SQLite is enabled on your hosting.</p>
+         <pre>' .
+         htmlspecialchars($e->getMessage()) .
+         '</pre>'
+    );
+}
+
+/* ========================================================
+   DATABASE TABLES
+======================================================== */
+
+$db->exec("
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'cashier',
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    sku TEXT DEFAULT '',
+    barcode TEXT UNIQUE,
+    category TEXT DEFAULT 'General',
+    pack_size INTEGER NOT NULL DEFAULT 1,
+    piece_price REAL NOT NULL DEFAULT 0,
+    pack_price REAL NOT NULL DEFAULT 0,
+    stock_pieces INTEGER NOT NULL DEFAULT 0,
+    low_stock INTEGER NOT NULL DEFAULT 5,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT DEFAULT '',
+    address TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice TEXT NOT NULL UNIQUE,
+    customer_id INTEGER DEFAULT NULL,
+    customer_name TEXT DEFAULT 'Walk-in Customer',
+    subtotal REAL NOT NULL DEFAULT 0,
+    discount REAL NOT NULL DEFAULT 0,
+    total REAL NOT NULL DEFAULT 0,
+    payment_method TEXT NOT NULL DEFAULT 'Cash',
+    cashier TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sale_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    product_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price REAL NOT NULL,
+    item_type TEXT NOT NULL DEFAULT 'piece',
+    total REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT DEFAULT 'SYSTEM',
+    action TEXT NOT NULL,
+    details TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+);
+");
+
+/* ========================================================
+   DEFAULT OWNER
+======================================================== */
+
+$count = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
+
+if ($count === 0) {
+    $stmt = $db->prepare("
+        INSERT INTO users
+        (name, username, password, role, active, created_at)
+        VALUES (?, ?, ?, ?, 1, ?)
+    ");
+
+    $stmt->execute([
+        'Owner',
+        'owner',
+        password_hash('owner123', PASSWORD_DEFAULT),
+        'owner',
+        date('Y-m-d H:i:s')
+    ]);
+}
+
+/* ========================================================
+   HELPERS
+======================================================== */
+
+function e($value): string {
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
+function money($value): string {
+    return '₦' . number_format((float)$value, 2);
+}
+
+function now(): string {
+    return date('Y-m-d H:i:s');
+}
+
+function loggedIn(): bool {
+    return isset($_SESSION['user']);
+}
+
+function userRole(): string {
+    return $_SESSION['user']['role'] ?? '';
+}
+
+function isOwner(): bool {
+    return userRole() === 'owner';
+}
+
+function canManage(): bool {
+    return in_array(userRole(), ['owner', 'manager'], true);
+}
+
+function audit(PDO $db, string $action, string $details = ''): void {
+
+    $username = $_SESSION['user']['username'] ?? 'SYSTEM';
+
+    $stmt = $db->prepare("
+        INSERT INTO audit
+        (username, action, details, created_at)
+        VALUES (?, ?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $username,
+        $action,
+        $details,
+        now()
+    ]);
+}
+
+function redirect(string $url = 'index.php'): never {
+    header("Location: $url");
+    exit;
+}
+
+function requireLogin(): void {
+    if (!loggedIn()) {
+        redirect('index.php');
+    }
+}
+
+/* ========================================================
+   LOGOUT
+======================================================== */
+
+if (isset($_GET['logout'])) {
+
+    if (loggedIn()) {
+        audit(
+            $GLOBALS['db'],
+            'LOGOUT',
+            'User logged out.'
+        );
+    }
+
+    $_SESSION = [];
+    session_destroy();
+
+    redirect();
+}
+
+/* ========================================================
+   LOGIN
+======================================================== */
+
+$loginError = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && ($_POST['action'] ?? '') === 'login') {
+
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    $stmt = $db->prepare("
+        SELECT *
+        FROM users
+        WHERE username = ?
+        AND active = 1
+        LIMIT 1
+    ");
+
+    $stmt->execute([$username]);
+
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+
+        session_regenerate_id(true);
+
+        unset($user['password']);
+
+        $_SESSION['user'] = $user;
+
+        audit(
+            $db,
+            'LOGIN',
+            'Successful login.'
+        );
+
+        redirect();
+
+    } else {
+
+        $loginError =
+            'Invalid username, password, or inactive account.';
+    }
+}
+
+/* ========================================================
+   PROTECTED ACTIONS
+======================================================== */
+
+if (loggedIn()
+    && $_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $action = $_POST['action'] ?? '';
+
+    /* ====================================================
+       ADD PRODUCT
+    ==================================================== */
+
+    if ($action === 'add_product') {
+
+        if (!canManage()) {
+            die('Permission denied.');
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $sku = trim($_POST['sku'] ?? '');
+        $barcode = trim($_POST['barcode'] ?? '');
+        $category = trim($_POST['category'] ?? 'General');
+
+        $packSize = max(
+            1,
+            (int)($_POST['pack_size'] ?? 1)
+        );
+
+        $piecePrice = max(
+            0,
+            (float)($_POST['piece_price'] ?? 0)
+        );
+
+        $packPrice = max(
+            0,
+            (float)($_POST['pack_price'] ?? 0)
+        );
+
+        $stock = max(
+            0,
+            (int)($_POST['stock'] ?? 0)
+        );
+
+        $lowStock = max(
+            0,
+            (int)($_POST['low_stock'] ?? 5)
+        );
+
+        if ($packPrice <= 0) {
+            $packPrice = $piecePrice * $packSize;
+        }
+
+        if ($name === '') {
+            die('Product name is required.');
+        }
+
+        if ($barcode === '') {
+            $barcode = 'KC' . date('ymdHis') .
+                rand(100, 999);
+        }
+
+        try {
+
+            $stmt = $db->prepare("
+                INSERT INTO products
+                (
+                    name,
+                    sku,
+                    barcode,
+                    category,
+                    pack_size,
+                    piece_price,
+                    pack_price,
+                    stock_pieces,
+                    low_stock,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $name,
+                $sku,
+                $barcode,
+                $category,
+                $packSize,
+                $piecePrice,
+                $packPrice,
+                $stock,
+                $lowStock,
+                now()
+            ]);
+
+            audit(
+                $db,
+                'PRODUCT_CREATED',
+                "Created product: $name"
+            );
+
+            redirect('?page=products&success=Product added');
+
+        } catch (Throwable $e) {
+
+            die(
+                'Could not add product. Barcode may already exist.'
+            );
+        }
+    }
+
+    /* ====================================================
+       DELETE PRODUCT
+    ==================================================== */
+
+    if ($action === 'delete_product') {
+
+        if (!isOwner()) {
+            die('Only Owner can delete products.');
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        $stmt = $db->prepare(
+            "SELECT name FROM products WHERE id = ?"
+        );
+
+        $stmt->execute([$id]);
+
+        $product = $stmt->fetch();
+
+        if ($product) {
+
+            $stmt = $db->prepare(
+                "DELETE FROM products WHERE id = ?"
+            );
+
+            $stmt->execute([$id]);
+
+            audit(
+                $db,
+                'PRODUCT_DELETED',
+                "Deleted product: " . $product['name']
+            );
+        }
+
+        redirect('?page=products');
+    }
+
+    /* ====================================================
+       STOCK ADJUSTMENT
+    ==================================================== */
+
+    if ($action === 'stock_adjust') {
+
+        if (!canManage()) {
+            die('Permission denied.');
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $adjustment = (int)($_POST['adjustment'] ?? 0);
+
+        $stmt = $db->prepare("
+            UPDATE products
+            SET stock_pieces =
+                MAX(0, stock_pieces + ?)
+            WHERE id = ?
+        ");
+
+        $stmt->execute([
+            $adjustment,
+            $id
+        ]);
+
+        audit(
+            $db,
+            'STOCK_ADJUSTMENT',
+            "Product ID $id adjusted by $adjustment pieces."
+        );
+
+        redirect('?page=inventory');
+    }
+
+    /* ====================================================
+       ADD CUSTOMER
+    ==================================================== */
+
+    if ($action === 'add_customer') {
+
+        if (!loggedIn()) {
+            die('Permission denied.');
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $address = trim($_POST['address'] ?? '');
+
+        if ($name === '') {
+            die('Customer name is required.');
+        }
+
+        $stmt = $db->prepare("
+            INSERT INTO customers
+            (name, phone, address, created_at)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $name,
+            $phone,
+            $address,
+            now()
+        ]);
+
+        audit(
+            $db,
+            'CUSTOMER_CREATED',
+            "Created customer: $name"
+        );
+
+        redirect('?page=customers');
+    }
+
+    /* ====================================================
+       CREATE USER
+    ==================================================== */
+
+    if ($action === 'add_user') {
+
+        if (!isOwner()) {
+            die('Only Owner can create users.');
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? 'cashier';
+
+        if (
+            $name === '' ||
+            $username === '' ||
+            $password === ''
+        ) {
+            die('All user fields are required.');
+        }
+
+        if (!in_array(
+            $role,
+            ['owner', 'manager', 'cashier'],
+            true
+        )) {
+            $role = 'cashier';
+        }
+
+        $stmt = $db->prepare("
+            INSERT INTO users
+            (name, username, password, role, active, created_at)
+            VALUES (?, ?, ?, ?, 1, ?)
+        ");
+
+        try {
+
+            $stmt->execute([
+                $name,
+                $username,
+                password_hash(
+                    $password,
+                    PASSWORD_DEFAULT
+                ),
+                $role,
+                now()
+            ]);
+
+            audit(
+                $db,
+                'USER_CREATED',
+                "Created user: $username ($role)"
+            );
+
+        } catch (Throwable $e) {
+
+            die('Username already exists.');
+        }
+
+        redirect('?page=users');
+    }
+
+    /* ====================================================
+       TOGGLE USER
+    ==================================================== */
+
+    if ($action === 'toggle_user') {
+
+        if (!isOwner()) {
+            die('Only Owner can change user access.');
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+
+        $stmt = $db->prepare("
+            UPDATE users
+            SET active =
+                CASE active
+                    WHEN 1 THEN 0
+                    ELSE 1
+                END
+            WHERE id = ?
+        ");
+
+        $stmt->execute([$id]);
+
+        audit(
+            $db,
+            'USER_ACCESS_CHANGED',
+            "Changed access for user ID $id."
+        );
+
+        redirect('?page=users');
+    }
+
+    /* ====================================================
+       CHANGE PASSWORD
+    ==================================================== */
+
+    if ($action === 'change_password') {
+
+        $old = $_POST['old_password'] ?? '';
+        $new = $_POST['new_password'] ?? '';
+
+        if (strlen($new) < 6) {
+            die('New password must be at least 6 characters.');
+        }
+
+        $stmt = $db->prepare(
+            "SELECT password FROM users WHERE id = ?"
+        );
+
+        $stmt->execute([
+            $_SESSION['user']['id']
+        ]);
+
+        $row = $stmt->fetch();
+
+        if (!$row || !password_verify($old, $row['password'])) {
+            die('Current password is incorrect.');
+        }
+
+        $stmt = $db->prepare("
+            UPDATE users
+            SET password = ?
+            WHERE id = ?
+        ");
+
+        $stmt->execute([
+            password_hash(
+                $new,
+                PASSWORD_DEFAULT
+            ),
+            $_SESSION['user']['id']
+        ]);
+
+        audit(
+            $db,
+            'PASSWORD_CHANGED',
+            'User changed password.'
+        );
+
+        redirect('?page=settings');
+    }
+
+    /* ====================================================
+       COMPLETE SALE
+    ==================================================== */
+
+    if ($action === 'complete_sale') {
+
+        if (!loggedIn()) {
+            die('Not logged in.');
+        }
+
+        $itemsJson = $_POST['items'] ?? '[]';
+
+        $items = json_decode(
+            $itemsJson,
+            true
+        );
+
+        if (!is_array($items) || count($items) === 0) {
+            die('Cart is empty.');
+        }
+
+        $customerId =
+            !empty($_POST['customer_id'])
+            ? (int)$_POST['customer_id']
+            : null;
+
+        $payment =
+            trim($_POST['payment_method'] ?? 'Cash');
+
+        $discount =
+            max(
+                0,
+                (float)($_POST['discount'] ?? 0)
+            );
+
+        if (!canManage() && $discount > 0) {
+            die('Cashiers cannot apply discounts.');
+        }
+
+        $db->beginTransaction();
+
+        try {
+
+            $subtotal = 0;
+            $verifiedItems = [];
+
+            foreach ($items as $item) {
+
+                $productId =
+                    (int)($item['product_id'] ?? 0);
+
+                $quantity =
+                    max(
+                        1,
+                        (int)($item['quantity'] ?? 1)
+                    );
+
+                $type =
+                    ($item['type'] ?? 'piece') === 'pack'
+                    ? 'pack'
+                    : 'piece';
+
+                $stmt = $db->prepare("
+                    SELECT *
+                    FROM products
+                    WHERE id = ?
+                    LIMIT 1
+                ");
+
+                $stmt->execute([$productId]);
+
+                $product = $stmt->fetch();
+
+                if (!$product) {
+                    throw new Exception(
+                        'Product not found.'
+                    );
+                }
+
+                $unitPrice =
+                    $type === 'pack'
+                    ? (float)$product['pack_price']
+                    : (float)$product['piece_price'];
+
+                $stockRequired =
+                    $type === 'pack'
+                    ? $quantity *
+                      (int)$product['pack_size']
+                    : $quantity;
+
+                if (
+                    (int)$product['stock_pieces']
+                    < $stockRequired
+                ) {
+                    throw new Exception(
+                        'Insufficient stock for ' .
+                        $product['name']
+                    );
+                }
+
+                $lineTotal =
+                    $unitPrice * $quantity;
+
+                $subtotal += $lineTotal;
+
+                $verifiedItems[] = [
+                    'product_id' =>
+                        $productId,
+
+                    'product_name' =>
+                        $product['name'],
+
+                    'quantity' =>
+                        $quantity,
+
+                    'unit_price' =>
+                        $unitPrice,
+
+                    'item_type' =>
+                        $type,
+
+                    'total' =>
+                        $lineTotal,
+
+                    'stock_required' =>
+                        $stockRequired
+                ];
+            }
+
+            $discount =
+                min($discount, $subtotal);
+
+            $total =
+                $subtotal - $discount;
+
+            $invoice =
+                'KCIGS-' .
+                date('YmdHis') .
+                '-' .
+                rand(100, 999);
+
+            $customerName =
+                'Walk-in Customer';
+
+            if ($customerId) {
+
+                $stmt = $db->prepare("
+                    SELECT name
+                    FROM customers
+                    WHERE id = ?
+                ");
+
+                $stmt->execute([
+                    $customerId
+                ]);
+
+                $customer =
+                    $stmt->fetch();
+
+                if ($customer) {
+                    $customerName =
+                        $customer['name'];
+                }
+            }
+
+            $stmt = $db->prepare("
+                INSERT INTO sales
+                (
+                    invoice,
+                    customer_id,
+                    customer_name,
+                    subtotal,
+                    discount,
+                    total,
+                    payment_method,
+                    cashier,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $invoice,
+                $customerId,
+                $customerName,
+                $subtotal,
+                $discount,
+                $total,
+                $payment,
+                $_SESSION['user']['username'],
+                now()
+            ]);
+
+            $saleId =
+                (int)$db->lastInsertId();
+
+            foreach ($verifiedItems as $item) {
+
+                $stmt = $db->prepare("
+                    INSERT INTO sale_items
+                    (
+                        sale_id,
+                        product_id,
+                        product_name,
+                        quantity,
+                        unit_price,
+                        item_type,
+                        total
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ");
+
+                $stmt->execute([
+                    $saleId,
+                    $item['product_id'],
+                    $item['product_name'],
+                    $item['quantity'],
+                    $item['unit_price'],
+                    $item['item_type'],
+                    $item['total']
+                ]);
+
+                $stmt = $db->prepare("
+                    UPDATE products
+                    SET stock_pieces =
+                        stock_pieces - ?
+                    WHERE id = ?
+                ");
+
+                $stmt->execute([
+                    $item['stock_required'],
+                    $item['product_id']
+                ]);
+            }
+
+            $db->commit();
+
+            audit(
+                $db,
+                'SALE_COMPLETED',
+                "Invoice $invoice - " .
+                money($total)
+            );
+
+            redirect(
+                '?page=receipt&id=' .
+                $saleId
+            );
+
+        } catch (Throwable $e) {
+
+            $db->rollBack();
+
+            die(
+                'Sale could not be completed: ' .
+                e($e->getMessage())
+            );
+        }
+    }
+}
+
+/* ========================================================
+   DATA
+======================================================== */
+
+$page = $_GET['page'] ?? 'dashboard';
+
+if (!loggedIn()) {
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="theme-color" content="#12395b">
-<title>SalesPro POS</title>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>KCIGS-SALESPRO Login</title>
 
 <style>
-*{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-    background:#f4f7fa;
-    color:#172033
-}
-button,input,select{
-    font:inherit
-}
-button{
-    cursor:pointer
-}
-.hidden{display:none!important}
 
-.login-screen{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    background:#102f4a
-}
-.login-box{
-    background:white;
-    width:100%;
-    max-width:480px;
-    padding:35px;
-    border-radius:24px;
-    box-shadow:0 20px 60px #0004
-}
-.logo{
-    font-size:42px;
-    font-weight:800;
-    color:#12395b
-}
-.subtitle{
-    font-size:18px;
-    color:#65748b;
-    margin:8px 0 25px
-}
-.demo{
-    background:#edf6ff;
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:20px;
-    color:#1763b5
-}
-label{
-    display:block;
-    font-weight:700;
-    margin-bottom:7px
-}
-input,select{
-    width:100%;
-    border:1px solid #ccd5df;
-    border-radius:10px;
-    padding:13px;
-    background:white;
-    outline:none
-}
-input:focus,select:focus{
-    border-color:#2672b8
-}
-.form-group{
-    margin-bottom:16px
-}
-.btn{
-    border:0;
-    border-radius:10px;
-    padding:12px 17px;
-    background:#205b86;
-    color:white;
-    font-weight:700
-}
-.btn:hover{opacity:.9}
-.btn.green{background:#16834b}
-.btn.red{background:#c83232}
-.btn.orange{background:#d98216}
-.btn.gray{background:#687383}
-.btn.light{
-    background:#eaf1f7;
-    color:#173b58
-}
-.btn.full{width:100%}
-
-.app{
-    min-height:100vh;
-    display:flex
-}
-.sidebar{
-    width:245px;
-    background:#102f4a;
-    color:white;
-    min-height:100vh;
-    padding:20px 15px;
-    position:fixed;
-    left:0;
-    top:0;
-    bottom:0;
-    overflow:auto
-}
-.brand{
-    font-size:27px;
-    font-weight:800;
-    padding:10px 12px 25px
-}
-.user-box{
-    background:#ffffff15;
-    padding:13px;
-    border-radius:12px;
-    margin-bottom:20px
-}
-.nav button{
-    width:100%;
-    border:0;
-    background:transparent;
-    color:#dce8f2;
-    padding:13px;
-    text-align:left;
-    border-radius:9px;
-    margin:2px 0
-}
-.nav button.active,
-.nav button:hover{
-    background:#ffffff18;
-    color:white
-}
-.logout{
-    margin-top:20px;
-    width:100%
+* {
+    box-sizing: border-box;
 }
 
-.main{
-    margin-left:245px;
-    width:calc(100% - 245px);
-    min-height:100vh
-}
-.topbar{
-    height:70px;
-    background:white;
-    border-bottom:1px solid #e0e6ec;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 25px;
-    position:sticky;
-    top:0;
-    z-index:5
-}
-.menu-btn{display:none}
-.content{
-    padding:25px;
-    max-width:1500px;
-    margin:auto
-}
-.section{display:none}
-.section.active{display:block}
-h1{margin:0}
-h2{margin-top:0}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-    margin-bottom:20px
-}
-.card{
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    border:1px solid #e4e9ee
-}
-.card small{color:#718096}
-.big{
-    font-size:27px;
-    font-weight:800;
-    margin-top:8px
+body {
+    margin: 0;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    background:
+        linear-gradient(
+            135deg,
+            #071b35,
+            #0d3970
+        );
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.panel{
-    background:white;
-    border-radius:15px;
-    padding:20px;
-    margin-bottom:20px;
-    border:1px solid #e3e8ed
-}
-.grid2{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px
-}
-.grid3{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px
-}
-.actions{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:15px
+.login {
+    width: min(420px, 92%);
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.3);
 }
 
-.table-wrap{
-    overflow-x:auto
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:700px
-}
-th,td{
-    padding:12px 10px;
-    border-bottom:1px solid #e6ebef;
-    text-align:left
-}
-th{
-    background:#f7f9fb;
-    font-size:13px
+.logo {
+    width: 75px;
+    height: 75px;
+    margin: auto;
+    border-radius: 18px;
+    background: #0b3b75;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 900;
 }
 
-.badge{
-    display:inline-block;
-    padding:5px 9px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:700
-}
-.badge.green{background:#dcf7e9;color:#137341}
-.badge.orange{background:#fff0d8;color:#9a5b00}
-.badge.red{background:#ffe1e1;color:#a51e1e}
-
-.pos{
-    display:grid;
-    grid-template-columns:1.5fr 1fr;
-    gap:20px
-}
-.product-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px;
-    margin-top:15px
-}
-.product-btn{
-    background:white;
-    border:1px solid #dce4eb;
-    border-radius:12px;
-    padding:15px;
-    text-align:left
-}
-.product-btn:hover{
-    border-color:#2570a8;
-    box-shadow:0 5px 15px #0001
-}
-.product-btn strong{
-    display:block;
-    margin-bottom:5px
-}
-.cart-row{
-    display:grid;
-    grid-template-columns:1fr 70px 90px 30px;
-    gap:7px;
-    align-items:center;
-    padding:10px 0;
-    border-bottom:1px solid #eee
-}
-.cart-row input{
-    padding:7px
-}
-.total-box{
-    margin-top:15px;
-    padding:15px;
-    background:#f3f7fa;
-    border-radius:12px
-}
-.total-line{
-    display:flex;
-    justify-content:space-between;
-    padding:5px 0
-}
-.total-line.final{
-    font-size:23px;
-    font-weight:800;
-    border-top:1px solid #ccd5dd;
-    margin-top:8px;
-    padding-top:12px
+h1 {
+    text-align: center;
+    color: #0b3b75;
+    margin-bottom: 5px;
 }
 
-.notice{
-    padding:12px;
-    background:#edf6ff;
-    border-radius:10px;
-    color:#225c91;
-    margin-bottom:15px
-}
-.warning{
-    padding:12px;
-    background:#fff4dd;
-    color:#8a5b00;
-    border-radius:10px;
-    margin-bottom:15px
-}
-.empty{
-    text-align:center;
-    padding:30px!important;
-    color:#8290a0
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 30px;
 }
 
-.modal{
-    position:fixed;
-    inset:0;
-    background:#0008;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    z-index:100
-}
-.modal.show{display:flex}
-.modal-box{
-    width:100%;
-    max-width:650px;
-    background:white;
-    border-radius:18px;
-    padding:25px;
-    max-height:90vh;
-    overflow:auto
-}
-.modal-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px
-}
-.close{
-    border:0;
-    background:#eee;
-    border-radius:50%;
-    width:35px;
-    height:35px;
-    font-size:22px
+label {
+    display: block;
+    font-weight: 700;
+    margin: 15px 0 7px;
 }
 
-footer{
-    text-align:center;
-    padding:30px;
-    color:#718096
+input,
+select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #d5dce5;
+    border-radius: 9px;
+    font-size: 15px;
 }
 
-@media(max-width:900px){
-    .sidebar{
-        transform:translateX(-100%);
-        transition:.25s;
-        z-index:50
-    }
-    .sidebar.open{
-        transform:translateX(0)
-    }
-    .main{
-        margin-left:0;
-        width:100%
-    }
-    .menu-btn{
-        display:block;
-        border:0;
-        background:#edf2f6;
-        padding:8px 12px;
-        border-radius:8px
-    }
-    .cards{
-        grid-template-columns:repeat(2,1fr)
-    }
-    .pos{
-        grid-template-columns:1fr
-    }
+button {
+    border: 0;
+    cursor: pointer;
 }
 
-@media(max-width:600px){
-    .content{padding:15px}
-    .topbar{padding:0 15px}
-    .cards{
-        grid-template-columns:1fr 1fr
-    }
-    .grid2,.grid3{
-        grid-template-columns:1fr
-    }
-    .product-grid{
-        grid-template-columns:1fr 1fr
-    }
-    .login-box{
-        padding:25px
-    }
+.login button {
+    width: 100%;
+    padding: 14px;
+    background: #0b3b75;
+    color: white;
+    border-radius: 9px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 20px;
 }
+
+.error {
+    background: #ffe3e3;
+    color: #a00000;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.demo {
+    margin-top: 20px;
+    background: #f3f6fa;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen" class="login-screen">
+<div class="login">
 
-    <div class="login-box">
-
-        <div class="logo">SalesPro</div>
-        <div class="subtitle">POS & Inventory Management</div>
-
-        <div class="demo">
-            <strong>Demo Accounts</strong><br>
-            Owner: owner / owner123<br>
-            Manager: manager / manager123<br>
-            Cashier: cashier / cashier123
-        </div>
-
-        <div class="form-group">
-            <label>Username</label>
-            <input id="loginUsername" placeholder="Enter username">
-        </div>
-
-        <div class="form-group">
-            <label>Password</label>
-            <input id="loginPassword" type="password" placeholder="Enter password">
-        </div>
-
-        <button class="btn full" onclick="login()">Login</button>
-
+    <div class="logo">
+        KC
     </div>
 
-</div>
+    <h1>KCIGS-SALESPRO</h1>
 
+    <div class="subtitle">
+        Sales • Inventory • POS
+    </div>
 
-<!-- APP -->
-<div id="app" class="app hidden">
+    <?php if ($loginError): ?>
 
-    <aside id="sidebar" class="sidebar">
-
-        <div class="brand">SalesPro</div>
-
-        <div class="user-box">
-            <strong id="sideUser">User</strong><br>
-            <small id="sideRole">CASHIER</small>
+        <div class="error">
+            <?= e($loginError) ?>
         </div>
 
-        <div class="nav">
+    <?php endif; ?>
 
-            <button onclick="showSection('dashboard',this)" class="active">
-                📊 Dashboard
-            </button>
+    <form method="post">
 
-            <button onclick="showSection('sales',this)">
-                🛒 New Sale
-            </button>
+        <input
+            type="hidden"
+            name="action"
+            value="login"
+        >
 
-            <button onclick="showSection('products',this)">
-                📦 Products
-            </button>
+        <label>Username</label>
 
-            <button onclick="showSection('inventory',this)">
-                🏪 Inventory
-            </button>
+        <input
+            name="username"
+            required
+            autocomplete="username"
+        >
 
-            <button onclick="showSection('customers',this)">
-                👥 Customers
-            </button>
+        <label>Password</label>
 
-            <button onclick="showSection('reports',this)">
-                📈 Reports
-            </button>
+        <input
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+        >
 
-            <button id="usersNav" onclick="showSection('users',this)">
-                👨🏾‍💼 Users
-            </button>
-
-            <button onclick="showSection('backup',this)">
-                💾 Backup
-            </button>
-
-        </div>
-
-        <button class="btn red logout" onclick="logout()">
-            Logout
+        <button type="submit">
+            Login
         </button>
 
-    </aside>
-
-
-    <main class="main">
-
-        <header class="topbar">
-
-            <button class="menu-btn" onclick="toggleSidebar()">
-                ☰
-            </button>
-
-            <h2 id="pageTitle">Dashboard</h2>
-
-            <div>
-                <strong id="topUser">Owner</strong>
-            </div>
-
-        </header>
-
-
-        <div class="content">
-
-            <!-- DASHBOARD -->
-            <section id="dashboard" class="section active">
-
-                <div class="cards">
-
-                    <div class="card">
-                        <small>Today's Sales</small>
-                        <div class="big" id="todaySales">₦0.00</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Transactions</small>
-                        <div class="big" id="todayTransactions">0</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Products</small>
-                        <div class="big" id="productCount">0</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Low Stock</small>
-                        <div class="big" id="lowStockCount">0</div>
-                    </div>
-
-                </div>
-
-                <div id="dashboardAlert"></div>
-
-                <div class="panel">
-
-                    <h2>Recent Sales</h2>
-
-                    <div class="table-wrap">
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Invoice</th>
-                                    <th>Customer</th>
-                                    <th>Total</th>
-                                    <th>Payment</th>
-                                    <th>Cashier</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="recentSales"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- SALES -->
-            <section id="sales" class="section">
-
-                <div class="pos">
-
-                    <div>
-
-                        <div class="panel">
-
-                            <h2>New Sale</h2>
-
-                            <div class="grid2">
-
-                                <div>
-                                    <label>Barcode / SKU</label>
-
-                                    <input
-                                        id="barcodeInput"
-                                        placeholder="Scan or enter barcode"
-                                        onkeydown="barcodeKey(event)"
-                                        autofocus
-                                    >
-
-                                </div>
-
-                                <div>
-                                    <label>Customer</label>
-
-                                    <select id="saleCustomer">
-                                        <option value="">Walk-in Customer</option>
-                                    </select>
-                                </div>
-
-                            </div>
-
-                            <div class="actions">
-
-                                <button class="btn" onclick="scanBarcode()">
-                                    📷 Scan Barcode
-                                </button>
-
-                                <button class="btn light" onclick="focusBarcode()">
-                                    🔎 Focus Scanner
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="panel">
-
-                            <h3>Products</h3>
-
-                            <input
-                                id="posSearch"
-                                placeholder="Search product..."
-                                oninput="renderPOSProducts()"
-                            >
-
-                            <div id="posProducts" class="product-grid"></div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel">
-
-                        <h2>Cart</h2>
-
-                        <div id="cart"></div>
-
-                        <div class="total-box">
-
-                            <div class="total-line">
-                                <span>Subtotal</span>
-                                <strong id="cartSubtotal">₦0.00</strong>
-                            </div>
-
-                            <div class="total-line">
-                                <span>Discount</span>
-                                <input
-                                    id="saleDiscount"
-                                    type="number"
-                                    min="0"
-                                    value="0"
-                                    oninput="renderCart()"
-                                >
-                            </div>
-
-                            <div class="total-line final">
-                                <span>Total</span>
-                                <span id="cartTotal">₦0.00</span>
-                            </div>
-
-                        </div>
-
-                        <div class="form-group" style="margin-top:15px">
-
-                            <label>Payment Method</label>
-
-                            <select id="paymentMethod">
-                                <option>Cash</option>
-                                <option>Transfer</option>
-                                <option>POS</option>
-                                <option>Card</option>
-                                <option>Credit</option>
-                            </select>
-
-                        </div>
-
-                        <button
-                            class="btn green full"
-                            onclick="completeSale()"
-                        >
-                            Complete Sale
-                        </button>
-
-                        <button
-                            class="btn gray full"
-                            style="margin-top:8px"
-                            onclick="clearCart()"
-                        >
-                            Clear Cart
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- PRODUCTS -->
-            <section id="products" class="section">
-
-                <div class="panel">
-
-                    <h2>Add Product</h2>
-
-                    <div class="grid3">
-
-                        <div>
-                            <label>Product Name</label>
-                            <input id="productName">
-                        </div>
-
-                        <div>
-                            <label>Barcode</label>
-                            <input id="productBarcode">
-                        </div>
-
-                        <div>
-                            <label>SKU</label>
-                            <input id="productSKU">
-                        </div>
-
-                        <div>
-                            <label>Category</label>
-                            <input id="productCategory" value="General">
-                        </div>
-
-                        <div>
-                            <label>Pieces Per Pack</label>
-                            <input id="productPack" type="number" min="1" value="1">
-                        </div>
-
-                        <div>
-                            <label>Cost Price / Piece</label>
-                            <input id="productCost" type="number" min="0">
-                        </div>
-
-                        <div>
-                            <label>Selling Price / Piece</label>
-                            <input id="productPrice" type="number" min="0">
-                        </div>
-
-                        <div>
-                            <label>Selling Price / Pack</label>
-                            <input id="productPackPrice" type="number" min="0">
-                        </div>
-
-                        <div>
-                            <label>Opening Stock (Pieces)</label>
-                            <input id="productStock" type="number" min="0">
-                        </div>
-
-                        <div>
-                            <label>Low Stock Level</label>
-                            <input id="productLow" type="number" min="0" value="5">
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="btn green" onclick="addProduct()">
-                            Add Product
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <h2>Products</h2>
-
-                    <input
-                        id="productSearch"
-                        placeholder="Search name, barcode or SKU..."
-                        oninput="renderProducts()"
-                    >
-
-                    <div class="table-wrap" style="margin-top:15px">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Barcode</th>
-                                    <th>SKU</th>
-                                    <th>Pack</th>
-                                    <th>Cost</th>
-                                    <th>Sell</th>
-                                    <th>Stock</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="productsTable"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- INVENTORY -->
-            <section id="inventory" class="section">
-
-                <div class="panel">
-
-                    <h2>Inventory</h2>
-
-                    <div class="table-wrap">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Barcode</th>
-                                    <th>Stock Pieces</th>
-                                    <th>Full Packs</th>
-                                    <th>Stock Value</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="inventoryTable"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- CUSTOMERS -->
-            <section id="customers" class="section">
-
-                <div class="panel">
-
-                    <h2>Add Customer</h2>
-
-                    <div class="grid3">
-
-                        <div>
-                            <label>Name</label>
-                            <input id="customerName">
-                        </div>
-
-                        <div>
-                            <label>Phone</label>
-                            <input id="customerPhone">
-                        </div>
-
-                        <div>
-                            <label>Address</label>
-                            <input id="customerAddress">
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="btn green" onclick="addCustomer()">
-                            Add Customer
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <h2>Customers & Credit</h2>
-
-                    <div class="table-wrap">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Phone</th>
-                                    <th>Address</th>
-                                    <th>Total Purchases</th>
-                                    <th>Outstanding Credit</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="customersTable"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- REPORTS -->
-            <section id="reports" class="section">
-
-                <div class="panel">
-
-                    <h2>Sales Reports</h2>
-
-                    <div class="grid3">
-
-                        <div>
-                            <label>From</label>
-                            <input id="reportFrom" type="date">
-                        </div>
-
-                        <div>
-                            <label>To</label>
-                            <input id="reportTo" type="date">
-                        </div>
-
-                        <div style="display:flex;align-items:end">
-                            <button
-                                class="btn full"
-                                onclick="generateReport()"
-                            >
-                                Generate Report
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="cards">
-
-                    <div class="card">
-                        <small>Revenue</small>
-                        <div class="big" id="reportRevenue">₦0.00</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Transactions</small>
-                        <div class="big" id="reportTransactions">0</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Profit</small>
-                        <div class="big" id="reportProfit">₦0.00</div>
-                    </div>
-
-                    <div class="card">
-                        <small>Units Sold</small>
-                        <div class="big" id="reportUnits">0</div>
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <h2>Sales Details</h2>
-
-                    <div class="table-wrap">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Invoice</th>
-                                    <th>Customer</th>
-                                    <th>Total</th>
-                                    <th>Profit</th>
-                                    <th>Payment</th>
-                                    <th>User</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="reportsTable"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- USERS -->
-            <section id="users" class="section">
-
-                <div class="panel">
-
-                    <h2>Users & Access</h2>
-
-                    <div class="notice">
-                        Owner has full access. Manager can manage products,
-                        inventory and discounts. Cashier can make sales.
-                    </div>
-
-                    <div class="table-wrap">
-
-                        <table>
-
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Username</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="usersTable"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <h2>Create User</h2>
-
-                    <div class="grid3">
-
-                        <div>
-                            <label>Name</label>
-                            <input id="newName">
-                        </div>
-
-                        <div>
-                            <label>Username</label>
-                            <input id="newUsername">
-                        </div>
-
-                        <div>
-                            <label>Password</label>
-                            <input id="newPassword" type="password">
-                        </div>
-
-                        <div>
-                            <label>Role</label>
-                            <select id="newRole">
-                                <option value="cashier">Cashier</option>
-                                <option value="manager">Manager</option>
-                                <option value="owner">Owner</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="btn green" onclick="createUser()">
-                            Create User
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- BACKUP -->
-            <section id="backup" class="section">
-
-                <div class="panel">
-
-                    <h2>Backup & Restore</h2>
-
-                    <div class="notice">
-                        Your data is stored locally on this device.
-                        Download regular backups.
-                    </div>
-
-                    <div class="actions">
-
-                        <button class="btn green" onclick="backupData()">
-                            Download Backup
-                        </button>
-
-                        <button
-                            class="btn"
-                            onclick="document.getElementById('restore').click()"
-                        >
-                            Restore Backup
-                        </button>
-
-                        <input
-                            id="restore"
-                            type="file"
-                            accept=".json"
-                            class="hidden"
-                            onchange="restoreData(event)"
-                        >
-
-                    </div>
-
-                </div>
-
-            </section>
-
-            <footer>
-                SalesPro POS & Inventory System<br>
-                Offline Version 1.0
-            </footer>
-
-        </div>
-
-    </main>
-
-</div>
-
-
-<!-- PRODUCT EDIT MODAL -->
-<div id="editModal" class="modal">
-
-    <div class="modal-box">
-
-        <div class="modal-head">
-            <h2>Edit Product</h2>
-            <button class="close" onclick="closeModal()">×</button>
-        </div>
-
-        <input id="editId" type="hidden">
-
-        <div class="grid2">
-
-            <div>
-                <label>Name</label>
-                <input id="editName">
-            </div>
-
-            <div>
-                <label>Barcode</label>
-                <input id="editBarcode">
-            </div>
-
-            <div>
-                <label>SKU</label>
-                <input id="editSKU">
-            </div>
-
-            <div>
-                <label>Category</label>
-                <input id="editCategory">
-            </div>
-
-            <div>
-                <label>Pack Size</label>
-                <input id="editPack" type="number">
-            </div>
-
-            <div>
-                <label>Cost / Piece</label>
-                <input id="editCost" type="number">
-            </div>
-
-            <div>
-                <label>Sell / Piece</label>
-                <input id="editPrice" type="number">
-            </div>
-
-            <div>
-                <label>Sell / Pack</label>
-                <input id="editPackPrice" type="number">
-            </div>
-
-            <div>
-                <label>Low Stock</label>
-                <input id="editLow" type="number">
-            </div>
-
-        </div>
-
-        <div class="actions">
-
-            <button class="btn green" onclick="saveProductEdit()">
-                Save
-            </button>
-
-            <button class="btn gray" onclick="closeModal()">
-                Cancel
-            </button>
-
-        </div>
-
+    </form>
+
+    <div class="demo">
+        <strong>Initial Owner Account</strong><br>
+        Username: owner<br>
+        Password: owner123
     </div>
 
 </div>
 
+</body>
+</html>
+
+<?php
+exit;
+}
+
+/* ========================================================
+   PAGE DATA
+======================================================== */
+
+$products = $db
+    ->query("
+        SELECT *
+        FROM products
+        ORDER BY name ASC
+    ")
+    ->fetchAll();
+
+$customers = $db
+    ->query("
+        SELECT *
+        FROM customers
+        ORDER BY name ASC
+    ")
+    ->fetchAll();
+
+$users = $db
+    ->query("
+        SELECT *
+        FROM users
+        ORDER BY name ASC
+    ")
+    ->fetchAll();
+
+$today = date('Y-m-d');
+
+$stmt = $db->prepare("
+    SELECT
+        COALESCE(SUM(total),0) revenue,
+        COUNT(*) transactions
+    FROM sales
+    WHERE date(created_at) = ?
+");
+
+$stmt->execute([$today]);
+
+$todayStats =
+    $stmt->fetch();
+
+$lowStockCount =
+    (int)$db->query("
+        SELECT COUNT(*)
+        FROM products
+        WHERE stock_pieces <= low_stock
+    ")->fetchColumn();
+
+$inventoryValue =
+    (float)$db->query("
+        SELECT
+        COALESCE(
+            SUM(stock_pieces * piece_price),
+            0
+        )
+        FROM products
+    ")->fetchColumn();
+
+/* ========================================================
+   RECEIPT PAGE
+======================================================== */
+
+if ($page === 'receipt') {
+
+    $id = (int)($_GET['id'] ?? 0);
+
+    $stmt = $db->prepare("
+        SELECT *
+        FROM sales
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$id]);
+
+    $sale = $stmt->fetch();
+
+    if (!$sale) {
+        die('Sale not found.');
+    }
+
+    $stmt = $db->prepare("
+        SELECT *
+        FROM sale_items
+        WHERE sale_id = ?
+    ");
+
+    $stmt->execute([$id]);
+
+    $saleItems =
+        $stmt->fetchAll();
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+>
+
+<title><?= e($sale['invoice']) ?></title>
+
+<style>
+
+body {
+    font-family: Arial;
+    background: #eee;
+    margin: 0;
+}
+
+.receipt {
+    width: 80mm;
+    background: white;
+    margin: 20px auto;
+    padding: 12px;
+}
+
+.center {
+    text-align: center;
+}
+
+.line {
+    border-top: 1px dashed #333;
+    margin: 10px 0;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+}
+
+.total {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.actions {
+    width: 80mm;
+    margin: 10px auto;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 5px;
+}
+
+@media print {
+
+    body {
+        background: white;
+    }
+
+    .receipt {
+        margin: 0;
+        width: 80mm;
+    }
+
+    .actions {
+        display: none;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="actions">
+
+<button onclick="window.print()">
+    Print Receipt
+</button>
+
+<button onclick="location.href='?page=pos'">
+    New Sale
+</button>
+
+</div>
+
+<div class="receipt">
+
+<div class="center">
+
+<h2>KCIGS</h2>
+
+<strong>KCIGS-SALESPRO</strong>
+
+<p>
+Sales & Inventory Management
+</p>
+
+</div>
+
+<div class="line"></div>
+
+<div>
+Invoice:
+<strong><?= e($sale['invoice']) ?></strong>
+</div>
+
+<div>
+Date:
+<?= e($sale['created_at']) ?>
+</div>
+
+<div>
+Customer:
+<?= e($sale['customer_name']) ?>
+</div>
+
+<div>
+Cashier:
+<?= e($sale['cashier']) ?>
+</div>
+
+<div class="line"></div>
+
+<?php foreach ($saleItems as $item): ?>
+
+<div>
+
+<strong>
+<?= e($item['product_name']) ?>
+</strong>
+
+<div class="row">
+
+<span>
+<?= (int)$item['quantity'] ?>
+x
+<?= money($item['unit_price']) ?>
+</span>
+
+<span>
+<?= money($item['total']) ?>
+</span>
+
+</div>
+
+</div>
+
+<?php endforeach; ?>
+
+<div class="line"></div>
+
+<div class="row">
+<span>Subtotal</span>
+<span><?= money($sale['subtotal']) ?></span>
+</div>
+
+<div class="row">
+<span>Discount</span>
+<span><?= money($sale['discount']) ?></span>
+</div>
+
+<div class="row total">
+<span>TOTAL</span>
+<span><?= money($sale['total']) ?></span>
+</div>
+
+<div class="row">
+<span>Payment</span>
+<span><?= e($sale['payment_method']) ?></span>
+</div>
+
+<div class="line"></div>
+
+<div class="center">
+
+<p>Thank you for your patronage.</p>
+
+<strong>KCIGS-SALESPRO</strong>
+
+</div>
+
+</div>
+
+</body>
+</html>
+
+<?php
+exit;
+}
+
+/* ========================================================
+   MAIN APPLICATION
+======================================================== */
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>KCIGS-SALESPRO</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<style>
+
+/* ======================================================
+   GLOBAL
+====================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    background: #f3f6fa;
+    color: #17202a;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ======================================================
+   SIDEBAR
+====================================================== */
+
+.sidebar {
+    width: 245px;
+    background: #082b55;
+    color: white;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+
+.brand {
+    padding: 25px 20px;
+    font-size: 21px;
+    font-weight: 900;
+    border-bottom:
+        1px solid rgba(255,255,255,.12);
+}
+
+.brand small {
+    display: block;
+    font-size: 11px;
+    opacity: .7;
+    margin-top: 5px;
+}
+
+.nav {
+    padding: 15px 10px;
+}
+
+.nav a {
+    display: block;
+    padding: 13px 15px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    color: #dcecff;
+}
+
+.nav a:hover,
+.nav a.active {
+    background: #124c89;
+    color: white;
+}
+
+.logout {
+    color: #ffcccc !important;
+}
+
+/* ======================================================
+   CONTENT
+====================================================== */
+
+.content {
+    margin-left: 245px;
+    width: calc(100% - 245px);
+}
+
+.topbar {
+    height: 72px;
+    background: white;
+    border-bottom: 1px solid #e1e6ec;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.user {
+    text-align: right;
+}
+
+.user strong {
+    display: block;
+}
+
+.user small {
+    color: #777;
+}
+
+main {
+    padding: 25px;
+}
+
+/* ======================================================
+   CARDS
+====================================================== */
+
+.cards {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0,1fr));
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #e3e8ef;
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    color: #697586;
+    font-size: 14px;
+}
+
+.big {
+    font-size: 25px;
+    font-weight: 900;
+    color: #082b55;
+}
+
+/* ======================================================
+   PANELS
+====================================================== */
+
+.panel {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e3e8ef;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.panel h2 {
+    margin-top: 0;
+}
+
+/* ======================================================
+   GRID
+====================================================== */
+
+.grid2 {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0,1fr));
+    gap: 15px;
+}
+
+.grid3 {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+    gap: 15px;
+}
+
+.field {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 11px;
+    border:
+        1px solid #d4dce5;
+    border-radius: 8px;
+    background: white;
+}
+
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    background: #0b3b75;
+    color: white;
+    font-weight: 700;
+}
+
+.btn.green {
+    background: #138a55;
+}
+
+.btn.red {
+    background: #c92a2a;
+}
+
+.btn.orange {
+    background: #d77a00;
+}
+
+.btn.gray {
+    background: #777;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+/* ======================================================
+   TABLE
+====================================================== */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid #edf0f4;
+    white-space: nowrap;
+}
+
+th {
+    background: #f7f9fb;
+    font-size: 13px;
+}
+
+.empty {
+    text-align: center;
+    color: #888;
+    padding: 35px;
+}
+
+/* ======================================================
+   BADGES
+====================================================== */
+
+.badge {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 20px;
+    background: #eee;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge.green {
+    background: #d9f5e7;
+    color: #08743f;
+}
+
+.badge.orange {
+    background: #fff0d5;
+    color: #995800;
+}
+
+.badge.red {
+    background: #ffe0e0;
+    color: #a00000;
+}
+
+/* ======================================================
+   POS
+====================================================== */
+
+.pos {
+    display: grid;
+    grid-template-columns:
+        1.5fr 1fr;
+    gap: 20px;
+}
+
+.product-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.product-search input {
+    flex: 1;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0,1fr));
+    gap: 10px;
+}
+
+.product-button {
+    background: white;
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.product-button:hover {
+    border-color: #0b3b75;
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.06);
+}
+
+.product-button strong {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.product-button small {
+    color: #777;
+}
+
+.cart-item {
+    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+}
+
+.cart-head {
+    display: flex;
+    justify-content: space-between;
+}
+
+.qty {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+}
+
+.qty button {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #e8edf3;
+}
+
+.pos-total {
+    font-size: 25px;
+    font-weight: 900;
+    color: #082b55;
+}
+
+/* ======================================================
+   BARCODE
+====================================================== */
+
+.barcode-box {
+    background: white;
+    padding: 15px;
+    text-align: center;
+    border: 1px dashed #bbb;
+    margin-top: 15px;
+}
+
+.barcode-box svg {
+    max-width: 100%;
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+.mobile-menu {
+    display: none;
+}
+
+@media(max-width:1000px) {
+
+    .cards {
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .pos {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+}
+
+@media(max-width:750px) {
+
+    .sidebar {
+        width: 220px;
+        transform: translateX(-100%);
+        transition: .2s;
+        z-index: 50;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .mobile-menu {
+        display: block;
+        font-size: 24px;
+        background: none;
+        color: #082b55;
+    }
+
+    .topbar {
+        padding: 0 15px;
+    }
+
+    main {
+        padding: 15px;
+    }
+
+    .cards,
+    .grid2,
+    .grid3 {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .user {
+        font-size: 12px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- ====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+
+        KCIGS-SALESPRO
+
+        <small>
+            Sales • Inventory • POS
+        </small>
+
+    </div>
+
+    <nav class="nav">
+
+        <a
+            href="?page=dashboard"
+            class="<?= $page === 'dashboard' ? 'active' : '' ?>"
+        >
+            📊 Dashboard
+        </a>
+
+        <a
+            href="?page=pos"
+            class="<?= $page === 'pos' ? 'active' : '' ?>"
+        >
+            🛒 Point of Sale
+        </a>
+
+        <a
+            href="?page=inventory"
+            class="<?= $page === 'inventory' ? 'active' : '' ?>"
+        >
+            📦 Inventory
+        </a>
+
+        <a
+            href="?page=products"
+            class="<?= $page === 'products' ? 'active' : '' ?>"
+        >
+            🏷️ Products
+        </a>
+
+        <a
+            href="?page=customers"
+            class="<?= $page === 'customers' ? 'active' : '' ?>"
+        >
+            👥 Customers
+        </a>
+
+        <a
+            href="?page=reports"
+            class="<?= $page === 'reports' ? 'active' : '' ?>"
+        >
+            📈 Reports
+        </a>
+
+        <?php if (isOwner()): ?>
+
+        <a
+            href="?page=users"
+            class="<?= $page === 'users' ? 'active' : '' ?>"
+        >
+            👤 Users
+        </a>
+
+        <?php endif; ?>
+
+        <a
+            href="?page=settings"
+            class="<?= $page === 'settings' ? 'active' : '' ?>"
+        >
+            ⚙️ Settings
+        </a>
+
+        <a
+            class="logout"
+            href="?logout=1"
+        >
+            🚪 Logout
+        </a>
+
+    </nav>
+
+</aside>
+
+<!-- ====================================================
+     CONTENT
+===================================================== -->
+
+<div class="content">
+
+<header class="topbar">
+
+    <button
+        class="mobile-menu"
+        onclick="toggleMenu()"
+    >
+        ☰
+    </button>
+
+    <div>
+        <strong>KCIGS-SALESPRO</strong>
+    </div>
+
+    <div class="user">
+
+        <strong>
+            <?= e($_SESSION['user']['name']) ?>
+        </strong>
+
+        <small>
+            <?= strtoupper(e($_SESSION['user']['role'])) ?>
+        </small>
+
+    </div>
+
+</header>
+
+<main>
+
+<?php if (isset($_GET['success'])): ?>
+
+<div
+    style="
+        background:#dff6e9;
+        color:#08743f;
+        padding:12px;
+        border-radius:8px;
+        margin-bottom:15px;
+    "
+>
+    <?= e($_GET['success']) ?>
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     DASHBOARD
+===================================================== -->
+
+<?php if ($page === 'dashboard'): ?>
+
+<h1>Dashboard</h1>
+
+<p>
+Welcome back,
+<strong><?= e($_SESSION['user']['name']) ?></strong>.
+</p>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Today's Revenue</h3>
+
+<div class="big">
+<?= money($todayStats['revenue']) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Transactions Today</h3>
+
+<div class="big">
+<?= number_format((int)$todayStats['transactions']) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Products</h3>
+
+<div class="big">
+<?= number_format(count($products)) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Low Stock</h3>
+
+<div class="big">
+<?= number_format($lowStockCount) ?>
+</div>
+
+</div>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Inventory Value</h3>
+
+<div class="big">
+<?= money($inventoryValue) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Customers</h3>
+
+<div class="big">
+<?= number_format(count($customers)) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Users</h3>
+
+<div class="big">
+<?= number_format(count($users)) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>System</h3>
+
+<div class="big">
+Online
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Quick Actions</h2>
+
+<div class="actions">
+
+<a class="btn" href="?page=pos">
+    🛒 New Sale
+</a>
+
+<?php if (canManage()): ?>
+
+<a class="btn green" href="?page=products">
+    ➕ Add Product
+</a>
+
+<?php endif; ?>
+
+<a class="btn orange" href="?page=inventory">
+    📦 Inventory
+</a>
+
+<a class="btn" href="?page=reports">
+    📈 Reports
+</a>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     POS
+===================================================== -->
+
+<?php if ($page === 'pos'): ?>
+
+<h1>Point of Sale</h1>
+
+<div class="pos">
+
+<div class="panel">
+
+<h2>Select Product</h2>
+
+<div class="product-search">
+
+<input
+    id="productSearch"
+    placeholder="Scan barcode or search product..."
+    autofocus
+>
+
+<button
+    class="btn"
+    onclick="searchProducts()"
+>
+    Search
+</button>
+
+</div>
+
+<div
+    id="scannerMessage"
+    style="
+        color:#777;
+        margin-bottom:10px;
+    "
+>
+    Barcode scanners that act as a keyboard can scan directly
+    into the search box.
+</div>
+
+<div
+    class="product-grid"
+    id="productGrid"
+>
+
+<?php foreach ($products as $product): ?>
+
+<button
+    class="product-button"
+    onclick='addToCart(
+        <?= json_encode([
+            'id'=>(int)$product['id'],
+            'name'=>$product['name'],
+            'piece_price'=>(float)$product['piece_price'],
+            'pack_price'=>(float)$product['pack_price'],
+            'pack_size'=>(int)$product['pack_size'],
+            'stock'=>(int)$product['stock_pieces'],
+            'barcode'=>$product['barcode']
+        ]) ?>
+    )'
+>
+
+<strong>
+<?= e($product['name']) ?>
+</strong>
+
+<small>
+<?= money($product['piece_price']) ?>
+/ piece
+</small>
+
+<br>
+
+<small>
+Stock:
+<?= number_format((int)$product['stock_pieces']) ?>
+</small>
+
+</button>
+
+<?php endforeach; ?>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Current Sale</h2>
+
+<div
+    id="cart"
+>
+<p class="empty">
+Cart is empty.
+</p>
+</div>
+
+<hr>
+
+<label>Customer</label>
+
+<select id="customer">
+
+<option value="">
+Walk-in Customer
+</option>
+
+<?php foreach ($customers as $customer): ?>
+
+<option value="<?= (int)$customer['id'] ?>">
+
+<?= e($customer['name']) ?>
+
+<?php if ($customer['phone']): ?>
+
+- <?= e($customer['phone']) ?>
+
+<?php endif; ?>
+
+</option>
+
+<?php endforeach; ?>
+
+</select>
+
+<label>Payment Method</label>
+
+<select id="payment">
+
+<option>Cash</option>
+<option>Transfer</option>
+<option>POS</option>
+<option>Card</option>
+<option>Other</option>
+
+</select>
+
+<label>Discount</label>
+
+<input
+    id="discount"
+    type="number"
+    min="0"
+    value="0"
+    <?= !canManage() ? 'disabled' : '' ?>
+>
+
+<div
+    style="
+        margin-top:20px;
+    "
+>
+
+<div class="cart-head">
+
+<strong>Subtotal</strong>
+
+<strong id="subtotal">
+₦0.00
+</strong>
+
+</div>
+
+<div class="cart-head">
+
+<strong>Discount</strong>
+
+<strong id="discountDisplay">
+₦0.00
+</strong>
+
+</div>
+
+<div
+    class="cart-head"
+    style="margin-top:15px;"
+>
+
+<strong>
+TOTAL
+</strong>
+
+<span
+    class="pos-total"
+    id="total"
+>
+₦0.00
+</span>
+
+</div>
+
+</div>
+
+<button
+    class="btn green"
+    style="
+        width:100%;
+        margin-top:20px;
+        padding:15px;
+    "
+    onclick="completeSale()"
+>
+    COMPLETE SALE
+</button>
+
+<button
+    class="btn gray"
+    style="
+        width:100%;
+        margin-top:8px;
+    "
+    onclick="clearCart()"
+>
+    Clear Cart
+</button>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     INVENTORY
+===================================================== -->
+
+<?php if ($page === 'inventory'): ?>
+
+<h1>Inventory</h1>
+
+<div class="panel">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Product</th>
+<th>Barcode</th>
+<th>Pack</th>
+<th>Pieces</th>
+<th>Packs</th>
+<th>Piece Price</th>
+<th>Pack Price</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php foreach ($products as $product): ?>
+
+<?php
+
+$stock =
+    (int)$product['stock_pieces'];
+
+$packSize =
+    max(1, (int)$product['pack_size']);
+
+$packs =
+    intdiv($stock, $packSize);
+
+$status =
+    $stock <= 0
+    ? '<span class="badge red">OUT</span>'
+    : (
+        $stock <= (int)$product['low_stock']
+        ? '<span class="badge orange">LOW</span>'
+        : '<span class="badge green">GOOD</span>'
+    );
+
+?>
+
+<tr>
+
+<td>
+<strong>
+<?= e($product['name']) ?>
+</strong>
+</td>
+
+<td>
+<?= e($product['barcode']) ?>
+</td>
+
+<td>
+<?= number_format($packSize) ?>
+</td>
+
+<td>
+<?= number_format($stock) ?>
+</td>
+
+<td>
+<?= number_format($packs) ?>
+</td>
+
+<td>
+<?= money($product['piece_price']) ?>
+</td>
+
+<td>
+<?= money($product['pack_price']) ?>
+</td>
+
+<td>
+<?= $status ?>
+</td>
+
+<td>
+
+<?php if (canManage()): ?>
+
+<form
+    method="post"
+    style="
+        display:flex;
+        gap:5px;
+    "
+>
+
+<input
+    type="hidden"
+    name="action"
+    value="stock_adjust"
+>
+
+<input
+    type="hidden"
+    name="id"
+    value="<?= (int)$product['id'] ?>"
+>
+
+<input
+    type="number"
+    name="adjustment"
+    placeholder="+/-"
+    style="width:80px;"
+    required
+>
+
+<button class="btn">
+    Adjust
+</button>
+
+</form>
+
+<?php else: ?>
+
+<span class="badge">
+View Only
+</span>
+
+<?php endif; ?>
+
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     PRODUCTS
+===================================================== -->
+
+<?php if ($page === 'products'): ?>
+
+<h1>Products</h1>
+
+<?php if (canManage()): ?>
+
+<div class="panel">
+
+<h2>Add Product</h2>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="add_product"
+>
+
+<div class="grid3">
+
+<div class="field">
+
+<label>Product Name</label>
+
+<input
+    name="name"
+    required
+>
+
+</div>
+
+<div class="field">
+
+<label>SKU</label>
+
+<input name="sku">
+
+</div>
+
+<div class="field">
+
+<label>Barcode</label>
+
+<input
+    name="barcode"
+    placeholder="Leave blank to generate"
+>
+
+</div>
+
+<div class="field">
+
+<label>Category</label>
+
+<input
+    name="category"
+    value="General"
+>
+
+</div>
+
+<div class="field">
+
+<label>Pieces Per Pack</label>
+
+<input
+    name="pack_size"
+    type="number"
+    min="1"
+    value="1"
+>
+
+</div>
+
+<div class="field">
+
+<label>Price Per Piece</label>
+
+<input
+    name="piece_price"
+    type="number"
+    step="0.01"
+    min="0"
+>
+
+</div>
+
+<div class="field">
+
+<label>Price Per Pack</label>
+
+<input
+    name="pack_price"
+    type="number"
+    step="0.01"
+    min="0"
+>
+
+</div>
+
+<div class="field">
+
+<label>Opening Stock (Pieces)</label>
+
+<input
+    name="stock"
+    type="number"
+    min="0"
+    value="0"
+>
+
+</div>
+
+<div class="field">
+
+<label>Low Stock Alert</label>
+
+<input
+    name="low_stock"
+    type="number"
+    min="0"
+    value="5"
+>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="btn green">
+    Add Product
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+<?php endif; ?>
+
+<div class="panel">
+
+<h2>Product List</h2>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Product</th>
+<th>Category</th>
+<th>SKU</th>
+<th>Barcode</th>
+<th>Pack</th>
+<th>Piece</th>
+<th>Pack Price</th>
+<th>Stock</th>
+<th>Barcode</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php foreach ($products as $product): ?>
+
+<tr>
+
+<td>
+<?= e($product['name']) ?>
+</td>
+
+<td>
+<?= e($product['category']) ?>
+</td>
+
+<td>
+<?= e($product['sku']) ?>
+</td>
+
+<td>
+<?= e($product['barcode']) ?>
+</td>
+
+<td>
+<?= (int)$product['pack_size'] ?>
+</td>
+
+<td>
+<?= money($product['piece_price']) ?>
+</td>
+
+<td>
+<?= money($product['pack_price']) ?>
+</td>
+
+<td>
+<?= number_format(
+    (int)$product['stock_pieces']
+) ?>
+</td>
+
+<td>
+
+<button
+    class="btn"
+    onclick="showBarcode(
+        <?= (int)$product['id'] ?>,
+        '<?= e($product['barcode']) ?>',
+        '<?= e($product['name']) ?>'
+    )"
+>
+    Print
+</button>
+
+</td>
+
+<td>
+
+<?php if (isOwner()): ?>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="delete_product"
+>
+
+<input
+    type="hidden"
+    name="id"
+    value="<?= (int)$product['id'] ?>"
+>
+
+<button
+    class="btn red"
+    onclick="
+        return confirm(
+            'Delete this product?'
+        )
+    "
+>
+    Delete
+</button>
+
+</form>
+
+<?php endif; ?>
+
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     CUSTOMERS
+===================================================== -->
+
+<?php if ($page === 'customers'): ?>
+
+<h1>Customers</h1>
+
+<div class="panel">
+
+<h2>Add Customer</h2>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="add_customer"
+>
+
+<div class="grid3">
+
+<div class="field">
+
+<label>Name</label>
+
+<input
+    name="name"
+    required
+>
+
+</div>
+
+<div class="field">
+
+<label>Phone</label>
+
+<input name="phone">
+
+</div>
+
+<div class="field">
+
+<label>Address</label>
+
+<input name="address">
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="btn green">
+Add Customer
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+<div class="panel">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Phone</th>
+<th>Address</th>
+<th>Total Purchases</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php foreach ($customers as $customer): ?>
+
+<?php
+
+$stmt = $db->prepare("
+    SELECT
+    COALESCE(SUM(total),0)
+    FROM sales
+    WHERE customer_id = ?
+");
+
+$stmt->execute([
+    $customer['id']
+]);
+
+$totalCustomer =
+    (float)$stmt->fetchColumn();
+
+?>
+
+<tr>
+
+<td>
+<?= e($customer['name']) ?>
+</td>
+
+<td>
+<?= e($customer['phone']) ?>
+</td>
+
+<td>
+<?= e($customer['address']) ?>
+</td>
+
+<td>
+<strong>
+<?= money($totalCustomer) ?>
+</strong>
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     REPORTS
+===================================================== -->
+
+<?php if ($page === 'reports'): ?>
+
+<h1>Sales Reports</h1>
+
+<?php
+
+$from =
+    $_GET['from'] ?? date('Y-m-01');
+
+$to =
+    $_GET['to'] ?? date('Y-m-d');
+
+$stmt = $db->prepare("
+    SELECT
+        COALESCE(SUM(total),0) revenue,
+        COALESCE(SUM(discount),0) discounts,
+        COUNT(*) transactions
+    FROM sales
+    WHERE date(created_at)
+    BETWEEN ? AND ?
+");
+
+$stmt->execute([
+    $from,
+    $to
+]);
+
+$report =
+    $stmt->fetch();
+
+?>
+
+<div class="panel">
+
+<form method="get">
+
+<input
+    type="hidden"
+    name="page"
+    value="reports"
+>
+
+<div class="grid3">
+
+<div>
+
+<label>From</label>
+
+<input
+    type="date"
+    name="from"
+    value="<?= e($from) ?>"
+>
+
+</div>
+
+<div>
+
+<label>To</label>
+
+<input
+    type="date"
+    name="to"
+    value="<?= e($to) ?>"
+>
+
+</div>
+
+<div style="display:flex;align-items:end;">
+
+<button
+    class="btn"
+    style="width:100%;"
+>
+Generate Report
+</button>
+
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Revenue</h3>
+
+<div class="big">
+<?= money($report['revenue']) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Transactions</h3>
+
+<div class="big">
+<?= number_format(
+    (int)$report['transactions']
+) ?>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Discounts</h3>
+
+<div class="big">
+<?= money($report['discounts']) ?>
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Sales</h2>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+<th>Invoice</th>
+<th>Customer</th>
+<th>Total</th>
+<th>Payment</th>
+<th>Cashier</th>
+<th>Receipt</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php
+
+$stmt = $db->prepare("
+    SELECT *
+    FROM sales
+    WHERE date(created_at)
+    BETWEEN ? AND ?
+    ORDER BY id DESC
+");
+
+$stmt->execute([
+    $from,
+    $to
+]);
+
+$sales =
+    $stmt->fetchAll();
+
+?>
+
+<?php foreach ($sales as $sale): ?>
+
+<tr>
+
+<td>
+<?= e($sale['created_at']) ?>
+</td>
+
+<td>
+<?= e($sale['invoice']) ?>
+</td>
+
+<td>
+<?= e($sale['customer_name']) ?>
+</td>
+
+<td>
+<strong>
+<?= money($sale['total']) ?>
+</strong>
+</td>
+
+<td>
+<?= e($sale['payment_method']) ?>
+</td>
+
+<td>
+<?= e($sale['cashier']) ?>
+</td>
+
+<td>
+
+<a
+    class="btn"
+    href="?page=receipt&id=<?= (int)$sale['id'] ?>"
+>
+View
+</a>
+
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     USERS
+===================================================== -->
+
+<?php if ($page === 'users' && isOwner()): ?>
+
+<h1>Users & Access</h1>
+
+<div class="panel">
+
+<h2>Create User</h2>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="add_user"
+>
+
+<div class="grid2">
+
+<div>
+
+<label>Name</label>
+
+<input
+    name="name"
+    required
+>
+
+</div>
+
+<div>
+
+<label>Username</label>
+
+<input
+    name="username"
+    required
+>
+
+</div>
+
+<div>
+
+<label>Password</label>
+
+<input
+    name="password"
+    type="password"
+    required
+>
+
+</div>
+
+<div>
+
+<label>Role</label>
+
+<select name="role">
+
+<option value="cashier">
+Cashier
+</option>
+
+<option value="manager">
+Manager
+</option>
+
+<option value="owner">
+Owner
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="btn green">
+Create User
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+<div class="panel">
+
+<h2>Users</h2>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Username</th>
+<th>Role</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php foreach ($users as $user): ?>
+
+<tr>
+
+<td>
+<?= e($user['name']) ?>
+</td>
+
+<td>
+<?= e($user['username']) ?>
+</td>
+
+<td>
+
+<span class="badge">
+
+<?= strtoupper(
+    e($user['role'])
+) ?>
+
+</span>
+
+</td>
+
+<td>
+
+<?php if ($user['active']): ?>
+
+<span class="badge green">
+Active
+</span>
+
+<?php else: ?>
+
+<span class="badge red">
+Disabled
+</span>
+
+<?php endif; ?>
+
+</td>
+
+<td>
+
+<?php if (
+    (int)$user['id']
+    !==
+    (int)$_SESSION['user']['id']
+): ?>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="toggle_user"
+>
+
+<input
+    type="hidden"
+    name="id"
+    value="<?= (int)$user['id'] ?>"
+>
+
+<button class="btn">
+
+<?= $user['active']
+    ? 'Disable'
+    : 'Enable'
+?>
+
+</button>
+
+</form>
+
+<?php else: ?>
+
+Current User
+
+<?php endif; ?>
+
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
+<!-- ====================================================
+     SETTINGS
+===================================================== -->
+
+<?php if ($page === 'settings'): ?>
+
+<h1>Settings</h1>
+
+<div class="panel">
+
+<h2>Change Password</h2>
+
+<form method="post">
+
+<input
+    type="hidden"
+    name="action"
+    value="change_password"
+>
+
+<div class="grid2">
+
+<div>
+
+<label>Current Password</label>
+
+<input
+    type="password"
+    name="old_password"
+    required
+>
+
+</div>
+
+<div>
+
+<label>New Password</label>
+
+<input
+    type="password"
+    name="new_password"
+    minlength="6"
+    required
+>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button class="btn green">
+Change Password
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+<div class="panel">
+
+<h2>System Information</h2>
+
+<p>
+<strong>Application:</strong>
+KCIGS-SALESPRO
+</p>
+
+<p>
+<strong>Version:</strong>
+1.0
+</p>
+
+<p>
+<strong>Database:</strong>
+SQLite
+</p>
+
+<p>
+<strong>Products:</strong>
+<?= number_format(count($products)) ?>
+</p>
+
+<p>
+<strong>Customers:</strong>
+<?= number_format(count($customers)) ?>
+</p>
+
+<p>
+<strong>Sales:</strong>
+<?=
+number_format(
+    (int)$db
+        ->query("SELECT COUNT(*) FROM sales")
+        ->fetchColumn()
+)
+?>
+</p>
+
+</div>
+
+<?php endif; ?>
+
+</main>
+
+</div>
+
+</div>
+
+<!-- ====================================================
+     BARCODE MODAL
+===================================================== -->
+
+<div
+    id="barcodeModal"
+    style="
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.6);
+        align-items:center;
+        justify-content:center;
+        z-index:100;
+    "
+>
+
+<div
+    style="
+        background:white;
+        width:min(450px,92%);
+        padding:25px;
+        border-radius:15px;
+        text-align:center;
+    "
+>
+
+<h2 id="barcodeName">
+Barcode
+</h2>
+
+<svg id="barcode"></svg>
+
+<p id="barcodeNumber"></p>
+
+<div class="actions">
+
+<button
+    class="btn"
+    onclick="window.print()"
+>
+Print
+</button>
+
+<button
+    class="btn gray"
+    onclick="closeBarcode()"
+>
+Close
+</button>
+
+</div>
+
+</div>
+
+</div>
 
 <script>
 
-const DB_KEY="SALESPRO_V2";
+/* ======================================================
+   POS JAVASCRIPT
+====================================================== */
 
-let db;
-let currentUser=null;
-let cart=[];
+let cart = [];
 
+const products = <?= json_encode(
+    array_map(
+        function($p) {
+            return [
+                'id' => (int)$p['id'],
+                'name' => $p['name'],
+                'barcode' => $p['barcode'],
+                'piece_price' =>
+                    (float)$p['piece_price'],
+                'pack_price' =>
+                    (float)$p['pack_price'],
+                'pack_size' =>
+                    (int)$p['pack_size'],
+                'stock' =>
+                    (int)$p['stock_pieces']
+            ];
+        },
+        $products
+    )
+) ?>;
 
-/* ==============================
-DATABASE
-============================== */
+function moneyJS(value) {
 
-function defaultDB(){
-
-    return {
-
-        users:[
+    return '₦' +
+        Number(value || 0)
+        .toLocaleString(
+            'en-NG',
             {
-                id:"u1",
-                name:"Owner",
-                username:"owner",
-                password:"owner123",
-                role:"owner",
-                active:true
-            },
-            {
-                id:"u2",
-                name:"Manager",
-                username:"manager",
-                password:"manager123",
-                role:"manager",
-                active:true
-            },
-            {
-                id:"u3",
-                name:"Cashier",
-                username:"cashier",
-                password:"cashier123",
-                role:"cashier",
-                active:true
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             }
-        ],
-
-        products:[],
-        customers:[],
-        sales:[]
-
-    };
-
+        );
 }
 
+function addToCart(product) {
 
-function loadDB(){
+    const existing =
+        cart.find(
+            item =>
+                item.product_id === product.id &&
+                item.type === 'piece'
+        );
 
-    const saved=localStorage.getItem(DB_KEY);
+    if (existing) {
 
-    if(saved){
+        if (
+            existing.quantity + 1
+            >
+            product.stock
+        ) {
 
-        try{
-            db=JSON.parse(saved);
-        }catch(e){
-            db=defaultDB();
+            alert('Insufficient stock.');
+
+            return;
         }
 
-    }else{
+        existing.quantity++;
 
-        db=defaultDB();
+    } else {
 
-    }
+        if (product.stock <= 0) {
 
-    saveDB();
+            alert('This product is out of stock.');
 
-}
-
-
-function saveDB(){
-
-    localStorage.setItem(DB_KEY,JSON.stringify(db));
-
-}
-
-
-function uid(){
-
-    return Date.now().toString(36)+
-        Math.random().toString(36).slice(2,8);
-
-}
-
-
-function money(n){
-
-    return "₦"+Number(n||0).toLocaleString(
-        "en-NG",
-        {
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
+            return;
         }
-    );
 
-}
+        cart.push({
 
+            product_id: product.id,
 
-function today(){
+            name: product.name,
 
-    const d=new Date();
+            type: 'piece',
 
-    return d.toISOString().slice(0,10);
+            quantity: 1,
 
-}
+            price: product.piece_price
 
-
-/* ==============================
-LOGIN
-============================== */
-
-function login(){
-
-    const username=
-        document.getElementById("loginUsername")
-        .value.trim();
-
-    const password=
-        document.getElementById("loginPassword")
-        .value;
-
-    const user=db.users.find(u=>
-        u.username.toLowerCase()===username.toLowerCase() &&
-        u.password===password &&
-        u.active
-    );
-
-    if(!user){
-
-        alert("Invalid login details.");
-
-        return;
-
+        });
     }
 
-    currentUser={...user};
-
-    sessionStorage.setItem(
-        "SALESPRO_USER",
-        JSON.stringify(currentUser)
-    );
-
-    document.getElementById("loginScreen")
-        .classList.add("hidden");
-
-    document.getElementById("app")
-        .classList.remove("hidden");
-
-    updateUserDisplay();
-
-    refreshAll();
-
+    renderCart();
 }
 
+function addPack(productId) {
 
-function updateUserDisplay(){
+    const product =
+        products.find(
+            p => p.id === productId
+        );
 
-    document.getElementById("sideUser")
-        .textContent=currentUser.name;
+    if (!product) return;
 
-    document.getElementById("sideRole")
-        .textContent=currentUser.role.toUpperCase();
+    if (
+        product.stock <
+        product.pack_size
+    ) {
 
-    document.getElementById("topUser")
-        .textContent=currentUser.name;
-
-    document.getElementById("usersNav")
-        .style.display=
-            currentUser.role==="owner"
-                ?"block"
-                :"none";
-
-}
-
-
-function logout(){
-
-    currentUser=null;
-
-    sessionStorage.removeItem("SALESPRO_USER");
-
-    document.getElementById("app")
-        .classList.add("hidden");
-
-    document.getElementById("loginScreen")
-        .classList.remove("hidden");
-
-}
-
-
-/* ==============================
-NAVIGATION
-============================== */
-
-function showSection(name,button){
-
-    document.querySelectorAll(".section")
-        .forEach(s=>s.classList.remove("active"));
-
-    document.getElementById(name)
-        .classList.add("active");
-
-    document.querySelectorAll(".nav button")
-        .forEach(b=>b.classList.remove("active"));
-
-    if(button)
-        button.classList.add("active");
-
-    const titles={
-        dashboard:"Dashboard",
-        sales:"New Sale",
-        products:"Products",
-        inventory:"Inventory",
-        customers:"Customers",
-        reports:"Reports",
-        users:"Users & Access",
-        backup:"Backup & Restore"
-    };
-
-    document.getElementById("pageTitle")
-        .textContent=titles[name];
-
-    if(name==="sales")
-        renderPOSProducts();
-
-    if(name==="inventory")
-        renderInventory();
-
-    if(name==="products")
-        renderProducts();
-
-    if(name==="customers")
-        renderCustomers();
-
-    if(name==="reports")
-        generateReport();
-
-    if(name==="users")
-        renderUsers();
-
-    if(window.innerWidth<900)
-        toggleSidebar(false);
-
-}
-
-
-function toggleSidebar(force){
-
-    const side=document.getElementById("sidebar");
-
-    if(force===false)
-        side.classList.remove("open");
-    else
-        side.classList.toggle("open");
-
-}
-
-
-/* ==============================
-PERMISSIONS
-============================== */
-
-function canManageProducts(){
-
-    return ["owner","manager"]
-        .includes(currentUser.role);
-
-}
-
-
-function canDiscount(){
-
-    return ["owner","manager"]
-        .includes(currentUser.role);
-
-}
-
-
-/* ==============================
-PRODUCTS
-============================== */
-
-function addProduct(){
-
-    if(!canManageProducts()){
-
-        alert("Only Owner or Manager can add products.");
+        alert('Not enough stock for one pack.');
 
         return;
-
     }
 
-    const name=
-        document.getElementById("productName").value.trim();
+    const existing =
+        cart.find(
+            item =>
+                item.product_id === product.id &&
+                item.type === 'pack'
+        );
 
-    const barcode=
-        document.getElementById("productBarcode").value.trim();
+    if (existing) {
 
-    const sku=
-        document.getElementById("productSKU").value.trim();
+        const required =
+            (existing.quantity + 1)
+            *
+            product.pack_size;
 
-    if(!name){
+        if (required > product.stock) {
 
-        alert("Product name is required.");
+            alert('Insufficient stock.');
+
+            return;
+        }
+
+        existing.quantity++;
+
+    } else {
+
+        cart.push({
+
+            product_id: product.id,
+
+            name: product.name,
+
+            type: 'pack',
+
+            quantity: 1,
+
+            price: product.pack_price
+        });
+    }
+
+    renderCart();
+}
+
+function changeQuantity(index, amount) {
+
+    const item =
+        cart[index];
+
+    if (!item) return;
+
+    const product =
+        products.find(
+            p => p.id === item.product_id
+        );
+
+    const newQty =
+        item.quantity + amount;
+
+    if (newQty <= 0) {
+
+        cart.splice(index, 1);
+
+        renderCart();
 
         return;
-
     }
 
-    if(barcode &&
-        db.products.some(p=>p.barcode===barcode)){
+    const required =
+        item.type === 'pack'
+        ? newQty * product.pack_size
+        : newQty;
 
-        alert("This barcode already exists.");
+    if (required > product.stock) {
+
+        alert('Insufficient stock.');
 
         return;
-
     }
 
-    const pack=
-        Math.max(
+    item.quantity = newQty;
+
+    renderCart();
+}
+
+function removeItem(index) {
+
+    cart.splice(index, 1);
+
+    renderCart();
+}
+
+function clearCart() {
+
+    if (
+        cart.length &&
+        !confirm('Clear current sale?')
+    ) {
+        return;
+    }
+
+    cart = [];
+
+    renderCart();
+}
+
+function renderCart() {
+
+    const container =
+        document.getElementById('cart');
+
+    if (!container) return;
+
+    if (!cart.length) {
+
+        container.innerHTML =
+            '<p class="empty">Cart is empty.</p>';
+
+        updateTotals();
+
+        return;
+    }
+
+    container.innerHTML =
+        cart.map(
+            (item,index) => {
+
+                return `
+                <div class="cart-item">
+
+                    <div class="cart-head">
+
+                        <strong>
+                            ${escapeJS(item.name)}
+                        </strong>
+
+                        <strong>
+                            ${moneyJS(
+                                item.price *
+                                item.quantity
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <small>
+                        ${item.type === 'pack'
+                            ? 'Pack'
+                            : 'Piece'}
+                        ×
+                        ${moneyJS(item.price)}
+                    </small>
+
+                    <div class="qty">
+
+                        <button
+                            onclick="
+                                changeQuantity(
+                                    ${index},
+                                    -1
+                                )
+                            "
+                        >
+                            −
+                        </button>
+
+                        <strong>
+                            ${item.quantity}
+                        </strong>
+
+                        <button
+                            onclick="
+                                changeQuantity(
+                                    ${index},
+                                    1
+                                )
+                            "
+                        >
+                            +
+                        </button>
+
+                        <button
+                            onclick="
+                                removeItem(
+                                    ${index}
+                                )
+                            "
+                        >
+                            ✕
+                        </button>
+
+                        ${
+                            item.type === 'piece'
+                            ?
+                            `
+                            <button
+                                onclick="
+                                    convertToPack(
+                                        ${index}
+                                    )
+                                "
+                            >
+                                Pack
+                            </button>
+                            `
+                            :
+                            ''
+                        }
+
+                    </div>
+
+                </div>
+                `;
+            }
+        ).join('');
+
+    updateTotals();
+}
+
+function convertToPack(index) {
+
+    const item =
+        cart[index];
+
+    const product =
+        products.find(
+            p => p.id === item.product_id
+        );
+
+    if (!product) return;
+
+    cart[index] = {
+
+        product_id:
+            product.id,
+
+        name:
+            product.name,
+
+        type:
+            'pack',
+
+        quantity:
             1,
-            Number(document.getElementById("productPack").value)||1
+
+        price:
+            product.pack_price
+    };
+
+    renderCart();
+}
+
+function updateTotals() {
+
+    let subtotal = 0;
+
+    cart.forEach(
+        item => {
+
+            subtotal +=
+                item.price *
+                item.quantity;
+        }
+    );
+
+    const discountInput =
+        document.getElementById(
+            'discount'
         );
 
-    const cost=
-        Math.max(
-            0,
-            Number(document.getElementById("productCost").value)||0
-        );
-
-    const price=
-        Math.max(
-            0,
-            Number(document.getElementById("productPrice").value)||0
-        );
-
-    let packPrice=
-        Number(document.getElementById("productPackPrice").value)||0;
-
-    if(packPrice<=0)
-        packPrice=price*pack;
-
-    db.products.push({
-
-        id:uid(),
-        name:name,
-        barcode:barcode,
-        sku:sku,
-        category:
-            document.getElementById("productCategory").value
-            ||"General",
-
-        pack:pack,
-        cost:cost,
-        price:price,
-        packPrice:packPrice,
-
-        stock:
-            Math.max(
-                0,
-                Number(document.getElementById("productStock").value)||0
+    const discount =
+        Math.min(
+            Number(
+                discountInput?.value || 0
             ),
+            subtotal
+        );
 
-        low:
-            Math.max(
-                0,
-                Number(document.getElementById("productLow").value)||5
-            )
+    const total =
+        subtotal - discount;
 
-    });
+    document.getElementById(
+        'subtotal'
+    ).textContent =
+        moneyJS(subtotal);
 
-    saveDB();
+    document.getElementById(
+        'discountDisplay'
+    ).textContent =
+        moneyJS(discount);
 
-    clearProductForm();
-
-    refreshAll();
-
-    alert("Product added successfully.");
-
+    document.getElementById(
+        'total'
+    ).textContent =
+        moneyJS(total);
 }
 
+function completeSale() {
 
-function clearProductForm(){
+    if (!cart.length) {
 
-    [
-        "productName",
-        "productBarcode",
-        "productSKU",
-        "productCost",
-        "productPrice",
-        "productPackPrice",
-        "productStock"
-    ].forEach(id=>{
-        document.getElementById(id).value="";
-    });
-
-    document.getElementById("productPack").value=1;
-    document.getElementById("productLow").value=5;
-
-}
-
-
-function renderProducts(){
-
-    const tbody=document.getElementById("productsTable");
-
-    const search=
-        document.getElementById("productSearch")
-        .value.toLowerCase();
-
-    const products=db.products.filter(p=>
-        p.name.toLowerCase().includes(search) ||
-        String(p.barcode).includes(search) ||
-        String(p.sku).toLowerCase().includes(search)
-    );
-
-    if(!products.length){
-
-        tbody.innerHTML=
-            `<tr><td colspan="8" class="empty">
-            No products found.
-            </td></tr>`;
+        alert('Cart is empty.');
 
         return;
-
     }
 
-    tbody.innerHTML=products.map(p=>`
+    const discount =
+        Number(
+            document.getElementById(
+                'discount'
+            ).value || 0
+        );
 
-        <tr>
+    const customer =
+        document.getElementById(
+            'customer'
+        ).value;
 
-            <td><strong>${esc(p.name)}</strong></td>
+    const payment =
+        document.getElementById(
+            'payment'
+        ).value;
 
-            <td>${esc(p.barcode||"-")}</td>
+    const form =
+        document.createElement('form');
 
-            <td>${esc(p.sku||"-")}</td>
+    form.method = 'POST';
 
-            <td>${p.pack}</td>
+    form.style.display = 'none';
 
-            <td>${money(p.cost)}</td>
+    form.innerHTML = `
 
-            <td>${money(p.price)}</td>
+        <input
+            name="action"
+            value="complete_sale"
+        >
 
-            <td>${p.stock.toLocaleString()}</td>
+        <input
+            name="items"
+            value='${JSON.stringify(cart)}'
+        >
 
-            <td>
+        <input
+            name="customer_id"
+            value="${customer}"
+        >
 
-                <button
-                    class="btn light"
-                    onclick="editProduct('${p.id}')">
-                    Edit
-                </button>
+        <input
+            name="payment_method"
+            value="${payment}"
+        >
 
-                ${
-                    currentUser.role==="owner"
-                    ?
-                    `<button
-                        class="btn red"
-                        onclick="deleteProduct('${p.id}')">
-                        Delete
-                    </button>`
-                    :""
-                }
+        <input
+            name="discount"
+            value="${discount}"
+        >
 
-            </td>
+    `;
 
-        </tr>
+    document.body.appendChild(form);
 
-    `).join("");
-
+    form.submit();
 }
 
+function searchProducts() {
 
-function editProduct(id){
+    const input =
+        document.getElementById(
+            'productSearch'
+        );
 
-    const p=db.products.find(x=>x.id===id);
+    const term =
+        input.value
+        .trim()
+        .toLowerCase();
 
-    if(!p)return;
+    const grid =
+        document.getElementById(
+            'productGrid'
+        );
 
-    document.getElementById("editId").value=p.id;
-    document.getElementById("editName").value=p.name;
-    document.getElementById("editBarcode").value=p.barcode||"";
-    document.getElementById("editSKU").value=p.sku||"";
-    document.getElementById("editCategory").value=p.category;
-    document.getElementById("editPack").value=p.pack;
-    document.getElementById("editCost").value=p.cost;
-    document.getElementById("editPrice").value=p.price;
-    document.getElementById("editPackPrice").value=p.packPrice;
-    document.getElementById("editLow").value=p.low;
+    const results =
+        products.filter(
+            product =>
+                product.name
+                    .toLowerCase()
+                    .includes(term)
+                ||
+                String(product.barcode)
+                    .toLowerCase()
+                    .includes(term)
+        );
 
-    document.getElementById("editModal")
-        .classList.add("show");
+    grid.innerHTML =
+        results.map(
+            product => `
 
-}
+            <button
+                class="product-button"
+                onclick='addToCart(
+                    ${JSON.stringify(product)}
+                )'
+            >
 
+                <strong>
+                    ${escapeJS(product.name)}
+                </strong>
 
-function saveProductEdit(){
+                <small>
+                    ${moneyJS(
+                        product.piece_price
+                    )}
+                    / piece
+                </small>
 
-    const id=document.getElementById("editId").value;
+                <br>
 
-    const p=db.products.find(x=>x.id===id);
+                <small>
+                    Stock:
+                    ${product.stock}
+                </small>
 
-    if(!p)return;
+            </button>
 
-    const barcode=
-        document.getElementById("editBarcode").value.trim();
+            `
+        ).join('');
 
-    if(
-        barcode &&
-        db.products.some(x=>
-            x.id!==id &&
-            x.barcode===barcode
+    if (
+        results.length === 1 &&
+        productMatchesBarcode(
+            results[0],
+            term
         )
-    ){
+    ) {
 
-        alert("Barcode already belongs to another product.");
+        addToCart(results[0]);
 
-        return;
+        input.value = '';
 
+        showAllProducts();
     }
+}
 
-    p.name=
-        document.getElementById("editName").value.trim();
+function productMatchesBarcode(
+    product,
+    term
+) {
 
-    p.barcode=barcode;
+    return String(
+        product.barcode
+    ).toLowerCase() === term;
+}
 
-    p.sku=
-        document.getElementById("editSKU").value.trim();
+function showAllProducts() {
 
-    p.category=
-        document.getElementById("editCategory").value.trim()
-        ||"General";
-
-    p.pack=
-        Math.max(
-            1,
-            Number(document.getElementById("editPack").value)||1
+    const grid =
+        document.getElementById(
+            'productGrid'
         );
 
-    if(canManageProducts()){
-
-        p.cost=
-            Math.max(
-                0,
-                Number(document.getElementById("editCost").value)||0
-            );
-
-        p.price=
-            Math.max(
-                0,
-                Number(document.getElementById("editPrice").value)||0
-            );
-
-        p.packPrice=
-            Math.max(
-                0,
-                Number(document.getElementById("editPackPrice").value)||0
-            );
-
-    }
-
-    p.low=
-        Math.max(
-            0,
-            Number(document.getElementById("editLow").value)||0
-        );
-
-    saveDB();
-
-    closeModal();
-
-    refreshAll();
-
-}
-
-
-function deleteProduct(id){
-
-    if(currentUser.role!=="owner"){
-
-        alert("Only Owner can delete products.");
-
-        return;
-
-    }
-
-    const p=db.products.find(x=>x.id===id);
-
-    if(!p)return;
-
-    if(!confirm("Delete "+p.name+"?"))
-        return;
-
-    db.products=db.products.filter(x=>x.id!==id);
-
-    saveDB();
-
-    refreshAll();
-
-}
-
-
-/* ==============================
-BARCODE
-============================== */
-
-function barcodeKey(event){
-
-    if(event.key==="Enter"){
-
-        event.preventDefault();
-
-        const value=
-            document.getElementById("barcodeInput")
-            .value.trim();
-
-        if(value)
-            addBarcodeProduct(value);
-
-    }
-
-}
-
-
-function addBarcodeProduct(code){
-
-    const p=db.products.find(x=>
-        x.barcode===code ||
-        x.sku===code
-    );
-
-    if(!p){
-
-        alert("Product not found for barcode: "+code);
-
-        return;
-
-    }
-
-    addToCart(p.id);
-
-    document.getElementById("barcodeInput").value="";
-
-}
-
-
-function focusBarcode(){
-
-    document.getElementById("barcodeInput").focus();
-
-}
-
-
-async function scanBarcode(){
-
-    if(!("BarcodeDetector" in window)){
-
-        alert(
-            "Camera barcode scanning is not supported by this browser.\n\n"+
-            "You can still use a Bluetooth/USB barcode scanner or enter the barcode manually."
-        );
-
-        focusBarcode();
-
-        return;
-
-    }
-
-    try{
-
-        const detector=new BarcodeDetector();
-
-        const stream=
-            await navigator.mediaDevices.getUserMedia({
-                video:{facingMode:"environment"}
-            });
-
-        const video=document.createElement("video");
-
-        video.srcObject=stream;
-
-        video.setAttribute("playsinline","");
-
-        await video.play();
-
-        const box=document.createElement("div");
-
-        box.style.cssText=
-            "position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center";
-
-        video.style.width="100%";
-
-        box.appendChild(video);
-
-        document.body.appendChild(box);
-
-        const scan=async()=>{
-
-            try{
-
-                const codes=
-                    await detector.detect(video);
-
-                if(codes.length){
-
-                    const code=codes[0].rawValue;
-
-                    stream.getTracks().forEach(t=>t.stop());
-
-                    box.remove();
-
-                    addBarcodeProduct(code);
-
-                    return;
-
-                }
-
-            }catch(e){}
-
-            requestAnimationFrame(scan);
-
-        };
-
-        scan();
-
-    }catch(e){
-
-        alert(
-            "Camera access was not available. Please allow camera permission or use a barcode scanner."
-        );
-
-    }
-
-}
-
-
-/* ==============================
-POS
-============================== */
-
-function renderPOSProducts(){
-
-    const box=document.getElementById("posProducts");
-
-    const search=
-        document.getElementById("posSearch")
-        .value.toLowerCase();
-
-    const products=db.products.filter(p=>
-        p.stock>0 &&
-        (
-            p.name.toLowerCase().includes(search) ||
-            String(p.barcode).includes(search) ||
-            String(p.sku).toLowerCase().includes(search)
-        )
-    );
-
-    box.innerHTML=products.map(p=>`
-
-        <button
-            class="product-btn"
-            onclick="addToCart('${p.id}')">
-
-            <strong>${esc(p.name)}</strong>
+    if (!grid) return;
+
+    grid.innerHTML =
+        products.map(
+            product => `
+
+            <button
+                class="product-button"
+                onclick='addToCart(
+                    ${JSON.stringify(product)}
+                )'
+            >
+
+            <strong>
+                ${escapeJS(product.name)}
+            </strong>
 
             <small>
-                ${money(p.price)} / piece
+                ${moneyJS(
+                    product.piece_price
+                )}
+                / piece
             </small>
 
             <br>
 
             <small>
-                Stock: ${p.stock}
+                Stock:
+                ${product.stock}
             </small>
 
-        </button>
+            </button>
 
-    `).join("");
-
+            `
+        ).join('');
 }
 
-
-function addToCart(id){
-
-    const p=db.products.find(x=>x.id===id);
-
-    if(!p)return;
-
-    if(p.stock<=0){
-
-        alert("This product is out of stock.");
-
-        return;
-
-    }
-
-    const existing=cart.find(x=>x.id===id);
-
-    if(existing){
-
-        if(existing.quantity>=p.stock){
-
-            alert("Not enough stock.");
-
-            return;
-
-        }
-
-        existing.quantity++;
-
-    }else{
-
-        cart.push({
-            id:p.id,
-            quantity:1
-        });
-
-    }
-
-    renderCart();
-
-}
-
-
-function renderCart(){
-
-    const box=document.getElementById("cart");
-
-    if(!cart.length){
-
-        box.innerHTML=
-            `<div class="empty">Cart is empty.</div>`;
-
-        document.getElementById("cartSubtotal")
-            .textContent=money(0);
-
-        document.getElementById("cartTotal")
-            .textContent=money(0);
-
-        return;
-
-    }
-
-    let subtotal=0;
-
-    box.innerHTML=cart.map(item=>{
-
-        const p=db.products.find(x=>x.id===item.id);
-
-        if(!p)return"";
-
-        const amount=p.price*item.quantity;
-
-        subtotal+=amount;
-
-        return `
-
-            <div class="cart-row">
-
-                <div>
-                    <strong>${esc(p.name)}</strong><br>
-                    <small>${money(p.price)}</small>
-                </div>
-
-                <input
-                    type="number"
-                    min="1"
-                    max="${p.stock}"
-                    value="${item.quantity}"
-                    onchange="changeQty('${p.id}',this.value)"
-                >
-
-                <strong>${money(amount)}</strong>
-
-                <button
-                    class="btn red"
-                    onclick="removeCart('${p.id}')">
-                    ×
-                </button>
-
-            </div>
-
-        `;
-
-    }).join("");
-
-    const discount=
-        canDiscount()
-        ?
-        Math.max(
-            0,
-            Number(document.getElementById("saleDiscount").value)||0
-        )
-        :0;
-
-    const total=Math.max(0,subtotal-discount);
-
-    document.getElementById("cartSubtotal")
-        .textContent=money(subtotal);
-
-    document.getElementById("cartTotal")
-        .textContent=money(total);
-
-}
-
-
-function changeQty(id,value){
-
-    const item=cart.find(x=>x.id===id);
-
-    const p=db.products.find(x=>x.id===id);
-
-    if(!item||!p)return;
-
-    let qty=Math.floor(Number(value)||1);
-
-    qty=Math.max(1,Math.min(qty,p.stock));
-
-    item.quantity=qty;
-
-    renderCart();
-
-}
-
-
-function removeCart(id){
-
-    cart=cart.filter(x=>x.id!==id);
-
-    renderCart();
-
-}
-
-
-function clearCart(){
-
-    cart=[];
-
-    document.getElementById("saleDiscount").value=0;
-
-    renderCart();
-
-}
-
-
-/* ==============================
-COMPLETE SALE
-============================== */
-
-function completeSale(){
-
-    if(!cart.length){
-
-        alert("Cart is empty.");
-
-        return;
-
-    }
-
-    const payment=
-        document.getElementById("paymentMethod").value;
-
-    const customer=
-        document.getElementById("saleCustomer").value
-        ||"Walk-in Customer";
-
-    const discount=
-        canDiscount()
-        ?
-        Math.max(
-            0,
-            Number(document.getElementById("saleDiscount").value)||0
-        )
-        :0;
-
-    let subtotal=0;
-    let costTotal=0;
-    let units=0;
-
-    const items=cart.map(item=>{
-
-        const p=db.products.find(x=>x.id===item.id);
-
-        const amount=p.price*item.quantity;
-
-        subtotal+=amount;
-
-        costTotal+=p.cost*item.quantity;
-
-        units+=item.quantity;
-
-        return {
-            productId:p.id,
-            name:p.name,
-            barcode:p.barcode,
-            quantity:item.quantity,
-            price:p.price,
-            cost:p.cost,
-            total:amount
-        };
-
-    });
-
-    if(payment==="Credit" && customer==="Walk-in Customer"){
-
-        alert("Credit sales require a customer.");
-
-        return;
-
-    }
-
-    const total=Math.max(0,subtotal-discount);
-
-    const sale={
-
-        id:uid(),
-
-        invoice:
-            "INV-"+Date.now(),
-
-        date:new Date().toISOString(),
-
-        customer:customer,
-
-        items:items,
-
-        subtotal:subtotal,
-
-        discount:discount,
-
-        total:total,
-
-        cost:costTotal,
-
-        profit:total-costTotal,
-
-        units:units,
-
-        payment:payment,
-
-        user:currentUser.username
-
-    };
-
-    items.forEach(item=>{
-
-        const p=db.products.find(x=>x.id===item.productId);
-
-        p.stock-=item.quantity;
-
-    });
-
-    db.sales.unshift(sale);
-
-    saveDB();
-
-    alert(
-        "Sale completed!\n\n"+
-        "Invoice: "+sale.invoice+
-        "\nTotal: "+money(sale.total)
-    );
-
-    cart=[];
-
-    document.getElementById("saleDiscount").value=0;
-
-    renderCart();
-
-    refreshAll();
-
-}
-
-
-/* ==============================
-CUSTOMERS
-============================== */
-
-function addCustomer(){
-
-    const name=
-        document.getElementById("customerName")
-        .value.trim();
-
-    if(!name){
-
-        alert("Customer name is required.");
-
-        return;
-
-    }
-
-    db.customers.push({
-
-        id:uid(),
-
-        name:name,
-
-        phone:
-            document.getElementById("customerPhone").value.trim(),
-
-        address:
-            document.getElementById("customerAddress").value.trim()
-
-    });
-
-    saveDB();
-
-    document.getElementById("customerName").value="";
-    document.getElementById("customerPhone").value="";
-    document.getElementById("customerAddress").value="";
-
-    refreshAll();
-
-}
-
-
-function renderCustomers(){
-
-    const tbody=document.getElementById("customersTable");
-
-    const select=document.getElementById("saleCustomer");
-
-    select.innerHTML=
-        `<option value="">Walk-in Customer</option>`+
-        db.customers.map(c=>
-            `<option value="${esc(c.name)}">${esc(c.name)}</option>`
-        ).join("");
-
-    if(!db.customers.length){
-
-        tbody.innerHTML=
-            `<tr><td colspan="5" class="empty">
-            No customers added.
-            </td></tr>`;
-
-        return;
-
-    }
-
-    tbody.innerHTML=db.customers.map(c=>{
-
-        const sales=
-            db.sales.filter(s=>s.customer===c.name);
-
-        const purchases=
-            sales.reduce((a,s)=>a+s.total,0);
-
-        const credit=
-            sales
-            .filter(s=>s.payment==="Credit")
-            .reduce((a,s)=>a+s.total,0);
-
-        return `
-
-            <tr>
-
-                <td>${esc(c.name)}</td>
-
-                <td>${esc(c.phone||"-")}</td>
-
-                <td>${esc(c.address||"-")}</td>
-
-                <td>${money(purchases)}</td>
-
-                <td>
-                    ${
-                        credit>0
-                        ?`<span class="badge red">${money(credit)}</span>`
-                        :money(0)
-                    }
-                </td>
-
-            </tr>
-
-        `;
-
-    }).join("");
-
-}
-
-
-/* ==============================
-INVENTORY
-============================== */
-
-function renderInventory(){
-
-    const tbody=document.getElementById("inventoryTable");
-
-    if(!db.products.length){
-
-        tbody.innerHTML=
-            `<tr><td colspan="7" class="empty">
-            No products.
-            </td></tr>`;
-
-        return;
-
-    }
-
-    tbody.innerHTML=db.products.map(p=>{
-
-        const packs=Math.floor(p.stock/p.pack);
-
-        const value=p.stock*p.cost;
-
-        let status;
-
-        if(p.stock<=0)
-            status=`<span class="badge red">Out</span>`;
-        else if(p.stock<=p.low)
-            status=`<span class="badge orange">Low</span>`;
-        else
-            status=`<span class="badge green">Good</span>`;
-
-        return `
-
-            <tr>
-
-                <td>${esc(p.name)}</td>
-
-                <td>${esc(p.barcode||"-")}</td>
-
-                <td>${p.stock.toLocaleString()}</td>
-
-                <td>${packs.toLocaleString()}</td>
-
-                <td>${money(value)}</td>
-
-                <td>${status}</td>
-
-                <td>
-                    <button
-                        class="btn light"
-                        onclick="adjustStock('${p.id}')">
-                        Adjust
-                    </button>
-                </td>
-
-            </tr>
-
-        `;
-
-    }).join("");
-
-}
-
-
-function adjustStock(id){
-
-    if(!canManageProducts()){
-
-        alert("Only Owner or Manager can adjust stock.");
-
-        return;
-
-    }
-
-    const p=db.products.find(x=>x.id===id);
-
-    if(!p)return;
-
-    const value=prompt(
-        "Enter stock adjustment for "+p.name+
-        "\n\nPositive = add stock\nNegative = remove stock",
-        "0"
-    );
-
-    if(value===null)return;
-
-    const amount=Math.floor(Number(value));
-
-    if(!Number.isFinite(amount)){
-
-        alert("Invalid number.");
-
-        return;
-
-    }
-
-    if(p.stock+amount<0){
-
-        alert("Stock cannot be negative.");
-
-        return;
-
-    }
-
-    p.stock+=amount;
-
-    saveDB();
-
-    refreshAll();
-
-}
-
-
-/* ==============================
-REPORTS
-============================== */
-
-function generateReport(){
-
-    const from=document.getElementById("reportFrom").value;
-    const to=document.getElementById("reportTo").value;
-
-    let sales=[...db.sales];
-
-    if(from)
-        sales=sales.filter(s=>
-            s.date.slice(0,10)>=from
-        );
-
-    if(to)
-        sales=sales.filter(s=>
-            s.date.slice(0,10)<=to
-        );
-
-    const revenue=
-        sales.reduce((a,s)=>a+s.total,0);
-
-    const profit=
-        sales.reduce((a,s)=>a+s.profit,0);
-
-    const units=
-        sales.reduce((a,s)=>a+s.units,0);
-
-    document.getElementById("reportRevenue")
-        .textContent=money(revenue);
-
-    document.getElementById("reportTransactions")
-        .textContent=sales.length;
-
-    document.getElementById("reportProfit")
-        .textContent=money(profit);
-
-    document.getElementById("reportUnits")
-        .textContent=units.toLocaleString();
-
-    const tbody=document.getElementById("reportsTable");
-
-    tbody.innerHTML=sales.length
-        ?
-        sales.map(s=>`
-
-            <tr>
-
-                <td>${new Date(s.date).toLocaleString()}</td>
-
-                <td>${esc(s.invoice)}</td>
-
-                <td>${esc(s.customer)}</td>
-
-                <td>${money(s.total)}</td>
-
-                <td>${money(s.profit)}</td>
-
-                <td>${esc(s.payment)}</td>
-
-                <td>${esc(s.user)}</td>
-
-            </tr>
-
-        `).join("")
-        :
-        `<tr><td colspan="7" class="empty">
-        No sales found.
-        </td></tr>`;
-
-}
-
-
-/* ==============================
-USERS
-============================== */
-
-function renderUsers(){
-
-    const tbody=document.getElementById("usersTable");
-
-    tbody.innerHTML=db.users.map(u=>`
-
-        <tr>
-
-            <td>${esc(u.name)}</td>
-
-            <td>${esc(u.username)}</td>
-
-            <td>
-                <span class="badge ${
-                    u.role==="owner"
-                    ?"green"
-                    :u.role==="manager"
-                    ?"orange"
-                    :""
-                }">
-                    ${u.role}
-                </span>
-            </td>
-
-            <td>
-                ${
-                    u.active
-                    ?'<span class="badge green">Active</span>'
-                    :'<span class="badge red">Disabled</span>'
-                }
-            </td>
-
-            <td>
-
-                ${
-                    u.id!==currentUser.id
-                    ?
-                    `<button
-                        class="btn light"
-                        onclick="toggleUser('${u.id}')">
-                        ${u.active?"Disable":"Enable"}
-                    </button>`
-                    :"Current User"
-                }
-
-            </td>
-
-        </tr>
-
-    `).join("");
-
-}
-
-
-function createUser(){
-
-    if(currentUser.role!=="owner"){
-
-        alert("Only Owner can create users.");
-
-        return;
-
-    }
-
-    const name=
-        document.getElementById("newName").value.trim();
-
-    const username=
-        document.getElementById("newUsername").value.trim();
-
-    const password=
-        document.getElementById("newPassword").value;
-
-    const role=
-        document.getElementById("newRole").value;
-
-    if(!name||!username||!password){
-
-        alert("Complete all fields.");
-
-        return;
-
-    }
-
-    if(db.users.some(u=>
-        u.username.toLowerCase()===username.toLowerCase()
-    )){
-
-        alert("Username already exists.");
-
-        return;
-
-    }
-
-    db.users.push({
-
-        id:uid(),
-        name:name,
-        username:username,
-        password:password,
-        role:role,
-        active:true
-
-    });
-
-    saveDB();
-
-    document.getElementById("newName").value="";
-    document.getElementById("newUsername").value="";
-    document.getElementById("newPassword").value="";
-
-    renderUsers();
-
-}
-
-
-function toggleUser(id){
-
-    if(currentUser.role!=="owner"){
-
-        alert("Only Owner can change user access.");
-
-        return;
-
-    }
-
-    const u=db.users.find(x=>x.id===id);
-
-    if(!u)return;
-
-    u.active=!u.active;
-
-    saveDB();
-
-    renderUsers();
-
-}
-
-
-/* ==============================
-BACKUP
-============================== */
-
-function backupData(){
-
-    if(currentUser.role!=="owner"){
-
-        alert("Only Owner can create backups.");
-
-        return;
-
-    }
-
-    const blob=new Blob(
-        [JSON.stringify(db,null,2)],
-        {type:"application/json"}
-    );
-
-    const url=URL.createObjectURL(blob);
-
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download=
-        "SalesPro_Backup_"+today()+".json";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-}
-
-
-function restoreData(event){
-
-    if(currentUser.role!=="owner"){
-
-        alert("Only Owner can restore backups.");
-
-        return;
-
-    }
-
-    const file=event.target.files[0];
-
-    if(!file)return;
-
-    const reader=new FileReader();
-
-    reader.onload=function(e){
-
-        try{
-
-            const imported=
-                JSON.parse(e.target.result);
-
-            if(
-                !imported.users ||
-                !imported.products ||
-                !imported.sales
-            ){
-
-                throw new Error();
-
-            }
-
-            if(!confirm(
-                "Restore this backup? Current data will be replaced."
-            ))
-                return;
-
-            db=imported;
-
-            saveDB();
-
-            refreshAll();
-
-            alert("Backup restored successfully.");
-
-        }catch(error){
-
-            alert("Invalid SalesPro backup.");
-
-        }
-
-    };
-
-    reader.readAsText(file);
-
-}
-
-
-/* ==============================
-DASHBOARD
-============================== */
-
-function updateDashboard(){
-
-    const t=today();
-
-    const sales=
-        db.sales.filter(s=>
-            s.date.slice(0,10)===t
-        );
-
-    const revenue=
-        sales.reduce((a,s)=>a+s.total,0);
-
-    const low=
-        db.products.filter(p=>p.stock<=p.low).length;
-
-    document.getElementById("todaySales")
-        .textContent=money(revenue);
-
-    document.getElementById("todayTransactions")
-        .textContent=sales.length;
-
-    document.getElementById("productCount")
-        .textContent=db.products.length;
-
-    document.getElementById("lowStockCount")
-        .textContent=low;
-
-    const alertBox=
-        document.getElementById("dashboardAlert");
-
-    alertBox.innerHTML=
-        low
-        ?
-        `<div class="warning">
-        ⚠️ ${low} product(s) are at or below the low-stock level.
-        </div>`
-        :"";
-
-}
-
-
-function renderRecentSales(){
-
-    const tbody=document.getElementById("recentSales");
-
-    const sales=db.sales.slice(0,10);
-
-    tbody.innerHTML=sales.length
-        ?
-        sales.map(s=>`
-
-            <tr>
-
-                <td>${new Date(s.date).toLocaleString()}</td>
-
-                <td>${esc(s.invoice)}</td>
-
-                <td>${esc(s.customer)}</td>
-
-                <td>${money(s.total)}</td>
-
-                <td>${esc(s.payment)}</td>
-
-                <td>${esc(s.user)}</td>
-
-            </tr>
-
-        `).join("")
-        :
-        `<tr><td colspan="6" class="empty">
-        No sales yet.
-        </td></tr>`;
-
-}
-
-
-/* ==============================
-UTILITIES
-============================== */
-
-function esc(value){
-
-    return String(value??"")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
+function escapeJS(value) {
+
+    return String(value)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
         .replaceAll("'","&#039;");
-
 }
 
+function showBarcode(
+    id,
+    barcode,
+    name
+) {
 
-function closeModal(){
+    document.getElementById(
+        'barcodeName'
+    ).textContent = name;
 
-    document.getElementById("editModal")
-        .classList.remove("show");
+    document.getElementById(
+        'barcodeNumber'
+    ).textContent = barcode;
 
+    document.getElementById(
+        'barcodeModal'
+    ).style.display = 'flex';
+
+    JsBarcode(
+        '#barcode',
+        barcode,
+        {
+            format: 'CODE128',
+            displayValue: true,
+            width: 2,
+            height: 70,
+            margin: 10
+        }
+    );
 }
 
+function closeBarcode() {
 
-function refreshAll(){
-
-    updateDashboard();
-
-    renderRecentSales();
-
-    renderPOSProducts();
-
-    renderCart();
-
-    renderProducts();
-
-    renderInventory();
-
-    renderCustomers();
-
-    renderUsers();
-
-    generateReport();
-
+    document.getElementById(
+        'barcodeModal'
+    ).style.display = 'none';
 }
 
+function toggleMenu() {
 
-/* ==============================
-INITIALIZE
-============================== */
+    document
+        .getElementById('sidebar')
+        .classList.toggle('open');
+}
 
-function init(){
+document.addEventListener(
+    'keydown',
+    function(event) {
 
-    loadDB();
+        if (
+            event.key === 'Enter' &&
+            document.activeElement?.id ===
+            'productSearch'
+        ) {
 
-    const session=
-        sessionStorage.getItem("SALESPRO_USER");
-
-    if(session){
-
-        try{
-
-            const saved=JSON.parse(session);
-
-            const user=db.users.find(u=>
-                u.id===saved.id &&
-                u.active
-            );
-
-            if(user){
-
-                currentUser={...user};
-
-                document.getElementById("loginScreen")
-                    .classList.add("hidden");
-
-                document.getElementById("app")
-                    .classList.remove("hidden");
-
-                updateUserDisplay();
-
-            }
-
-        }catch(e){}
+            searchProducts();
+        }
 
     }
+);
 
-    document.getElementById("reportFrom").value=today();
-    document.getElementById("reportTo").value=today();
+const discount =
+    document.getElementById(
+        'discount'
+    );
 
-    if(currentUser)
-        refreshAll();
+if (discount) {
 
+    discount.addEventListener(
+        'input',
+        updateTotals
+    );
 }
 
-
-init();
+renderCart();
 
 </script>
 
