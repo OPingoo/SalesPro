@@ -1,17 +1,2537 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b2d4f">
-<title>KCIGS-SALESPRO</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#12395b">
+<title>SalesPro POS</title>
 
 <style>
-/* CSS goes here */
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    background:#f4f7fa;
+    color:#172033
+}
+button,input,select{
+    font:inherit
+}
+button{
+    cursor:pointer
+}
+.hidden{display:none!important}
+
+.login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:#102f4a
+}
+.login-box{
+    background:white;
+    width:100%;
+    max-width:480px;
+    padding:35px;
+    border-radius:24px;
+    box-shadow:0 20px 60px #0004
+}
+.logo{
+    font-size:42px;
+    font-weight:800;
+    color:#12395b
+}
+.subtitle{
+    font-size:18px;
+    color:#65748b;
+    margin:8px 0 25px
+}
+.demo{
+    background:#edf6ff;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    color:#1763b5
+}
+label{
+    display:block;
+    font-weight:700;
+    margin-bottom:7px
+}
+input,select{
+    width:100%;
+    border:1px solid #ccd5df;
+    border-radius:10px;
+    padding:13px;
+    background:white;
+    outline:none
+}
+input:focus,select:focus{
+    border-color:#2672b8
+}
+.form-group{
+    margin-bottom:16px
+}
+.btn{
+    border:0;
+    border-radius:10px;
+    padding:12px 17px;
+    background:#205b86;
+    color:white;
+    font-weight:700
+}
+.btn:hover{opacity:.9}
+.btn.green{background:#16834b}
+.btn.red{background:#c83232}
+.btn.orange{background:#d98216}
+.btn.gray{background:#687383}
+.btn.light{
+    background:#eaf1f7;
+    color:#173b58
+}
+.btn.full{width:100%}
+
+.app{
+    min-height:100vh;
+    display:flex
+}
+.sidebar{
+    width:245px;
+    background:#102f4a;
+    color:white;
+    min-height:100vh;
+    padding:20px 15px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow:auto
+}
+.brand{
+    font-size:27px;
+    font-weight:800;
+    padding:10px 12px 25px
+}
+.user-box{
+    background:#ffffff15;
+    padding:13px;
+    border-radius:12px;
+    margin-bottom:20px
+}
+.nav button{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:#dce8f2;
+    padding:13px;
+    text-align:left;
+    border-radius:9px;
+    margin:2px 0
+}
+.nav button.active,
+.nav button:hover{
+    background:#ffffff18;
+    color:white
+}
+.logout{
+    margin-top:20px;
+    width:100%
+}
+
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+    min-height:100vh
+}
+.topbar{
+    height:70px;
+    background:white;
+    border-bottom:1px solid #e0e6ec;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    position:sticky;
+    top:0;
+    z-index:5
+}
+.menu-btn{display:none}
+.content{
+    padding:25px;
+    max-width:1500px;
+    margin:auto
+}
+.section{display:none}
+.section.active{display:block}
+h1{margin:0}
+h2{margin-top:0}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    border:1px solid #e4e9ee
+}
+.card small{color:#718096}
+.big{
+    font-size:27px;
+    font-weight:800;
+    margin-top:8px
+}
+
+.panel{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    border:1px solid #e3e8ed
+}
+.grid2{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px
+}
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px
+}
+.actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:15px
+}
+
+.table-wrap{
+    overflow-x:auto
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px
+}
+th,td{
+    padding:12px 10px;
+    border-bottom:1px solid #e6ebef;
+    text-align:left
+}
+th{
+    background:#f7f9fb;
+    font-size:13px
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700
+}
+.badge.green{background:#dcf7e9;color:#137341}
+.badge.orange{background:#fff0d8;color:#9a5b00}
+.badge.red{background:#ffe1e1;color:#a51e1e}
+
+.pos{
+    display:grid;
+    grid-template-columns:1.5fr 1fr;
+    gap:20px
+}
+.product-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-top:15px
+}
+.product-btn{
+    background:white;
+    border:1px solid #dce4eb;
+    border-radius:12px;
+    padding:15px;
+    text-align:left
+}
+.product-btn:hover{
+    border-color:#2570a8;
+    box-shadow:0 5px 15px #0001
+}
+.product-btn strong{
+    display:block;
+    margin-bottom:5px
+}
+.cart-row{
+    display:grid;
+    grid-template-columns:1fr 70px 90px 30px;
+    gap:7px;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid #eee
+}
+.cart-row input{
+    padding:7px
+}
+.total-box{
+    margin-top:15px;
+    padding:15px;
+    background:#f3f7fa;
+    border-radius:12px
+}
+.total-line{
+    display:flex;
+    justify-content:space-between;
+    padding:5px 0
+}
+.total-line.final{
+    font-size:23px;
+    font-weight:800;
+    border-top:1px solid #ccd5dd;
+    margin-top:8px;
+    padding-top:12px
+}
+
+.notice{
+    padding:12px;
+    background:#edf6ff;
+    border-radius:10px;
+    color:#225c91;
+    margin-bottom:15px
+}
+.warning{
+    padding:12px;
+    background:#fff4dd;
+    color:#8a5b00;
+    border-radius:10px;
+    margin-bottom:15px
+}
+.empty{
+    text-align:center;
+    padding:30px!important;
+    color:#8290a0
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:#0008;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100
+}
+.modal.show{display:flex}
+.modal-box{
+    width:100%;
+    max-width:650px;
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    max-height:90vh;
+    overflow:auto
+}
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px
+}
+.close{
+    border:0;
+    background:#eee;
+    border-radius:50%;
+    width:35px;
+    height:35px;
+    font-size:22px
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    color:#718096
+}
+
+@media(max-width:900px){
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+        z-index:50
+    }
+    .sidebar.open{
+        transform:translateX(0)
+    }
+    .main{
+        margin-left:0;
+        width:100%
+    }
+    .menu-btn{
+        display:block;
+        border:0;
+        background:#edf2f6;
+        padding:8px 12px;
+        border-radius:8px
+    }
+    .cards{
+        grid-template-columns:repeat(2,1fr)
+    }
+    .pos{
+        grid-template-columns:1fr
+    }
+}
+
+@media(max-width:600px){
+    .content{padding:15px}
+    .topbar{padding:0 15px}
+    .cards{
+        grid-template-columns:1fr 1fr
+    }
+    .grid2,.grid3{
+        grid-template-columns:1fr
+    }
+    .product-grid{
+        grid-template-columns:1fr 1fr
+    }
+    .login-box{
+        padding:25px
+    }
+}
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-...
+<div id="loginScreen" class="login-screen">
+
+    <div class="login-box">
+
+        <div class="logo">SalesPro</div>
+        <div class="subtitle">POS & Inventory Management</div>
+
+        <div class="demo">
+            <strong>Demo Accounts</strong><br>
+            Owner: owner / owner123<br>
+            Manager: manager / manager123<br>
+            Cashier: cashier / cashier123
+        </div>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input id="loginUsername" placeholder="Enter username">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input id="loginPassword" type="password" placeholder="Enter password">
+        </div>
+
+        <button class="btn full" onclick="login()">Login</button>
+
+    </div>
+
+</div>
+
+
+<!-- APP -->
+<div id="app" class="app hidden">
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="brand">SalesPro</div>
+
+        <div class="user-box">
+            <strong id="sideUser">User</strong><br>
+            <small id="sideRole">CASHIER</small>
+        </div>
+
+        <div class="nav">
+
+            <button onclick="showSection('dashboard',this)" class="active">
+                📊 Dashboard
+            </button>
+
+            <button onclick="showSection('sales',this)">
+                🛒 New Sale
+            </button>
+
+            <button onclick="showSection('products',this)">
+                📦 Products
+            </button>
+
+            <button onclick="showSection('inventory',this)">
+                🏪 Inventory
+            </button>
+
+            <button onclick="showSection('customers',this)">
+                👥 Customers
+            </button>
+
+            <button onclick="showSection('reports',this)">
+                📈 Reports
+            </button>
+
+            <button id="usersNav" onclick="showSection('users',this)">
+                👨🏾‍💼 Users
+            </button>
+
+            <button onclick="showSection('backup',this)">
+                💾 Backup
+            </button>
+
+        </div>
+
+        <button class="btn red logout" onclick="logout()">
+            Logout
+        </button>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <button class="menu-btn" onclick="toggleSidebar()">
+                ☰
+            </button>
+
+            <h2 id="pageTitle">Dashboard</h2>
+
+            <div>
+                <strong id="topUser">Owner</strong>
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="section active">
+
+                <div class="cards">
+
+                    <div class="card">
+                        <small>Today's Sales</small>
+                        <div class="big" id="todaySales">₦0.00</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Transactions</small>
+                        <div class="big" id="todayTransactions">0</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Products</small>
+                        <div class="big" id="productCount">0</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Low Stock</small>
+                        <div class="big" id="lowStockCount">0</div>
+                    </div>
+
+                </div>
+
+                <div id="dashboardAlert"></div>
+
+                <div class="panel">
+
+                    <h2>Recent Sales</h2>
+
+                    <div class="table-wrap">
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Cashier</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="recentSales"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SALES -->
+            <section id="sales" class="section">
+
+                <div class="pos">
+
+                    <div>
+
+                        <div class="panel">
+
+                            <h2>New Sale</h2>
+
+                            <div class="grid2">
+
+                                <div>
+                                    <label>Barcode / SKU</label>
+
+                                    <input
+                                        id="barcodeInput"
+                                        placeholder="Scan or enter barcode"
+                                        onkeydown="barcodeKey(event)"
+                                        autofocus
+                                    >
+
+                                </div>
+
+                                <div>
+                                    <label>Customer</label>
+
+                                    <select id="saleCustomer">
+                                        <option value="">Walk-in Customer</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="actions">
+
+                                <button class="btn" onclick="scanBarcode()">
+                                    📷 Scan Barcode
+                                </button>
+
+                                <button class="btn light" onclick="focusBarcode()">
+                                    🔎 Focus Scanner
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="panel">
+
+                            <h3>Products</h3>
+
+                            <input
+                                id="posSearch"
+                                placeholder="Search product..."
+                                oninput="renderPOSProducts()"
+                            >
+
+                            <div id="posProducts" class="product-grid"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <h2>Cart</h2>
+
+                        <div id="cart"></div>
+
+                        <div class="total-box">
+
+                            <div class="total-line">
+                                <span>Subtotal</span>
+                                <strong id="cartSubtotal">₦0.00</strong>
+                            </div>
+
+                            <div class="total-line">
+                                <span>Discount</span>
+                                <input
+                                    id="saleDiscount"
+                                    type="number"
+                                    min="0"
+                                    value="0"
+                                    oninput="renderCart()"
+                                >
+                            </div>
+
+                            <div class="total-line final">
+                                <span>Total</span>
+                                <span id="cartTotal">₦0.00</span>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group" style="margin-top:15px">
+
+                            <label>Payment Method</label>
+
+                            <select id="paymentMethod">
+                                <option>Cash</option>
+                                <option>Transfer</option>
+                                <option>POS</option>
+                                <option>Card</option>
+                                <option>Credit</option>
+                            </select>
+
+                        </div>
+
+                        <button
+                            class="btn green full"
+                            onclick="completeSale()"
+                        >
+                            Complete Sale
+                        </button>
+
+                        <button
+                            class="btn gray full"
+                            style="margin-top:8px"
+                            onclick="clearCart()"
+                        >
+                            Clear Cart
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PRODUCTS -->
+            <section id="products" class="section">
+
+                <div class="panel">
+
+                    <h2>Add Product</h2>
+
+                    <div class="grid3">
+
+                        <div>
+                            <label>Product Name</label>
+                            <input id="productName">
+                        </div>
+
+                        <div>
+                            <label>Barcode</label>
+                            <input id="productBarcode">
+                        </div>
+
+                        <div>
+                            <label>SKU</label>
+                            <input id="productSKU">
+                        </div>
+
+                        <div>
+                            <label>Category</label>
+                            <input id="productCategory" value="General">
+                        </div>
+
+                        <div>
+                            <label>Pieces Per Pack</label>
+                            <input id="productPack" type="number" min="1" value="1">
+                        </div>
+
+                        <div>
+                            <label>Cost Price / Piece</label>
+                            <input id="productCost" type="number" min="0">
+                        </div>
+
+                        <div>
+                            <label>Selling Price / Piece</label>
+                            <input id="productPrice" type="number" min="0">
+                        </div>
+
+                        <div>
+                            <label>Selling Price / Pack</label>
+                            <input id="productPackPrice" type="number" min="0">
+                        </div>
+
+                        <div>
+                            <label>Opening Stock (Pieces)</label>
+                            <input id="productStock" type="number" min="0">
+                        </div>
+
+                        <div>
+                            <label>Low Stock Level</label>
+                            <input id="productLow" type="number" min="0" value="5">
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="btn green" onclick="addProduct()">
+                            Add Product
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h2>Products</h2>
+
+                    <input
+                        id="productSearch"
+                        placeholder="Search name, barcode or SKU..."
+                        oninput="renderProducts()"
+                    >
+
+                    <div class="table-wrap" style="margin-top:15px">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Barcode</th>
+                                    <th>SKU</th>
+                                    <th>Pack</th>
+                                    <th>Cost</th>
+                                    <th>Sell</th>
+                                    <th>Stock</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="productsTable"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- INVENTORY -->
+            <section id="inventory" class="section">
+
+                <div class="panel">
+
+                    <h2>Inventory</h2>
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Barcode</th>
+                                    <th>Stock Pieces</th>
+                                    <th>Full Packs</th>
+                                    <th>Stock Value</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="inventoryTable"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CUSTOMERS -->
+            <section id="customers" class="section">
+
+                <div class="panel">
+
+                    <h2>Add Customer</h2>
+
+                    <div class="grid3">
+
+                        <div>
+                            <label>Name</label>
+                            <input id="customerName">
+                        </div>
+
+                        <div>
+                            <label>Phone</label>
+                            <input id="customerPhone">
+                        </div>
+
+                        <div>
+                            <label>Address</label>
+                            <input id="customerAddress">
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="btn green" onclick="addCustomer()">
+                            Add Customer
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h2>Customers & Credit</h2>
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
+                                    <th>Total Purchases</th>
+                                    <th>Outstanding Credit</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="customersTable"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- REPORTS -->
+            <section id="reports" class="section">
+
+                <div class="panel">
+
+                    <h2>Sales Reports</h2>
+
+                    <div class="grid3">
+
+                        <div>
+                            <label>From</label>
+                            <input id="reportFrom" type="date">
+                        </div>
+
+                        <div>
+                            <label>To</label>
+                            <input id="reportTo" type="date">
+                        </div>
+
+                        <div style="display:flex;align-items:end">
+                            <button
+                                class="btn full"
+                                onclick="generateReport()"
+                            >
+                                Generate Report
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="cards">
+
+                    <div class="card">
+                        <small>Revenue</small>
+                        <div class="big" id="reportRevenue">₦0.00</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Transactions</small>
+                        <div class="big" id="reportTransactions">0</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Profit</small>
+                        <div class="big" id="reportProfit">₦0.00</div>
+                    </div>
+
+                    <div class="card">
+                        <small>Units Sold</small>
+                        <div class="big" id="reportUnits">0</div>
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h2>Sales Details</h2>
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Profit</th>
+                                    <th>Payment</th>
+                                    <th>User</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="reportsTable"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- USERS -->
+            <section id="users" class="section">
+
+                <div class="panel">
+
+                    <h2>Users & Access</h2>
+
+                    <div class="notice">
+                        Owner has full access. Manager can manage products,
+                        inventory and discounts. Cashier can make sales.
+                    </div>
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="usersTable"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h2>Create User</h2>
+
+                    <div class="grid3">
+
+                        <div>
+                            <label>Name</label>
+                            <input id="newName">
+                        </div>
+
+                        <div>
+                            <label>Username</label>
+                            <input id="newUsername">
+                        </div>
+
+                        <div>
+                            <label>Password</label>
+                            <input id="newPassword" type="password">
+                        </div>
+
+                        <div>
+                            <label>Role</label>
+                            <select id="newRole">
+                                <option value="cashier">Cashier</option>
+                                <option value="manager">Manager</option>
+                                <option value="owner">Owner</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="btn green" onclick="createUser()">
+                            Create User
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- BACKUP -->
+            <section id="backup" class="section">
+
+                <div class="panel">
+
+                    <h2>Backup & Restore</h2>
+
+                    <div class="notice">
+                        Your data is stored locally on this device.
+                        Download regular backups.
+                    </div>
+
+                    <div class="actions">
+
+                        <button class="btn green" onclick="backupData()">
+                            Download Backup
+                        </button>
+
+                        <button
+                            class="btn"
+                            onclick="document.getElementById('restore').click()"
+                        >
+                            Restore Backup
+                        </button>
+
+                        <input
+                            id="restore"
+                            type="file"
+                            accept=".json"
+                            class="hidden"
+                            onchange="restoreData(event)"
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <footer>
+                SalesPro POS & Inventory System<br>
+                Offline Version 1.0
+            </footer>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- PRODUCT EDIT MODAL -->
+<div id="editModal" class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-head">
+            <h2>Edit Product</h2>
+            <button class="close" onclick="closeModal()">×</button>
+        </div>
+
+        <input id="editId" type="hidden">
+
+        <div class="grid2">
+
+            <div>
+                <label>Name</label>
+                <input id="editName">
+            </div>
+
+            <div>
+                <label>Barcode</label>
+                <input id="editBarcode">
+            </div>
+
+            <div>
+                <label>SKU</label>
+                <input id="editSKU">
+            </div>
+
+            <div>
+                <label>Category</label>
+                <input id="editCategory">
+            </div>
+
+            <div>
+                <label>Pack Size</label>
+                <input id="editPack" type="number">
+            </div>
+
+            <div>
+                <label>Cost / Piece</label>
+                <input id="editCost" type="number">
+            </div>
+
+            <div>
+                <label>Sell / Piece</label>
+                <input id="editPrice" type="number">
+            </div>
+
+            <div>
+                <label>Sell / Pack</label>
+                <input id="editPackPrice" type="number">
+            </div>
+
+            <div>
+                <label>Low Stock</label>
+                <input id="editLow" type="number">
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button class="btn green" onclick="saveProductEdit()">
+                Save
+            </button>
+
+            <button class="btn gray" onclick="closeModal()">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const DB_KEY="SALESPRO_V2";
+
+let db;
+let currentUser=null;
+let cart=[];
+
+
+/* ==============================
+DATABASE
+============================== */
+
+function defaultDB(){
+
+    return {
+
+        users:[
+            {
+                id:"u1",
+                name:"Owner",
+                username:"owner",
+                password:"owner123",
+                role:"owner",
+                active:true
+            },
+            {
+                id:"u2",
+                name:"Manager",
+                username:"manager",
+                password:"manager123",
+                role:"manager",
+                active:true
+            },
+            {
+                id:"u3",
+                name:"Cashier",
+                username:"cashier",
+                password:"cashier123",
+                role:"cashier",
+                active:true
+            }
+        ],
+
+        products:[],
+        customers:[],
+        sales:[]
+
+    };
+
+}
+
+
+function loadDB(){
+
+    const saved=localStorage.getItem(DB_KEY);
+
+    if(saved){
+
+        try{
+            db=JSON.parse(saved);
+        }catch(e){
+            db=defaultDB();
+        }
+
+    }else{
+
+        db=defaultDB();
+
+    }
+
+    saveDB();
+
+}
+
+
+function saveDB(){
+
+    localStorage.setItem(DB_KEY,JSON.stringify(db));
+
+}
+
+
+function uid(){
+
+    return Date.now().toString(36)+
+        Math.random().toString(36).slice(2,8);
+
+}
+
+
+function money(n){
+
+    return "₦"+Number(n||0).toLocaleString(
+        "en-NG",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+function today(){
+
+    const d=new Date();
+
+    return d.toISOString().slice(0,10);
+
+}
+
+
+/* ==============================
+LOGIN
+============================== */
+
+function login(){
+
+    const username=
+        document.getElementById("loginUsername")
+        .value.trim();
+
+    const password=
+        document.getElementById("loginPassword")
+        .value;
+
+    const user=db.users.find(u=>
+        u.username.toLowerCase()===username.toLowerCase() &&
+        u.password===password &&
+        u.active
+    );
+
+    if(!user){
+
+        alert("Invalid login details.");
+
+        return;
+
+    }
+
+    currentUser={...user};
+
+    sessionStorage.setItem(
+        "SALESPRO_USER",
+        JSON.stringify(currentUser)
+    );
+
+    document.getElementById("loginScreen")
+        .classList.add("hidden");
+
+    document.getElementById("app")
+        .classList.remove("hidden");
+
+    updateUserDisplay();
+
+    refreshAll();
+
+}
+
+
+function updateUserDisplay(){
+
+    document.getElementById("sideUser")
+        .textContent=currentUser.name;
+
+    document.getElementById("sideRole")
+        .textContent=currentUser.role.toUpperCase();
+
+    document.getElementById("topUser")
+        .textContent=currentUser.name;
+
+    document.getElementById("usersNav")
+        .style.display=
+            currentUser.role==="owner"
+                ?"block"
+                :"none";
+
+}
+
+
+function logout(){
+
+    currentUser=null;
+
+    sessionStorage.removeItem("SALESPRO_USER");
+
+    document.getElementById("app")
+        .classList.add("hidden");
+
+    document.getElementById("loginScreen")
+        .classList.remove("hidden");
+
+}
+
+
+/* ==============================
+NAVIGATION
+============================== */
+
+function showSection(name,button){
+
+    document.querySelectorAll(".section")
+        .forEach(s=>s.classList.remove("active"));
+
+    document.getElementById(name)
+        .classList.add("active");
+
+    document.querySelectorAll(".nav button")
+        .forEach(b=>b.classList.remove("active"));
+
+    if(button)
+        button.classList.add("active");
+
+    const titles={
+        dashboard:"Dashboard",
+        sales:"New Sale",
+        products:"Products",
+        inventory:"Inventory",
+        customers:"Customers",
+        reports:"Reports",
+        users:"Users & Access",
+        backup:"Backup & Restore"
+    };
+
+    document.getElementById("pageTitle")
+        .textContent=titles[name];
+
+    if(name==="sales")
+        renderPOSProducts();
+
+    if(name==="inventory")
+        renderInventory();
+
+    if(name==="products")
+        renderProducts();
+
+    if(name==="customers")
+        renderCustomers();
+
+    if(name==="reports")
+        generateReport();
+
+    if(name==="users")
+        renderUsers();
+
+    if(window.innerWidth<900)
+        toggleSidebar(false);
+
+}
+
+
+function toggleSidebar(force){
+
+    const side=document.getElementById("sidebar");
+
+    if(force===false)
+        side.classList.remove("open");
+    else
+        side.classList.toggle("open");
+
+}
+
+
+/* ==============================
+PERMISSIONS
+============================== */
+
+function canManageProducts(){
+
+    return ["owner","manager"]
+        .includes(currentUser.role);
+
+}
+
+
+function canDiscount(){
+
+    return ["owner","manager"]
+        .includes(currentUser.role);
+
+}
+
+
+/* ==============================
+PRODUCTS
+============================== */
+
+function addProduct(){
+
+    if(!canManageProducts()){
+
+        alert("Only Owner or Manager can add products.");
+
+        return;
+
+    }
+
+    const name=
+        document.getElementById("productName").value.trim();
+
+    const barcode=
+        document.getElementById("productBarcode").value.trim();
+
+    const sku=
+        document.getElementById("productSKU").value.trim();
+
+    if(!name){
+
+        alert("Product name is required.");
+
+        return;
+
+    }
+
+    if(barcode &&
+        db.products.some(p=>p.barcode===barcode)){
+
+        alert("This barcode already exists.");
+
+        return;
+
+    }
+
+    const pack=
+        Math.max(
+            1,
+            Number(document.getElementById("productPack").value)||1
+        );
+
+    const cost=
+        Math.max(
+            0,
+            Number(document.getElementById("productCost").value)||0
+        );
+
+    const price=
+        Math.max(
+            0,
+            Number(document.getElementById("productPrice").value)||0
+        );
+
+    let packPrice=
+        Number(document.getElementById("productPackPrice").value)||0;
+
+    if(packPrice<=0)
+        packPrice=price*pack;
+
+    db.products.push({
+
+        id:uid(),
+        name:name,
+        barcode:barcode,
+        sku:sku,
+        category:
+            document.getElementById("productCategory").value
+            ||"General",
+
+        pack:pack,
+        cost:cost,
+        price:price,
+        packPrice:packPrice,
+
+        stock:
+            Math.max(
+                0,
+                Number(document.getElementById("productStock").value)||0
+            ),
+
+        low:
+            Math.max(
+                0,
+                Number(document.getElementById("productLow").value)||5
+            )
+
+    });
+
+    saveDB();
+
+    clearProductForm();
+
+    refreshAll();
+
+    alert("Product added successfully.");
+
+}
+
+
+function clearProductForm(){
+
+    [
+        "productName",
+        "productBarcode",
+        "productSKU",
+        "productCost",
+        "productPrice",
+        "productPackPrice",
+        "productStock"
+    ].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+
+    document.getElementById("productPack").value=1;
+    document.getElementById("productLow").value=5;
+
+}
+
+
+function renderProducts(){
+
+    const tbody=document.getElementById("productsTable");
+
+    const search=
+        document.getElementById("productSearch")
+        .value.toLowerCase();
+
+    const products=db.products.filter(p=>
+        p.name.toLowerCase().includes(search) ||
+        String(p.barcode).includes(search) ||
+        String(p.sku).toLowerCase().includes(search)
+    );
+
+    if(!products.length){
+
+        tbody.innerHTML=
+            `<tr><td colspan="8" class="empty">
+            No products found.
+            </td></tr>`;
+
+        return;
+
+    }
+
+    tbody.innerHTML=products.map(p=>`
+
+        <tr>
+
+            <td><strong>${esc(p.name)}</strong></td>
+
+            <td>${esc(p.barcode||"-")}</td>
+
+            <td>${esc(p.sku||"-")}</td>
+
+            <td>${p.pack}</td>
+
+            <td>${money(p.cost)}</td>
+
+            <td>${money(p.price)}</td>
+
+            <td>${p.stock.toLocaleString()}</td>
+
+            <td>
+
+                <button
+                    class="btn light"
+                    onclick="editProduct('${p.id}')">
+                    Edit
+                </button>
+
+                ${
+                    currentUser.role==="owner"
+                    ?
+                    `<button
+                        class="btn red"
+                        onclick="deleteProduct('${p.id}')">
+                        Delete
+                    </button>`
+                    :""
+                }
+
+            </td>
+
+        </tr>
+
+    `).join("");
+
+}
+
+
+function editProduct(id){
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    document.getElementById("editId").value=p.id;
+    document.getElementById("editName").value=p.name;
+    document.getElementById("editBarcode").value=p.barcode||"";
+    document.getElementById("editSKU").value=p.sku||"";
+    document.getElementById("editCategory").value=p.category;
+    document.getElementById("editPack").value=p.pack;
+    document.getElementById("editCost").value=p.cost;
+    document.getElementById("editPrice").value=p.price;
+    document.getElementById("editPackPrice").value=p.packPrice;
+    document.getElementById("editLow").value=p.low;
+
+    document.getElementById("editModal")
+        .classList.add("show");
+
+}
+
+
+function saveProductEdit(){
+
+    const id=document.getElementById("editId").value;
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    const barcode=
+        document.getElementById("editBarcode").value.trim();
+
+    if(
+        barcode &&
+        db.products.some(x=>
+            x.id!==id &&
+            x.barcode===barcode
+        )
+    ){
+
+        alert("Barcode already belongs to another product.");
+
+        return;
+
+    }
+
+    p.name=
+        document.getElementById("editName").value.trim();
+
+    p.barcode=barcode;
+
+    p.sku=
+        document.getElementById("editSKU").value.trim();
+
+    p.category=
+        document.getElementById("editCategory").value.trim()
+        ||"General";
+
+    p.pack=
+        Math.max(
+            1,
+            Number(document.getElementById("editPack").value)||1
+        );
+
+    if(canManageProducts()){
+
+        p.cost=
+            Math.max(
+                0,
+                Number(document.getElementById("editCost").value)||0
+            );
+
+        p.price=
+            Math.max(
+                0,
+                Number(document.getElementById("editPrice").value)||0
+            );
+
+        p.packPrice=
+            Math.max(
+                0,
+                Number(document.getElementById("editPackPrice").value)||0
+            );
+
+    }
+
+    p.low=
+        Math.max(
+            0,
+            Number(document.getElementById("editLow").value)||0
+        );
+
+    saveDB();
+
+    closeModal();
+
+    refreshAll();
+
+}
+
+
+function deleteProduct(id){
+
+    if(currentUser.role!=="owner"){
+
+        alert("Only Owner can delete products.");
+
+        return;
+
+    }
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    if(!confirm("Delete "+p.name+"?"))
+        return;
+
+    db.products=db.products.filter(x=>x.id!==id);
+
+    saveDB();
+
+    refreshAll();
+
+}
+
+
+/* ==============================
+BARCODE
+============================== */
+
+function barcodeKey(event){
+
+    if(event.key==="Enter"){
+
+        event.preventDefault();
+
+        const value=
+            document.getElementById("barcodeInput")
+            .value.trim();
+
+        if(value)
+            addBarcodeProduct(value);
+
+    }
+
+}
+
+
+function addBarcodeProduct(code){
+
+    const p=db.products.find(x=>
+        x.barcode===code ||
+        x.sku===code
+    );
+
+    if(!p){
+
+        alert("Product not found for barcode: "+code);
+
+        return;
+
+    }
+
+    addToCart(p.id);
+
+    document.getElementById("barcodeInput").value="";
+
+}
+
+
+function focusBarcode(){
+
+    document.getElementById("barcodeInput").focus();
+
+}
+
+
+async function scanBarcode(){
+
+    if(!("BarcodeDetector" in window)){
+
+        alert(
+            "Camera barcode scanning is not supported by this browser.\n\n"+
+            "You can still use a Bluetooth/USB barcode scanner or enter the barcode manually."
+        );
+
+        focusBarcode();
+
+        return;
+
+    }
+
+    try{
+
+        const detector=new BarcodeDetector();
+
+        const stream=
+            await navigator.mediaDevices.getUserMedia({
+                video:{facingMode:"environment"}
+            });
+
+        const video=document.createElement("video");
+
+        video.srcObject=stream;
+
+        video.setAttribute("playsinline","");
+
+        await video.play();
+
+        const box=document.createElement("div");
+
+        box.style.cssText=
+            "position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center";
+
+        video.style.width="100%";
+
+        box.appendChild(video);
+
+        document.body.appendChild(box);
+
+        const scan=async()=>{
+
+            try{
+
+                const codes=
+                    await detector.detect(video);
+
+                if(codes.length){
+
+                    const code=codes[0].rawValue;
+
+                    stream.getTracks().forEach(t=>t.stop());
+
+                    box.remove();
+
+                    addBarcodeProduct(code);
+
+                    return;
+
+                }
+
+            }catch(e){}
+
+            requestAnimationFrame(scan);
+
+        };
+
+        scan();
+
+    }catch(e){
+
+        alert(
+            "Camera access was not available. Please allow camera permission or use a barcode scanner."
+        );
+
+    }
+
+}
+
+
+/* ==============================
+POS
+============================== */
+
+function renderPOSProducts(){
+
+    const box=document.getElementById("posProducts");
+
+    const search=
+        document.getElementById("posSearch")
+        .value.toLowerCase();
+
+    const products=db.products.filter(p=>
+        p.stock>0 &&
+        (
+            p.name.toLowerCase().includes(search) ||
+            String(p.barcode).includes(search) ||
+            String(p.sku).toLowerCase().includes(search)
+        )
+    );
+
+    box.innerHTML=products.map(p=>`
+
+        <button
+            class="product-btn"
+            onclick="addToCart('${p.id}')">
+
+            <strong>${esc(p.name)}</strong>
+
+            <small>
+                ${money(p.price)} / piece
+            </small>
+
+            <br>
+
+            <small>
+                Stock: ${p.stock}
+            </small>
+
+        </button>
+
+    `).join("");
+
+}
+
+
+function addToCart(id){
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    if(p.stock<=0){
+
+        alert("This product is out of stock.");
+
+        return;
+
+    }
+
+    const existing=cart.find(x=>x.id===id);
+
+    if(existing){
+
+        if(existing.quantity>=p.stock){
+
+            alert("Not enough stock.");
+
+            return;
+
+        }
+
+        existing.quantity++;
+
+    }else{
+
+        cart.push({
+            id:p.id,
+            quantity:1
+        });
+
+    }
+
+    renderCart();
+
+}
+
+
+function renderCart(){
+
+    const box=document.getElementById("cart");
+
+    if(!cart.length){
+
+        box.innerHTML=
+            `<div class="empty">Cart is empty.</div>`;
+
+        document.getElementById("cartSubtotal")
+            .textContent=money(0);
+
+        document.getElementById("cartTotal")
+            .textContent=money(0);
+
+        return;
+
+    }
+
+    let subtotal=0;
+
+    box.innerHTML=cart.map(item=>{
+
+        const p=db.products.find(x=>x.id===item.id);
+
+        if(!p)return"";
+
+        const amount=p.price*item.quantity;
+
+        subtotal+=amount;
+
+        return `
+
+            <div class="cart-row">
+
+                <div>
+                    <strong>${esc(p.name)}</strong><br>
+                    <small>${money(p.price)}</small>
+                </div>
+
+                <input
+                    type="number"
+                    min="1"
+                    max="${p.stock}"
+                    value="${item.quantity}"
+                    onchange="changeQty('${p.id}',this.value)"
+                >
+
+                <strong>${money(amount)}</strong>
+
+                <button
+                    class="btn red"
+                    onclick="removeCart('${p.id}')">
+                    ×
+                </button>
+
+            </div>
+
+        `;
+
+    }).join("");
+
+    const discount=
+        canDiscount()
+        ?
+        Math.max(
+            0,
+            Number(document.getElementById("saleDiscount").value)||0
+        )
+        :0;
+
+    const total=Math.max(0,subtotal-discount);
+
+    document.getElementById("cartSubtotal")
+        .textContent=money(subtotal);
+
+    document.getElementById("cartTotal")
+        .textContent=money(total);
+
+}
+
+
+function changeQty(id,value){
+
+    const item=cart.find(x=>x.id===id);
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!item||!p)return;
+
+    let qty=Math.floor(Number(value)||1);
+
+    qty=Math.max(1,Math.min(qty,p.stock));
+
+    item.quantity=qty;
+
+    renderCart();
+
+}
+
+
+function removeCart(id){
+
+    cart=cart.filter(x=>x.id!==id);
+
+    renderCart();
+
+}
+
+
+function clearCart(){
+
+    cart=[];
+
+    document.getElementById("saleDiscount").value=0;
+
+    renderCart();
+
+}
+
+
+/* ==============================
+COMPLETE SALE
+============================== */
+
+function completeSale(){
+
+    if(!cart.length){
+
+        alert("Cart is empty.");
+
+        return;
+
+    }
+
+    const payment=
+        document.getElementById("paymentMethod").value;
+
+    const customer=
+        document.getElementById("saleCustomer").value
+        ||"Walk-in Customer";
+
+    const discount=
+        canDiscount()
+        ?
+        Math.max(
+            0,
+            Number(document.getElementById("saleDiscount").value)||0
+        )
+        :0;
+
+    let subtotal=0;
+    let costTotal=0;
+    let units=0;
+
+    const items=cart.map(item=>{
+
+        const p=db.products.find(x=>x.id===item.id);
+
+        const amount=p.price*item.quantity;
+
+        subtotal+=amount;
+
+        costTotal+=p.cost*item.quantity;
+
+        units+=item.quantity;
+
+        return {
+            productId:p.id,
+            name:p.name,
+            barcode:p.barcode,
+            quantity:item.quantity,
+            price:p.price,
+            cost:p.cost,
+            total:amount
+        };
+
+    });
+
+    if(payment==="Credit" && customer==="Walk-in Customer"){
+
+        alert("Credit sales require a customer.");
+
+        return;
+
+    }
+
+    const total=Math.max(0,subtotal-discount);
+
+    const sale={
+
+        id:uid(),
+
+        invoice:
+            "INV-"+Date.now(),
+
+        date:new Date().toISOString(),
+
+        customer:customer,
+
+        items:items,
+
+        subtotal:subtotal,
+
+        discount:discount,
+
+        total:total,
+
+        cost:costTotal,
+
+        profit:total-costTotal,
+
+        units:units,
+
+        payment:payment,
+
+        user:currentUser.username
+
+    };
+
+    items.forEach(item=>{
+
+        const p=db.products.find(x=>x.id===item.productId);
+
+        p.stock-=item.quantity;
+
+    });
+
+    db.sales.unshift(sale);
+
+    saveDB();
+
+    alert(
+        "Sale completed!\n\n"+
+        "Invoice: "+sale.invoice+
+        "\nTotal: "+money(sale.total)
+    );
+
+    cart=[];
+
+    document.getElementById("saleDiscount").value=0;
+
+    renderCart();
+
+    refreshAll();
+
+}
+
+
+/* ==============================
+CUSTOMERS
+============================== */
+
+function addCustomer(){
+
+    const name=
+        document.getElementById("customerName")
+        .value.trim();
+
+    if(!name){
+
+        alert("Customer name is required.");
+
+        return;
+
+    }
+
+    db.customers.push({
+
+        id:uid(),
+
+        name:name,
+
+        phone:
+            document.getElementById("customerPhone").value.trim(),
+
+        address:
+            document.getElementById("customerAddress").value.trim()
+
+    });
+
+    saveDB();
+
+    document.getElementById("customerName").value="";
+    document.getElementById("customerPhone").value="";
+    document.getElementById("customerAddress").value="";
+
+    refreshAll();
+
+}
+
+
+function renderCustomers(){
+
+    const tbody=document.getElementById("customersTable");
+
+    const select=document.getElementById("saleCustomer");
+
+    select.innerHTML=
+        `<option value="">Walk-in Customer</option>`+
+        db.customers.map(c=>
+            `<option value="${esc(c.name)}">${esc(c.name)}</option>`
+        ).join("");
+
+    if(!db.customers.length){
+
+        tbody.innerHTML=
+            `<tr><td colspan="5" class="empty">
+            No customers added.
+            </td></tr>`;
+
+        return;
+
+    }
+
+    tbody.innerHTML=db.customers.map(c=>{
+
+        const sales=
+            db.sales.filter(s=>s.customer===c.name);
+
+        const purchases=
+            sales.reduce((a,s)=>a+s.total,0);
+
+        const credit=
+            sales
+            .filter(s=>s.payment==="Credit")
+            .reduce((a,s)=>a+s.total,0);
+
+        return `
+
+            <tr>
+
+                <td>${esc(c.name)}</td>
+
+                <td>${esc(c.phone||"-")}</td>
+
+                <td>${esc(c.address||"-")}</td>
+
+                <td>${money(purchases)}</td>
+
+                <td>
+                    ${
+                        credit>0
+                        ?`<span class="badge red">${money(credit)}</span>`
+                        :money(0)
+                    }
+                </td>
+
+            </tr>
+
+        `;
+
+    }).join("");
+
+}
+
+
+/* ==============================
+INVENTORY
+============================== */
+
+function renderInventory(){
+
+    const tbody=document.getElementById("inventoryTable");
+
+    if(!db.products.length){
+
+        tbody.innerHTML=
+            `<tr><td colspan="7" class="empty">
+            No products.
+            </td></tr>`;
+
+        return;
+
+    }
+
+    tbody.innerHTML=db.products.map(p=>{
+
+        const packs=Math.floor(p.stock/p.pack);
+
+        const value=p.stock*p.cost;
+
+        let status;
+
+        if(p.stock<=0)
+            status=`<span class="badge red">Out</span>`;
+        else if(p.stock<=p.low)
+            status=`<span class="badge orange">Low</span>`;
+        else
+            status=`<span class="badge green">Good</span>`;
+
+        return `
+
+            <tr>
+
+                <td>${esc(p.name)}</td>
+
+                <td>${esc(p.barcode||"-")}</td>
+
+                <td>${p.stock.toLocaleString()}</td>
+
+                <td>${packs.toLocaleString()}</td>
+
+                <td>${money(value)}</td>
+
+                <td>${status}</td>
+
+                <td>
+                    <button
+                        class="btn light"
+                        onclick="adjustStock('${p.id}')">
+                        Adjust
+                    </button>
+                </td>
+
+            </tr>
+
+        `;
+
+    }).join("");
+
+}
+
+
+function adjustStock(id){
+
+    if(!canManageProducts()){
+
+        alert("Only Owner or Manager can adjust stock.");
+
+        return;
+
+    }
+
+    const p=db.products.find(x=>x.id===id);
+
+    if(!p)return;
+
+    const value=prompt(
+        "Enter stock adjustment for "+p.name+
+        "\n\nPositive = add stock\nNegative = remove stock",
+        "0"
+    );
+
+    if(value===null)return;
+
+    const amount=Math.floor(Number(value));
+
+    if(!Number.isFinite(amount)){
+
+        alert("Invalid number.");
+
+        return;
+
+    }
+
+    if(p.stock+amount<0){
+
+        alert("Stock cannot be negative.");
+
+        return;
+
+    }
+
+    p.stock+=amount;
+
+    saveDB();
+
+    refreshAll();
+
+}
+
+
+/* ==============================
+REPORTS
+============================== */
+
+function generateReport(){
+
+    const from=document.getElementById("reportFrom").value;
+    const to=document.getElementById("reportTo").value;
+
+    let sales=[...db.sales];
+
+    if(from)
+        sales=sales.filter(s=>
+            s.date.slice(0,10)>=from
+        );
+
+    if(to)
+        sales=sales.filter(s=>
+            s.date.slice(0,10)<=to
+        );
