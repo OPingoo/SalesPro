@@ -1,17 +1,2535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-▦ 🛒 📦 🧾 👥 💳 📊 ⚙️
-Dashboard
+<title>KCIGS-SALESPRO POS</title>
 
-+ New Sale
-Today's Sales
-₦0
-Transactions
-0
-Products
-0
-Low Stock
-0
-Recent Sales
+<style>
 
-Low Stock Alert
+/* =========================================================
+   KCIGS-SALESPRO
+   PART 1 — CORE HTML + PROFESSIONAL CSS
+   ========================================================= */
 
+:root {
+    --navy: #071b3a;
+    --blue: #0b4ea2;
+    --blue-light: #eaf2ff;
+    --gold: #d6a21d;
+    --gold-light: #fff8df;
+    --white: #ffffff;
+    --bg: #f4f6fa;
+    --text: #172033;
+    --muted: #667085;
+    --green: #039855;
+    --green-light: #ecfdf3;
+    --red: #d92d20;
+    --red-light: #fff1f0;
+    --orange: #f79009;
+    --border: #e4e7ec;
+    --shadow: 0 4px 15px rgba(16, 24, 40, 0.07);
+    --radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* =========================================================
+   GENERAL ELEMENTS
+   ========================================================= */
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: var(--white);
+    color: var(--text);
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(11, 78, 162, 0.08);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #344054;
+}
+
+/* =========================================================
+   APPLICATION LAYOUT
+   ========================================================= */
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    width: 250px;
+    background:
+        linear-gradient(
+            180deg,
+            #071b3a 0%,
+            #06152e 100%
+        );
+
+    color: var(--white);
+
+    padding: 20px 14px;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    z-index: 100;
+
+    overflow-y: auto;
+
+    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
+}
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+    padding: 8px 10px 22px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.12);
+
+    margin-bottom: 15px;
+}
+
+.brand-logo {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold),
+            #f5d76e
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--navy);
+
+    font-weight: 900;
+    font-size: 17px;
+
+    margin-bottom: 10px;
+}
+
+.brand h1 {
+    font-size: 20px;
+    line-height: 1.2;
+
+    margin-bottom: 5px;
+
+    letter-spacing: 0.3px;
+}
+
+.brand small {
+    color: var(--gold);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    line-height: 1.4;
+
+    display: block;
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav button {
+    width: 100%;
+
+    text-align: left;
+
+    background: transparent;
+
+    color: #dbe5f5;
+
+    padding: 12px 13px;
+
+    border-radius: 9px;
+
+    margin: 3px 0;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s,
+        color 0.2s,
+        transform 0.2s;
+}
+
+.nav button:hover {
+    background: rgba(255,255,255,0.08);
+
+    color: #ffffff;
+
+    transform: translateX(2px);
+}
+
+.nav button.active {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(214,162,29,0.22),
+            rgba(255,255,255,0.08)
+        );
+
+    color: #ffffff;
+
+    border-left: 3px solid var(--gold);
+}
+
+.nav .icon {
+    width: 28px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-right: 5px;
+}
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.main {
+    margin-left: 250px;
+
+    width: calc(100% - 250px);
+
+    padding: 22px;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+.top h2 {
+    font-size: 24px;
+
+    font-weight: 800;
+}
+
+.date {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    margin-top: 4px;
+}
+
+/* =========================================================
+   PAGE SYSTEM
+   ========================================================= */
+
+.page {
+    display: none;
+
+    animation:
+        fadeIn 0.25s ease;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* =========================================================
+   DASHBOARD CARDS
+   ========================================================= */
+
+.cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 15px;
+}
+
+.card {
+    background: var(--white);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 18px;
+
+    box-shadow: var(--shadow);
+
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 20px rgba(16,24,40,0.10);
+}
+
+.label {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.metric {
+    font-size: 25px;
+
+    font-weight: 900;
+
+    margin-top: 8px;
+
+    color: var(--navy);
+}
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.panel {
+    background: var(--white);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    padding: 18px;
+
+    box-shadow: var(--shadow);
+}
+
+.panel h3 {
+    margin-bottom: 15px;
+
+    font-size: 17px;
+
+    font-weight: 800;
+}
+
+/* =========================================================
+   GRID SYSTEM
+   ========================================================= */
+
+.grid2 {
+    display: grid;
+
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap: 16px;
+
+    margin-top: 16px;
+}
+
+.grid3 {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 16px;
+}
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.toolbar {
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 15px;
+
+    align-items: center;
+}
+
+.search {
+    max-width: 330px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.btn {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 10px 14px;
+
+    border-radius: 8px;
+
+    background: var(--blue);
+
+    color: var(--white);
+
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+.btn:hover {
+    filter: brightness(0.95);
+
+    transform: translateY(-1px);
+}
+
+.btn.gold {
+    background: var(--gold);
+
+    color: var(--navy);
+}
+
+.btn.green {
+    background: var(--green);
+
+    color: var(--white);
+}
+
+.btn.red {
+    background: var(--red);
+
+    color: var(--white);
+}
+
+.btn.gray {
+    background: #eef2f6;
+
+    color: #344054;
+}
+
+.btn.small {
+    padding: 7px 10px;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   POS LAYOUT
+   ========================================================= */
+
+.pos {
+    display: grid;
+
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap: 16px;
+}
+
+/* =========================================================
+   PRODUCT GRID
+   ========================================================= */
+
+.product-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    max-height: 570px;
+
+    overflow-y: auto;
+
+    padding-right: 3px;
+}
+
+.product {
+    border:
+        1px solid var(--border);
+
+    border-radius: 10px;
+
+    padding: 13px;
+
+    background: var(--white);
+
+    transition: 0.2s;
+
+    cursor: pointer;
+}
+
+.product:hover {
+    border-color: var(--blue);
+
+    box-shadow:
+        0 4px 14px rgba(11,78,162,0.10);
+
+    transform: translateY(-2px);
+}
+
+.product b {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 14px;
+}
+
+.product small {
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.product .price {
+    font-weight: 900;
+
+    color: var(--blue);
+
+    margin-top: 9px;
+
+    font-size: 15px;
+}
+
+/* =========================================================
+   CART
+   ========================================================= */
+
+.cart {
+    max-height: 440px;
+
+    overflow-y: auto;
+}
+
+.cartrow {
+    display: grid;
+
+    grid-template-columns:
+        1fr 95px 90px 28px;
+
+    gap: 7px;
+
+    align-items: center;
+
+    padding: 11px 0;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.cartrow b {
+    font-size: 13px;
+}
+
+.cartrow small {
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.qty {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.qty button {
+    background: #eef2f6;
+
+    color: #344054;
+
+    width: 26px;
+
+    height: 26px;
+
+    border-radius: 5px;
+
+    font-weight: 900;
+}
+
+.qty button:hover {
+    background: var(--blue);
+
+    color: #fff;
+}
+
+/* =========================================================
+   TOTALS
+   ========================================================= */
+
+.totals {
+    border-top:
+        2px solid var(--border);
+
+    margin-top: 13px;
+
+    padding-top: 13px;
+}
+
+.totalline {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 8px 0;
+
+    font-size: 14px;
+}
+
+.grand {
+    font-size: 22px;
+
+    font-weight: 900;
+
+    color: var(--navy);
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 11px 9px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    text-align: left;
+
+    font-size: 13px;
+}
+
+th {
+    background: #f8fafc;
+
+    color: #475467;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+tbody tr:hover {
+    background: #fafcff;
+}
+
+.right {
+    text-align: right;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.badge {
+    display: inline-block;
+
+    padding: 4px 8px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    background: var(--green-light);
+
+    color: #027a48;
+}
+
+.badge.low {
+    background: var(--red-light);
+
+    color: #b42318;
+}
+
+.badge.warning {
+    background: var(--gold-light);
+
+    color: #8a6116;
+}
+
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
+
+.empty {
+    text-align: center;
+
+    padding: 35px 15px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.formgrid {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 13px;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 17px;
+
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(16,24,40,0.65);
+
+    z-index: 500;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 15px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modalbox {
+    background: var(--white);
+
+    width: min(620px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    border-radius: 14px;
+
+    padding: 21px;
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,0.20);
+}
+
+.modalbox h3 {
+    margin-bottom: 18px;
+
+    font-size: 19px;
+}
+
+/* =========================================================
+   RECEIPT
+   ========================================================= */
+
+.printwrap {
+    display: none;
+}
+
+.receipt {
+    width: 80mm;
+
+    background: #ffffff;
+
+    color: #000000;
+
+    padding: 8px;
+
+    font-family: monospace;
+
+    font-size: 12px;
+}
+
+.receipt h2 {
+    text-align: center;
+
+    font-size: 16px;
+
+    margin-bottom: 4px;
+}
+
+.receipt .center {
+    text-align: center;
+}
+
+.receipt hr {
+    border: 0;
+
+    border-top:
+        1px dashed #000;
+
+    margin: 8px 0;
+}
+
+.receipt-line {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 8px;
+
+    margin: 4px 0;
+}
+
+/* =========================================================
+   TOAST NOTIFICATION
+   ========================================================= */
+
+.toast {
+    position: fixed;
+
+    right: 20px;
+
+    bottom: 20px;
+
+    background: #101828;
+
+    color: #fff;
+
+    padding: 12px 17px;
+
+    border-radius: 9px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.18);
+
+    display: none;
+
+    z-index: 1000;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+.toast.show {
+    display: block;
+
+    animation:
+        toastIn 0.25s ease;
+}
+
+@keyframes toastIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* =========================================================
+   MOBILE MENU BUTTON
+   ========================================================= */
+
+.mobile-menu {
+    display: none;
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 8px;
+
+    background: var(--navy);
+
+    color: #fff;
+
+    font-size: 20px;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 7px;
+
+    height: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f2f4f7;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c5cad3;
+
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #98a2b3;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .cards {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .pos {
+        grid-template-columns:
+            1fr;
+    }
+
+    .grid2 {
+        grid-template-columns:
+            1fr;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+
+}
+
+/* =========================================================
+   SMALL TABLET
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .sidebar {
+        width: 75px;
+    }
+
+    .brand h1,
+    .brand small {
+        display: none;
+    }
+
+    .brand {
+        text-align: center;
+        padding: 8px 3px 18px;
+    }
+
+    .brand-logo {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .nav button {
+        text-align: center;
+
+        padding: 12px 5px;
+    }
+
+    .nav button span:not(.icon) {
+        display: none;
+    }
+
+    .nav .icon {
+        margin: 0;
+
+        width: 100%;
+    }
+
+    .main {
+        margin-left: 75px;
+
+        width:
+            calc(100% - 75px);
+
+        padding: 15px;
+    }
+
+    .grid3 {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .main {
+        padding: 10px;
+    }
+
+    .top {
+        align-items: flex-start;
+
+        margin-bottom: 13px;
+    }
+
+    .top h2 {
+        font-size: 19px;
+    }
+
+    .date {
+        font-size: 11px;
+    }
+
+    .cards {
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+    }
+
+    .card {
+        padding: 13px;
+    }
+
+    .metric {
+        font-size: 19px;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 7px;
+    }
+
+    .product {
+        padding: 10px;
+    }
+
+    .cartrow {
+        grid-template-columns:
+            1fr 78px 70px 25px;
+
+        gap: 5px;
+    }
+
+    .formgrid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+
+    .toolbar {
+        align-items: stretch;
+    }
+
+    .search {
+        max-width: none;
+    }
+
+    .btn {
+        padding: 9px 11px;
+        font-size: 12px;
+    }
+
+    .panel {
+        padding: 13px;
+    }
+
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+    .sidebar {
+        width: 60px;
+    }
+
+    .main {
+        margin-left: 60px;
+
+        width:
+            calc(100% - 60px);
+    }
+
+    .cards {
+        grid-template-columns:
+            1fr;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     APPLICATION START
+     ===================================================== -->
+
+<div class="app">
+
+    <!-- =================================================
+         SIDEBAR
+         ================================================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                KC
+            </div>
+
+            <h1>
+                KCIGS-SALESPRO
+            </h1>
+
+            <small>
+                KC INTEGRATED GLOBAL SERVICES
+            </small>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <button
+                class="active"
+                data-page="dashboard">
+
+                <span class="icon">▦</span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="pos">
+
+                <span class="icon">🛒</span>
+
+                <span>
+                    POS / New Sale
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="inventory">
+
+                <span class="icon">📦</span>
+
+                <span>
+                    Inventory
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="sales">
+
+                <span class="icon">🧾</span>
+
+                <span>
+                    Sales History
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="customers">
+
+                <span class="icon">👥</span>
+
+                <span>
+                    Customers
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="expenses">
+
+                <span class="icon">💳</span>
+
+                <span>
+                    Expenses
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="reports">
+
+                <span class="icon">📊</span>
+
+                <span>
+                    Reports
+                </span>
+
+            </button>
+
+
+            <button
+                data-page="settings">
+
+                <span class="icon">⚙️</span>
+
+                <span>
+                    Settings / Backup
+                </span>
+
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =================================================
+         MAIN CONTENT
+         ================================================= -->
+
+    <main class="main">
+
+        <!-- TOP HEADER -->
+
+        <div class="top">
+
+            <div>
+
+                <h2 id="pageTitle">
+                    Dashboard
+                </h2>
+
+                <div
+                    class="date"
+                    id="today">
+                    Loading date...
+                </div>
+
+            </div>
+
+
+            <button
+                class="btn gold"
+                onclick="newSale()">
+
+                + New Sale
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             DASHBOARD
+             ================================================= -->
+
+        <section
+            id="dashboard"
+            class="page active">
+
+            <div class="cards">
+
+                <div class="card">
+
+                    <div class="label">
+                        Today's Sales
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="mToday">
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Transactions
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="mTxn">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Products
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="mProducts">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Low Stock
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="mLow">
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid2">
+
+                <div class="panel">
+
+                    <h3>
+                        Recent Sales
+                    </h3>
+
+                    <div id="recentSales">
+
+                        <div class="empty">
+                            No sales yet.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h3>
+                        Low Stock Alert
+                    </h3>
+
+                    <div id="lowStock">
+
+                        <div class="empty">
+                            Stock levels look good.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             POS
+             ================================================= -->
+
+        <section
+            id="pos"
+            class="page">
+
+            <div class="pos">
+
+                <!-- PRODUCTS -->
+
+                <div class="panel">
+
+                    <div class="toolbar">
+
+                        <input
+                            id="posSearch"
+                            class="search"
+                            type="search"
+                            placeholder="Search product...">
+
+                        <select
+                            id="posCat"
+                            style="max-width:190px">
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div
+                        class="product-grid"
+                        id="productGrid">
+
+                        <div class="empty">
+                            Products will appear here.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CART -->
+
+                <div class="panel">
+
+                    <h3>
+                        Current Sale
+                    </h3>
+
+
+                    <input
+                        id="customerName"
+                        placeholder="Customer name (optional)"
+                        style="margin-bottom:10px;">
+
+
+                    <div
+                        class="cart"
+                        id="cart">
+
+                        <div class="empty">
+                            Cart is empty.
+                        </div>
+
+                    </div>
+
+
+                    <div class="totals">
+
+                        <div class="totalline">
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <b id="subtotal">
+                                ₦0
+                            </b>
+
+                        </div>
+
+
+                        <div class="totalline">
+
+                            <span>
+                                Discount
+                            </span>
+
+                            <input
+                                id="discount"
+                                type="number"
+                                min="0"
+                                value="0"
+                                style="width:120px;padding:7px;">
+
+                        </div>
+
+
+                        <div class="totalline">
+
+                            <span>
+                                Grand Total
+                            </span>
+
+                            <b
+                                class="grand"
+                                id="grandTotal">
+                                ₦0
+                            </b>
+
+                        </div>
+
+
+                        <select
+                            id="payment"
+                            style="margin:10px 0;">
+
+                            <option>
+                                Cash
+                            </option>
+
+                            <option>
+                                Transfer
+                            </option>
+
+                            <option>
+                                POS
+                            </option>
+
+                            <option>
+                                Credit
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            class="btn green"
+                            style="width:100%;">
+
+                            COMPLETE SALE
+
+                        </button>
+
+
+                        <button
+                            class="btn gray"
+                            style="width:100%;margin-top:7px;">
+
+                            Clear Sale
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             INVENTORY
+             ================================================= -->
+
+        <section
+            id="inventory"
+            class="page">
+
+            <div class="panel">
+
+                <div class="toolbar">
+
+                    <input
+                        id="invSearch"
+                        class="search"
+                        placeholder="Search inventory...">
+
+
+                    <button class="btn">
+                        + Add Product
+                    </button>
+
+
+                    <button class="btn gold">
+                        Stock In
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Product
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Cost
+                                </th>
+
+                                <th>
+                                    Selling
+                                </th>
+
+                                <th>
+                                    Stock
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="inventoryTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SALES HISTORY
+             ================================================= -->
+
+        <section
+            id="sales"
+            class="page">
+
+            <div class="panel">
+
+                <div class="toolbar">
+
+                    <input
+                        id="salesSearch"
+                        class="search"
+                        placeholder="Search receipt/customer/payment...">
+
+
+                    <button class="btn gray">
+                        Export CSV
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Receipt
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Items
+                                </th>
+
+                                <th>
+                                    Payment
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="salesTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CUSTOMERS
+             ================================================= -->
+
+        <section
+            id="customers"
+            class="page">
+
+            <div class="panel">
+
+                <div class="toolbar">
+
+                    <input
+                        id="custSearch"
+                        class="search"
+                        placeholder="Search customers...">
+
+
+                    <button class="btn">
+                        + Add Customer
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Name
+                                </th>
+
+                                <th>
+                                    Phone
+                                </th>
+
+                                <th>
+                                    Address
+                                </th>
+
+                                <th>
+                                    Sales
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="customersTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EXPENSES
+             ================================================= -->
+
+        <section
+            id="expenses"
+            class="page">
+
+            <div class="panel">
+
+                <div class="toolbar">
+
+                    <button class="btn">
+                        + Add Expense
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Description
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="expensesTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORTS
+             ================================================= -->
+
+        <section
+            id="reports"
+            class="page">
+
+            <div class="cards">
+
+                <div class="card">
+
+                    <div class="label">
+                        Total Sales
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="rSales">
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Gross Profit
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="rProfit">
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Expenses
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="rExpenses">
+                        ₦0
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="label">
+                        Net Profit
+                    </div>
+
+                    <div
+                        class="metric"
+                        id="rNet">
+                        ₦0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="panel"
+                style="margin-top:16px;">
+
+                <h3>
+                    Sales by Payment Method
+                </h3>
+
+                <div id="paymentReport">
+
+                    <div class="empty">
+                        No sales recorded.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SETTINGS
+             ================================================= -->
+
+        <section
+            id="settings"
+            class="page">
+
+            <div class="grid2">
+
+                <div class="panel">
+
+                    <h3>
+                        Business Settings
+                    </h3>
+
+
+                    <div class="formgrid">
+
+                        <div class="full">
+
+                            <label>
+                                Business Name
+                            </label>
+
+                            <input
+                                id="bizName"
+                                value="KC INTEGRATED GLOBAL SERVICES">
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                Phone
+                            </label>
+
+                            <input
+                                id="bizPhone">
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                Address
+                            </label>
+
+                            <input
+                                id="bizAddress">
+
+                        </div>
+
+
+                        <div class="full">
+
+                            <label>
+                                Receipt Footer
+                            </label>
+
+                            <textarea
+                                id="bizFooter">Thank you for your patronage.</textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button class="btn">
+                            Save Settings
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h3>
+                        Data Management
+                    </h3>
+
+                    <p class="label"
+                       style="margin-bottom:15px;">
+
+                        Your POS data will be stored
+                        locally on this device.
+
+                    </p>
+
+
+                    <button class="btn green">
+                        Download Backup
+                    </button>
+
+
+                    <button
+                        class="btn gray"
+                        style="margin-top:8px;">
+
+                        Restore Backup
+
+                    </button>
+
+
+                    <button
+                        class="btn red"
+                        style="margin-top:8px;">
+
+                        Reset All Data
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCT MODAL
+     ===================================================== -->
+
+<div
+    class="modal"
+    id="productModal">
+
+    <div class="modalbox">
+
+        <h3>
+            Add Product
+        </h3>
+
+
+        <div class="formgrid">
+
+            <input
+                id="pId"
+                type="hidden">
+
+
+            <div>
+
+                <label>
+                    Product Name
+                </label>
+
+                <input
+                    id="pName"
+                    placeholder="Product name">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Category
+                </label>
+
+                <input
+                    id="pCategory"
+                    placeholder="e.g. Drinks">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Cost Price
+                </label>
+
+                <input
+                    id="pCost"
+                    type="number"
+                    min="0">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Selling Price
+                </label>
+
+                <input
+                    id="pPrice"
+                    type="number"
+                    min="0">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Stock Quantity
+                </label>
+
+                <input
+                    id="pStock"
+                    type="number"
+                    min="0">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Low Stock Level
+                </label>
+
+                <input
+                    id="pMin"
+                    type="number"
+                    min="0"
+                    value="5">
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button class="btn gray">
+                Cancel
+            </button>
+
+            <button class="btn">
+                Save Product
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CUSTOMER MODAL
+     ===================================================== -->
+
+<div
+    class="modal"
+    id="customerModal">
+
+    <div class="modalbox">
+
+        <h3>
+            Add Customer
+        </h3>
+
+
+        <div class="formgrid">
+
+            <input
+                id="cId"
+                type="hidden">
+
+
+            <div>
+
+                <label>
+                    Customer Name
+                </label>
+
+                <input
+                    id="cName">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Phone
+                </label>
+
+                <input
+                    id="cPhone">
+
+            </div>
+
+
+            <div class="full">
+
+                <label>
+                    Address
+                </label>
+
+                <input
+                    id="cAddress">
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button class="btn gray">
+                Cancel
+            </button>
+
+            <button class="btn">
+                Save Customer
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     EXPENSE MODAL
+     ===================================================== -->
+
+<div
+    class="modal"
+    id="expenseModal">
+
+    <div class="modalbox">
+
+        <h3>
+            Add Expense
+        </h3>
+
+
+        <div class="formgrid">
+
+            <div>
+
+                <label>
+                    Description
+                </label>
+
+                <input
+                    id="eDesc"
+                    placeholder="e.g. Transport">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Category
+                </label>
+
+                <input
+                    id="eCat"
+                    placeholder="Expense category">
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Amount
+                </label>
+
+                <input
+                    id="eAmount"
+                    type="number"
+                    min="0">
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button class="btn gray">
+                Cancel
+            </button>
+
+            <button class="btn">
+                Save Expense
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRINT RECEIPT AREA
+     ===================================================== -->
+
+<div
+    class="printwrap"
+    id="printArea">
+
+</div>
+
+
+<!-- =====================================================
+     TOAST NOTIFICATION
+     ===================================================== -->
+
+<div
+    class="toast"
+    id="toast">
+
+    Done
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT WILL BE ADDED IN PART 2–5
+     ===================================================== -->
+
+<script>
+
+/*
+    KCIGS-SALESPRO
+
+    PART 1
+
+    The application interface and styling
+    have been created above.
+
+    Parts 2–5 will add the complete
+    POS functionality, inventory,
+    sales, reports, database,
+    receipt printing and backup.
+*/
+
+console.log(
+    "KCIGS-SALESPRO PART 1 loaded successfully."
+);
+
+</script>
+
+</body>
+</html>
