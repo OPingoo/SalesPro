@@ -3,114 +3,814 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KC Integrated Global Services — POS</title>
+<title>KCIGS Invoice Generator</title>
+
 <style>
-:root{--blue:#073b75;--blue2:#0b63b6;--gold:#d9a514;--bg:#f4f7fb;--text:#172033;--muted:#6b7280;--white:#fff;--danger:#c62828;--green:#168447;--border:#e4e8ef}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}button{cursor:pointer;border:0}
-.app{display:flex;min-height:100vh}.sidebar{width:245px;background:linear-gradient(180deg,#052c59,#071a35);color:#fff;padding:18px;position:fixed;top:0;bottom:0;left:0;z-index:5}
-.brand{text-align:center;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.15)}.brand img{width:110px;height:85px;object-fit:contain}.brand h2{font-size:16px;margin:4px 0;color:#fff}.brand small{color:#e7c55d}
-.nav{margin-top:18px}.nav button{display:block;width:100%;padding:13px 12px;background:transparent;color:#dbe8f7;text-align:left;border-radius:9px;margin:5px 0}.nav button:hover,.nav button.active{background:#0d5ca7;color:#fff}
-.main{margin-left:245px;width:calc(100% - 245px);padding:20px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.topbar h1{margin:0;font-size:24px}.mobile-menu{display:none}
-.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border:1px solid var(--border);border-radius:13px;padding:18px;box-shadow:0 3px 12px rgba(10,30,60,.04)}.card .label{font-size:13px;color:var(--muted)}.card .value{font-size:24px;font-weight:800;margin-top:8px}
-.grid2{display:grid;grid-template-columns:1.35fr .85fr;gap:16px;margin-top:16px}.panel{background:#fff;border:1px solid var(--border);border-radius:13px;padding:16px}.panel h3{margin:0 0 14px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select,.form input,.form select{border:1px solid #d7dce5;border-radius:8px;padding:10px;background:#fff;outline:none}.toolbar input{flex:1;min-width:180px}
-.btn{padding:10px 14px;border-radius:8px;background:var(--blue2);color:#fff}.btn.gold{background:var(--gold);color:#111}.btn.green{background:var(--green)}.btn.danger{background:var(--danger)}.btn.light{background:#edf3fa;color:#17436d}.btn:disabled{opacity:.45;cursor:not-allowed}
-.products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-height:62vh;overflow:auto}.product{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}.product:hover{border-color:#76a9d8}.product h4{margin:0 0 5px;font-size:15px}.product .price{font-weight:800;color:var(--blue2)}.product small{color:var(--muted)}.product button{width:100%;margin-top:9px}
-.cart{max-height:45vh;overflow:auto}.cart-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}.qty{display:flex;align-items:center;gap:6px}.qty button{width:27px;height:27px;border-radius:6px;background:#eaf0f7}.cart-total{margin-top:12px;font-size:20px;font-weight:800;display:flex;justify-content:space-between}.checkout{display:grid;gap:8px;margin-top:13px}.checkout select,.checkout input{padding:11px;border:1px solid #d7dce5;border-radius:8px}
-table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:11px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}th{background:#f7f9fc}.table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eaf5ee;color:#167642;font-size:12px}.badge.low{background:#fff2e4;color:#a05200}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.form label{font-size:13px;color:var(--muted);display:grid;gap:6px}.form .full{grid-column:1/-1}.empty{text-align:center;color:var(--muted);padding:25px}
-.receipt{display:none}.footer-note{font-size:12px;color:var(--muted);margin-top:12px}
-@media(max-width:900px){.sidebar{width:205px}.main{margin-left:205px;width:calc(100% - 205px)}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.products{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:650px){.sidebar{display:none}.main{margin-left:0;width:100%;padding:12px}.mobile-menu{display:block;background:var(--blue);color:#fff;padding:8px 11px;border-radius:8px}.cards{grid-template-columns:1fr 1fr}.products{grid-template-columns:1fr}.form{grid-template-columns:1fr}.topbar h1{font-size:19px}}
-@media print{body *{visibility:hidden}.receipt,.receipt *{visibility:visible}.receipt{display:block;position:absolute;left:0;top:0;width:80mm;padding:5mm;background:#fff;color:#000}.no-print{display:none!important}}
+:root {
+    --navy: #10264a;
+    --blue: #174a8b;
+    --gold: #d5a72c;
+    --light: #f3f6fb;
+    --border: #dce3ed;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 16px;
+    font-family: Arial, sans-serif;
+    background: var(--light);
+    color: #202938;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+.header {
+    background: var(--navy);
+    color: white;
+    padding: 22px;
+    border-bottom: 5px solid var(--gold);
+    border-radius: 10px 10px 0 0;
+}
+
+.header h1 {
+    margin: 0 0 8px;
+    font-size: 23px;
+}
+
+.header p {
+    margin: 4px 0;
+    font-size: 13px;
+}
+
+.panel {
+    background: white;
+    padding: 20px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0000000a;
+}
+
+h2 {
+    font-size: 16px;
+    color: var(--navy);
+    margin-top: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #b8d4fa;
+    border-color: var(--blue);
+}
+
+.field { min-width: 0; }
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+}
+
+th {
+    background: var(--navy);
+    color: white;
+    font-size: 12px;
+    text-align: left;
+}
+
+th, td {
+    padding: 9px 7px;
+    border: 1px solid var(--border);
+}
+
+td input {
+    border: 1px solid #e0e5ed;
+    padding: 8px 5px;
+    min-width: 65px;
+}
+
+td:first-child input { min-width: 150px; }
+
+.amount {
+    text-align: right;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+button {
+    border: 0;
+    padding: 11px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+button:active { transform: scale(.98); }
+
+.primary { background: var(--blue); color: white; }
+.gold { background: var(--gold); color: #17233b; }
+.gray { background: #e8edf5; color: #23334c; }
+.danger { background: #fee2e2; color: #a61b1b; }
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.summary {
+    max-width: 400px;
+    margin-left: auto;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.grand {
+    background: var(--navy);
+    color: white;
+    padding: 15px;
+    margin-top: 8px;
+    font-size: 19px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.words {
+    margin-top: 15px;
+    background: #fff8e6;
+    border-left: 4px solid var(--gold);
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #65738a;
+}
+
+#notice {
+    display: none;
+    padding: 12px;
+    background: #dcfce7;
+    color: #166534;
+    margin-bottom: 12px;
+    border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    body { padding: 8px; }
+    .panel { padding: 13px; }
+    .grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 19px; }
+    .actions button { flex: 1 1 40%; }
+}
+
+@media print {
+    body { padding: 0; background: white; }
+    .container { max-width: none; }
+    .no-print, #notice { display: none !important; }
+    .header, .grand, th {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .panel {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+    input, select, textarea {
+        border: none;
+        padding: 2px;
+        appearance: none;
+        -webkit-appearance: none;
+        background: transparent;
+    }
+    .delete-col { display: none; }
+    .table-wrap { overflow: visible; }
+    table { min-width: 0; }
+    td, th { padding: 6px 4px; font-size: 11px; }
+    td:first-child input { min-width: 0; }
+    .header { border-radius: 0; }
+    @page { margin: 12mm; }
+}
 </style>
 </head>
+
 <body>
-<div class="app">
-<aside class="sidebar">
-  <div class="brand">
-    <img id="logo" alt="KC Integrated Global Services">
-    <h2>KC INTEGRATED</h2><small>GLOBAL SERVICES</small>
-  </div>
-  <div class="nav">
-    <button class="active" data-page="dashboard">📊 Dashboard</button>
-    <button data-page="pos">🛒 POS / Sales</button>
-    <button data-page="inventory">📦 Inventory</button>
-    <button data-page="sales">🧾 Sales History</button>
-    <button data-page="settings">⚙️ Settings</button>
-  </div>
-</aside>
+<div class="container">
 
-<main class="main">
-  <div class="topbar">
-    <div style="display:flex;gap:9px;align-items:center"><button class="mobile-menu" onclick="toggleMobile()">☰</button><h1 id="pageTitle">Dashboard</h1></div>
-    <div id="clock"></div>
-  </div>
+<header class="header">
+    <h1>KC INTEGRATED GLOBAL SERVICES</h1>
+    <p><strong>INVOICE / SALES RECEIPT</strong></p>
+    <p>Wholesale & Retail Drinks, Bottle Water and Consumer Products</p>
+    <p>Tel: 08023717432 | 08168021011</p>
+    <p>Location: Opposite Dubiken Fueling Station, Nnewichi, Orieagbo</p>
+</header>
 
-  <section id="dashboard" class="page active">
-    <div class="cards">
-      <div class="card"><div class="label">Today's Sales</div><div class="value" id="dashToday">₦0</div></div>
-      <div class="card"><div class="label">Total Transactions</div><div class="value" id="dashTransactions">0</div></div>
-      <div class="card"><div class="label">Products</div><div class="value" id="dashProducts">0</div></div>
-      <div class="card"><div class="label">Low Stock</div><div class="value" id="dashLow">0</div></div>
-    </div>
-    <div class="grid2">
-      <div class="panel"><h3>Recent Sales</h3><div class="table-wrap"><table><thead><tr><th>Receipt</th><th>Date</th><th>Payment</th><th>Total</th></tr></thead><tbody id="recentSales"></tbody></table></div></div>
-      <div class="panel"><h3>Low Stock Alert</h3><div id="lowStockList"></div></div>
-    </div>
-  </section>
-
-  <section id="pos" class="page">
-    <div class="grid2">
-      <div class="panel">
-        <h3>Products</h3>
-        <div class="toolbar"><input id="posSearch" placeholder="Search product..." oninput="renderProducts()"><select id="posCategory" onchange="renderProducts()"><option value="">All categories</option></select></div>
-        <div class="products" id="productGrid"></div>
-      </div>
-      <div class="panel">
-        <h3>Current Sale</h3><div class="cart" id="cart"></div>
-        <div class="cart-total"><span>Total</span><span id="cartTotal">₦0</span></div>
-        <div class="checkout">
-          <input id="customer" placeholder="Customer name (optional)">
-          <select id="payment"><option>Cash</option><option>POS</option><option>Transfer</option><option>Credit</option></select>
-          <button class="btn green" onclick="completeSale()">Complete Sale</button>
-          <button class="btn light" onclick="clearCart()">Clear Cart</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="inventory" class="page">
-    <div class="panel">
-      <div class="toolbar"><input id="inventorySearch" placeholder="Search inventory..." oninput="renderInventory()"><button class="btn" onclick="openProductForm()">+ Add Product</button><button class="btn gold" onclick="exportProducts()">Export CSV</button></div>
-      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Action</th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
-    </div>
-  </section>
-
-  <section id="sales" class="page">
-    <div class="panel">
-      <div class="toolbar"><input id="salesSearch" placeholder="Search receipt/customer..." oninput="renderSales()"><button class="btn gold" onclick="exportSales()">Export Sales CSV</button></div>
-      <div class="table-wrap"><table><thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Payment</th><th>Total</th><th>Action</th></tr></thead><tbody id="salesBody"></tbody></table></div>
-    </div>
-  </section>
-
-  <section id="settings" class="page">
-    <div class="panel">
-      <h3>Business Settings</h3>
-      <div class="form">
-        <label>Business Name<input id="setBusiness"></label>
-        <label>Currency<input id="setCurrency"></label>
-        <label>Phone<input id="setPhone"></label>
-        <label>Address<input id="setAddress"></label>
-        <label class="full">Receipt Footer<input id="setFooter"></label>
-      </div>
-      <br><button class="btn green" onclick="saveSettings()">Save Settings</button>
-      <button class="btn danger" onclick="resetDemo()">Reset Demo Data</button>
-      <p class="footer-note">Data is stored in this browser using localStorage. It works offline after the file is loaded.</p>
-    </div>
-  </section>
-</main>
+<div class="actions no-print">
+    <button class="primary" onclick="newInvoice()">＋ New Invoice</button>
+    <button class="gold" onclick="addRow()">＋ Add Product</button>
+    <button class="primary" onclick="saveInvoice()">Save Invoice</button>
+    <button class="gray" onclick="window.print()">Print / Save PDF</button>
+    <button class="gray" onclick="shareWhatsApp()">Share WhatsApp</button>
+    <button class="gray" onclick="exportBackup()">Export Backup</button>
 </div>
 
-<div class="receipt" id="receipt"></div>
+<div id="notice"></div>
+
+<section class="panel">
+    <h2>Invoice Details</h2>
+    <div class="grid">
+        <div class="field">
+            <label>Invoice Number</label>
+            <input id="invoiceNo">
+        </div>
+        <div class="field">
+            <label>Invoice Date</label>
+            <input type="date" id="invoiceDate">
+        </div>
+        <div class="field">
+            <label>Customer Name</label>
+            <input id="customer" placeholder="Enter customer name">
+        </div>
+        <div class="field">
+            <label>Customer Phone</label>
+            <input id="phone" placeholder="Enter phone number">
+        </div>
+        <div class="field">
+            <label>Payment Status</label>
+            <select id="status">
+                <option>Unpaid</option>
+                <option>Partially Paid</option>
+                <option>Paid</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Payment Method</label>
+            <select id="paymentMethod">
+                <option>Cash</option>
+                <option>Bank Transfer</option>
+                <option>POS</option>
+                <option>Credit</option>
+                <option>Other</option>
+            </select>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Products / Items</h2>
+    <div class="table-wrap">
+        <table id="itemsTable">
+            <thead>
+                <tr>
+                    <th>Product Description</th>
+                    <th>Qty</th>
+                    <th>Unit Price (₦)</th>
+                    <th>Amount (₦)</th>
+                    <th class="delete-col no-print">Remove</th>
+                </tr>
+            </thead>
+            <tbody id="items"></tbody>
+        </table>
+    </div>
+    <div class="actions no-print">
+        <button class="gold" onclick="addRow()">＋ Add Another Product</button>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Payment Summary</h2>
+
+    <div class="grid">
+        <div class="field">
+            <label>Discount (₦)</label>
+            <input type="number" id="discount" min="0" value="0">
+        </div>
+        <div class="field">
+            <label>Amount Paid (₦)</label>
+            <input type="number" id="paid" min="0" value="0">
+        </div>
+        <div class="field">
+            <label>Additional Notes</label>
+            <textarea id="notes" rows="3" placeholder="Thank you for your patronage."></textarea>
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <strong id="subtotal">₦0.00</strong>
+        </div>
+        <div class="summary-row">
+            <span>Discount</span>
+            <strong id="discountDisplay">₦0.00</strong>
+        </div>
+        <div class="summary-row">
+            <span>Amount Paid</span>
+            <strong id="paidDisplay">₦0.00</strong>
+        </div>
+        <div class="grand">
+            <span>GRAND TOTAL</span>
+            <span id="total">₦0.00</span>
+        </div>
+        <div class="summary-row">
+            <span>Balance Due</span>
+            <strong id="balance">₦0.00</strong>
+        </div>
+    </div>
+
+    <div class="words">
+        <strong>Amount in Words:</strong>
+        <span id="amountWords">Zero Naira Only</span>
+    </div>
+</section>
+
+<section class="panel no-print">
+    <h2>Saved Invoices</h2>
+    <p style="font-size:12px;color:#65738a">
+        Invoices are saved in this browser on this device.
+        Export a backup regularly. Clearing browser data may erase saved invoices.
+    </p>
+    <div class="grid">
+        <div class="field">
+            <label>Find Saved Invoice</label>
+            <input id="searchInvoice" placeholder="Invoice number or customer"
+                   oninput="renderSavedInvoices()">
+        </div>
+        <div class="field">
+            <label>Load Invoice</label>
+            <select id="savedInvoices">
+                <option value="">Select saved invoice</option>
+            </select>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="primary" onclick="loadInvoice()">Load Selected</button>
+        <button class="danger" onclick="deleteInvoice()">Delete Selected</button>
+        <button class="gray" onclick="document.getElementById('backupFile').click()">
+            Import Backup
+        </button>
+        <input type="file" id="backupFile" accept=".json,application/json"
+               hidden onchange="importBackup(event)">
+    </div>
+</section>
+
+<div class="footer">
+    <strong>KC INTEGRATED GLOBAL SERVICES</strong><br>
+    Thank you for your patronage.
+</div>
+
+</div>
 
 <script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const money = n => "₦" + (Number(n) || 0).toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+function today() {
+    const d = new Date();
+    return [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getDate()).padStart(2, "0")
+    ].join("-");
+}
+
+function makeInvoiceNumber() {
+    const date = today().replaceAll("-", "");
+    const key = "kcisInvoiceCounter_" + date;
+    let counter = Number(localStorage.getItem(key) || 0) + 1;
+    localStorage.setItem(key, String(counter));
+    return "KCIGS-" + date + "-" + String(counter).padStart(3, "0");
+}
+
+function notify(message) {
+    $("notice").textContent = message;
+    $("notice").style.display = "block";
+    setTimeout(() => $("notice").style.display = "none", 3500);
+}
+
+function addRow(item = {}) {
+    const tr = document.createElement("tr");
+
+    const nameTd = document.createElement("td");
+    const name = document.createElement("input");
+    name.placeholder = "Product name";
+    name.className = "product-name";
+    name.value = item.name || "";
+    nameTd.appendChild(name);
+
+    const qtyTd = document.createElement("td");
+    const qty = document.createElement("input");
+    qty.type = "number";
+    qty.min = "0";
+    qty.step = "any";
+    qty.value = item.qty ?? 1;
+    qty.className = "qty";
+    qty.setAttribute("aria-label", "Quantity");
+    qtyTd.appendChild(qty);
+
+    const priceTd = document.createElement("td");
+    const price = document.createElement("input");
+    price.type = "number";
+    price.min = "0";
+    price.step = "any";
+    price.value = item.price ?? 0;
+    price.className = "price";
+    price.setAttribute("aria-label", "Unit price");
+    priceTd.appendChild(price);
+
+    const amountTd = document.createElement("td");
+    amountTd.className = "amount";
+    amountTd.textContent = money((Number(qty.value) || 0) *
+                                  (Number(price.value) || 0));
+
+    const removeTd = document.createElement("td");
+    removeTd.className = "delete-col no-print";
+    const remove = document.createElement("button");
+    remove.className = "danger";
+    remove.textContent = "✕";
+    remove.type = "button";
+    remove.setAttribute("aria-label", "Remove product");
+    remove.onclick = () => {
+        tr.remove();
+        calculate();
+    };
+    removeTd.appendChild(remove);
+
+    tr.append(nameTd, qtyTd, priceTd, amountTd, removeTd);
+    $("items").appendChild(tr);
+
+    [name, qty, price].forEach(el => {
+        el.addEventListener("input", calculate);
+    });
+
+    calculate();
+}
+
+function getItems() {
+    return [...$("items").rows].map(row => ({
+        name: row.querySelector(".product-name").value.trim(),
+        qty: Math.max(0, Number(row.querySelector(".qty").value) || 0),
+        price: Math.max(0, Number(row.querySelector(".price").value) || 0)
+    }));
+}
+
+function calculate() {
+    let subtotal = 0;
+
+    [...$("items").rows].forEach(row => {
+        const qty = Math.max(0, Number(row.querySelector(".qty").value) || 0);
+        const price = Math.max(0, Number(row.querySelector(".price").value) || 0);
+        const amount = qty * price;
+        row.cells[3].textContent = money(amount);
+        subtotal += amount;
+    });
+
+    const discount = Math.min(
+        subtotal, Math.max(0, Number($("discount").value) || 0)
+    );
+    const total = Math.max(0, subtotal - discount);
+    const paid = Math.min(total, Math.max(0, Number($("paid").value) || 0));
+    const balance = Math.max(0, total - paid);
+
+    $("subtotal").textContent = money(subtotal);
+    $("discountDisplay").textContent = money(discount);
+    $("paidDisplay").textContent = money(paid);
+    $("total").textContent = money(total);
+    $("balance").textContent = money(balance);
+    $("amountWords").textContent = amountInWords(Math.round(total)) +
+        (Math.round(total) === 1 ? " Naira Only" : " Naira Only");
+
+    return {subtotal, discount, total, paid, balance};
+}
+
+function amountInWords(value) {
+    value = Math.floor(Math.max(0, value));
+    if (value === 0) return "Zero";
+
+    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six",
+        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
+        "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
+        "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty",
+        "Sixty", "Seventy", "Eighty", "Ninety"];
+
+    function underThousand(n) {
+        let s = "";
+        if (n >= 100) {
+            s += ones[Math.floor(n / 100)] + " Hundred";
+            n %= 100;
+            if (n) s += " ";
+        }
+        if (n >= 20) {
+            s += tens[Math.floor(n / 10)];
+            if (n % 10) s += " " + ones[n % 10];
+        } else if (n > 0) {
+            s += ones[n];
+        }
+        return s;
+    }
+
+    const scales = [
+        [1e9, "Billion"], [1e6, "Million"], [1e3, "Thousand"], [1, ""]
+    ];
+    let result = "";
+
+    for (const [scale, label] of scales) {
+        if (value >= scale) {
+            const group = Math.floor(value / scale);
+            value %= scale;
+            result += (result ? " " : "") + underThousand(group);
+            if (label) result += " " + label;
+        }
+    }
+    return result;
+}
+
+function invoiceData() {
+    const totals = calculate();
+    return {
+        invoiceNo: $("invoiceNo").value.trim(),
+        invoiceDate: $("invoiceDate").value,
+        customer: $("customer").value.trim(),
+        phone: $("phone").value.trim(),
+        status: $("status").value,
+        paymentMethod: $("paymentMethod").value,
+        items: getItems(),
+        discount: totals.discount,
+        paid: totals.paid,
+        notes: $("notes").value,
+        updatedAt: new Date().toISOString()
+    };
+}
+
+function validateInvoice(data) {
+    if (!data.invoiceNo) {
+        notify("Please enter an invoice number.");
+        return false;
+    }
+    if (!data.customer) {
+        notify("Please enter the customer name.");
+        $("customer").focus();
+        return false;
+    }
+    if (!data.items.some(i => i.name && i.qty > 0)) {
+        notify("Add at least one product with a name and quantity.");
+        return false;
+    }
+    return true;
+}
+
+function getSaved() {
+    try {
+        const data = JSON.parse(localStorage.getItem("kcisInvoices") || "{}");
+        return data && typeof data === "object" && !Array.isArray(data)
+            ? data : {};
+    } catch {
+        return {};
+    }
+}
+
+function saveInvoice() {
+    const data = invoiceData();
+    if (!validateInvoice(data)) return;
+
+    const saved = getSaved();
+    saved[data.invoiceNo] = data;
+
+    try {
+        localStorage.setItem("kcisInvoices", JSON.stringify(saved));
+        renderSavedInvoices();
+        $("savedInvoices").value = data.invoiceNo;
+        notify("Invoice saved successfully on this device.");
+    } catch {
+        notify("Could not save. Browser storage may be full or unavailable.");
+    }
+}
+
+function fillInvoice(data) {
+    $("invoiceNo").value = data.invoiceNo || "";
+    $("invoiceDate").value = data.invoiceDate || today();
+    $("customer").value = data.customer || "";
+    $("phone").value = data.phone || "";
+    $("status").value = data.status || "Unpaid";
+    $("paymentMethod").value = data.paymentMethod || "Cash";
+    $("discount").value = data.discount || 0;
+    $("paid").value = data.paid || 0;
+    $("notes").value = data.notes || "";
+    $("items").replaceChildren();
+    (data.items || []).forEach(addRow);
+    if (!(data.items || []).length) addRow();
+    calculate();
+}
+
+function renderSavedInvoices() {
+    const saved = getSaved();
+    const query = ($("searchInvoice").value || "").toLowerCase();
+    const select = $("savedInvoices");
+    select.replaceChildren(new Option("Select saved invoice", ""));
+
+    Object.values(saved)
+        .filter(d => ((d.invoiceNo || "") + " " + (d.customer || ""))
+            .toLowerCase().includes(query))
+        .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
+        .forEach(d => {
+            select.add(new Option(
+                (d.invoiceNo || "Invoice") + " — " + (d.customer || "Customer"),
+                d.invoiceNo
+            ));
+        });
+}
+
+function loadInvoice() {
+    const id = $("savedInvoices").value;
+    const data = getSaved()[id];
+    if (!data) return notify("Select a saved invoice first.");
+    fillInvoice(data);
+    notify("Invoice loaded.");
+}
+
+function deleteInvoice() {
+    const id = $("savedInvoices").value;
+    if (!id) return notify("Select an invoice to delete.");
+    if (!confirm("Permanently delete invoice " + id + "?")) return;
+
+    const saved = getSaved();
+    delete saved[id];
+    localStorage.setItem("kcisInvoices", JSON.stringify(saved));
+    renderSavedInvoices();
+    notify("Invoice deleted.");
+}
+
+function newInvoice() {
+    if (!confirm("Start a new invoice? Save your current invoice first if needed."))
+        return;
+
+    fillInvoice({
+        invoiceNo: makeInvoiceNumber(),
+        invoiceDate: today(),
+        customer: "",
+        phone: "",
+        status: "Unpaid",
+        paymentMethod: "Cash",
+        items: [{name:"", qty:1, price:0}],
+        discount: 0,
+        paid: 0,
+        notes: "Thank you for your patronage."
+    });
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function shareWhatsApp() {
+    const d = invoiceData();
+    if (!validateInvoice(d)) return;
+
+    const t = calculate();
+    const lines = [
+        "*KC INTEGRATED GLOBAL SERVICES*",
+        "*INVOICE / SALES SUMMARY*",
+        "Invoice: " + d.invoiceNo,
+        "Date: " + d.invoiceDate,
+        "Customer: " + d.customer,
+        d.phone ? "Phone: " + d.phone : "",
+        "",
+        "*Items:*",
+        ...d.items.filter(i => i.name && i.qty > 0).map(i =>
+            i.name + " — " + i.qty + " × " + money(i.price) +
+            " = " + money(i.qty * i.price)
+        ),
+        "",
+        "Subtotal: " + money(t.subtotal),
+        "Discount: " + money(t.discount),
+        "*GRAND TOTAL: " + money(t.total) + "*",
+        "Paid: " + money(t.paid),
+        "Balance: " + money(t.balance),
+        "Payment status: " + d.status,
+        "Payment method: " + d.paymentMethod,
+        d.notes ? "Note: " + d.notes : "",
+        "",
+        "Thank you for your patronage."
+    ].filter(line => line !== "");
+
+    const url = "https://wa.me/?text=" + encodeURIComponent(lines.join("\n"));
+    window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function exportBackup() {
+    const data = getSaved();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "KCIGS-Invoice-Backup-" + today() + ".json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    notify("Backup export started.");
+}
+
+function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        try {
+            const incoming = JSON.parse(reader.result);
+            if (!incoming || typeof incoming !== "object" ||
+                Array.isArray(incoming)) throw new Error("Invalid format");
+
+            for (const [key, value] of Object.entries(incoming)) {
+                if (!value || typeof value !== "object" ||
+                    !Array.isArray(value.items) ||
+                    !value.invoiceNo) {
+                    throw new Error("Invalid invoice data");
+                }
+            }
+
+            if (!confirm("Import invoices? Existing invoices with matching " +
+                         "numbers will be replaced.")) return;
+
+            const saved = getSaved();
+            Object.assign(saved, incoming);
+            localStorage.setItem("kcisInvoices", JSON.stringify(saved));
+            renderSavedInvoices();
+            notify("Backup imported successfully.");
+        } catch {
+            notify("Import failed. Please select a valid KCIGS invoice backup.");
+        } finally {
+            event.target.value = "";
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+$("discount").addEventListener("input", calculate);
+$("paid").addEventListener("input", calculate);
+
+fillInvoice({
+    invoiceNo: makeInvoiceNumber(),
+    invoiceDate: today(),
+    status: "Unpaid",
+    paymentMethod: "Cash",
+    items: [{name:"", qty:1, price:0}],
+    discount: 0,
+    paid: 0,
+    notes: "Thank you for your patronage."
+});
+
+renderSavedInvoices();
+</script>
+</body>
+</html>
