@@ -2,63 +2,155 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KCIGS Invoice Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KCIGS SalesPro — Offline POS & Inventory</title>
 
 <style>
 :root {
     --navy: #10264a;
     --blue: #174a8b;
     --gold: #d5a72c;
-    --light: #f3f6fb;
-    --border: #dce3ed;
+    --bg: #f3f6fb;
+    --ink: #202938;
+    --muted: #64748b;
+    --line: #dce3ed;
+    --green: #16803c;
+    --red: #b42318;
 }
 
 * { box-sizing: border-box; }
 
 body {
     margin: 0;
-    padding: 16px;
-    font-family: Arial, sans-serif;
-    background: var(--light);
-    color: #202938;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px Arial, sans-serif;
 }
 
-.container {
-    max-width: 1000px;
+button, input, select, textarea {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    border-radius: 7px;
+    padding: 10px 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.primary { background: var(--blue); color: white; }
+.gold { background: var(--gold); color: #17233b; }
+.light { background: #e8edf5; color: #23334c; }
+.danger { background: #fee2e2; color: #a61b1b; }
+.success { background: #dcfce7; color: #166534; }
+
+.app {
+    max-width: 1250px;
     margin: auto;
+    padding: 14px;
 }
 
-.header {
+.brand {
     background: var(--navy);
-    color: white;
-    padding: 22px;
+    color: #fff;
     border-bottom: 5px solid var(--gold);
-    border-radius: 10px 10px 0 0;
+    padding: 18px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-.header h1 {
-    margin: 0 0 8px;
-    font-size: 23px;
+.brand h1 {
+    margin: 0 0 5px;
+    font-size: 22px;
 }
 
-.header p {
-    margin: 4px 0;
-    font-size: 13px;
+.brand p {
+    margin: 3px 0;
+    color: #e2e8f0;
+    font-size: 12px;
 }
 
-.panel {
+.badge {
+    background: #ffffff1c;
+    padding: 7px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+nav {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-top: 0;
+}
+
+.navbtn {
+    background: #eef2f7;
+    color: #26364d;
+}
+
+.navbtn.active {
+    background: var(--blue);
+    color: #fff;
+}
+
+main { padding-top: 14px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.card {
     background: white;
-    padding: 20px;
+    padding: 17px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
     margin-bottom: 14px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px #0000000a;
+    box-shadow: 0 2px 7px #10264a08;
 }
 
-h2 {
+.card h2 {
     font-size: 16px;
     color: var(--navy);
-    margin-top: 0;
+    margin: 0 0 14px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.stat {
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.stat small {
+    display: block;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.stat strong {
+    font-size: 21px;
+    color: var(--navy);
+    overflow-wrap: anywhere;
 }
 
 .grid {
@@ -67,340 +159,917 @@ h2 {
     gap: 12px;
 }
 
-label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 11px;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    font-size: 14px;
-    background: white;
-}
-
-input:focus, select:focus {
-    outline: 2px solid #b8d4fa;
-    border-color: var(--blue);
+.grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .field { min-width: 0; }
 
-.table-wrap {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 620px;
-}
-
-th {
-    background: var(--navy);
-    color: white;
+.field label {
+    display: block;
+    font-weight: 700;
     font-size: 12px;
-    text-align: left;
+    margin-bottom: 5px;
+    color: #334155;
 }
 
-th, td {
-    padding: 9px 7px;
-    border: 1px solid var(--border);
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: white;
+    color: var(--ink);
+    min-width: 0;
 }
 
-td input {
-    border: 1px solid #e0e5ed;
-    padding: 8px 5px;
-    min-width: 65px;
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid #bfd7fb;
+    border-color: var(--blue);
 }
-
-td:first-child input { min-width: 150px; }
-
-.amount {
-    text-align: right;
-    white-space: nowrap;
-    font-weight: bold;
-}
-
-button {
-    border: 0;
-    padding: 11px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-button:active { transform: scale(.98); }
-
-.primary { background: var(--blue); color: white; }
-.gold { background: var(--gold); color: #17233b; }
-.gray { background: #e8edf5; color: #23334c; }
-.danger { background: #fee2e2; color: #a61b1b; }
 
 .actions {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
-    margin: 16px 0;
+    flex-wrap: wrap;
+    margin-top: 12px;
 }
 
-.summary {
-    max-width: 400px;
+.tablewrap { overflow-x: auto; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 650px;
+}
+
+th, td {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 8px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+}
+
+td input, td select {
+    padding: 7px;
+    min-width: 65px;
+}
+
+.right {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.totalbox {
+    max-width: 430px;
     margin-left: auto;
 }
 
-.summary-row {
+.totalrow {
     display: flex;
     justify-content: space-between;
-    gap: 15px;
+    gap: 12px;
     padding: 9px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
 }
 
 .grand {
     background: var(--navy);
     color: white;
-    padding: 15px;
-    margin-top: 8px;
     font-size: 19px;
-    font-weight: bold;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 7px;
+    margin-top: 8px;
     display: flex;
     justify-content: space-between;
     gap: 10px;
 }
 
-.words {
-    margin-top: 15px;
-    background: #fff8e6;
-    border-left: 4px solid var(--gold);
+.notice {
+    display: none;
     padding: 12px;
-    font-size: 13px;
-    line-height: 1.5;
+    border-radius: 7px;
+    margin-bottom: 12px;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.notice.bad {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.pill {
+    display: inline-block;
+    border-radius: 30px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #e2e8f0;
+}
+
+.pill.paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pill.unpaid {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.pill.partial {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.low {
+    color: var(--red);
+    font-weight: bold;
+}
+
+.empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 24px;
 }
 
 .footer {
     text-align: center;
-    padding: 20px;
-    font-size: 12px;
-    color: #65738a;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 18px;
 }
 
-#notice {
-    display: none;
-    padding: 12px;
-    background: #dcfce7;
-    color: #166534;
-    margin-bottom: 12px;
-    border-radius: 5px;
-}
+.hidden { display: none !important; }
 
-@media (max-width: 600px) {
-    body { padding: 8px; }
-    .panel { padding: 13px; }
-    .grid { grid-template-columns: 1fr; }
-    .header h1 { font-size: 19px; }
-    .actions button { flex: 1 1 40%; }
+@media(max-width:760px) {
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid, .grid3 {
+        grid-template-columns: 1fr;
+    }
+
+    .app { padding: 7px; }
+    .card { padding: 12px; }
+    .brand h1 { font-size: 18px; }
+    .stat strong { font-size: 18px; }
 }
 
 @media print {
-    body { padding: 0; background: white; }
-    .container { max-width: none; }
-    .no-print, #notice { display: none !important; }
-    .header, .grand, th {
+    body { background: white; }
+    .app { padding: 0; max-width: none; }
+
+    .brand {
+        border-radius: 0;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
-    .panel {
+
+    nav, .no-print, .footer {
+        display: none !important;
+    }
+
+    main { padding: 0; }
+    .page { display: none !important; }
+
+    .page.printing {
+        display: block !important;
+    }
+
+    .card {
         box-shadow: none;
-        border: 1px solid #ddd;
         break-inside: avoid;
     }
+
+    .print-hide { display: none !important; }
+
     input, select, textarea {
-        border: none;
-        padding: 2px;
+        border: 0;
+        padding: 1px;
         appearance: none;
-        -webkit-appearance: none;
         background: transparent;
     }
-    .delete-col { display: none; }
-    .table-wrap { overflow: visible; }
+
     table { min-width: 0; }
-    td, th { padding: 6px 4px; font-size: 11px; }
-    td:first-child input { min-width: 0; }
-    .header { border-radius: 0; }
-    @page { margin: 12mm; }
+
+    th {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    @page { margin: 10mm; }
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+<div class="app">
 
-<header class="header">
-    <h1>KC INTEGRATED GLOBAL SERVICES</h1>
-    <p><strong>INVOICE / SALES RECEIPT</strong></p>
-    <p>Wholesale & Retail Drinks, Bottle Water and Consumer Products</p>
-    <p>Tel: 08023717432 | 08168021011</p>
-    <p>Location: Opposite Dubiken Fueling Station, Nnewichi, Orieagbo</p>
+<header class="brand">
+    <div>
+        <h1 id="brandName">KC INTEGRATED GLOBAL SERVICES</h1>
+        <p id="brandDesc">
+            Wholesale & Retail Drinks, Bottle Water and Consumer Products
+        </p>
+        <p id="brandContact">
+            Tel: 08023717432 | 08168021011 ·
+            Opposite Dubiken Fueling Station, Nnewichi, Orieagbo
+        </p>
+    </div>
+    <span class="badge">KCIGS-SALESPRO · OFFLINE EDITION</span>
 </header>
 
-<div class="actions no-print">
-    <button class="primary" onclick="newInvoice()">＋ New Invoice</button>
-    <button class="gold" onclick="addRow()">＋ Add Product</button>
-    <button class="primary" onclick="saveInvoice()">Save Invoice</button>
-    <button class="gray" onclick="window.print()">Print / Save PDF</button>
-    <button class="gray" onclick="shareWhatsApp()">Share WhatsApp</button>
-    <button class="gray" onclick="exportBackup()">Export Backup</button>
-</div>
+<nav class="no-print">
+    <button class="navbtn active" data-page="dashboard">Dashboard</button>
+    <button class="navbtn" data-page="pos">POS / Invoice</button>
+    <button class="navbtn" data-page="inventory">Inventory</button>
+    <button class="navbtn" data-page="customers">Customers & Debts</button>
+    <button class="navbtn" data-page="reports">Reports</button>
+    <button class="navbtn" data-page="settings">Settings & Backup</button>
+</nav>
 
-<div id="notice"></div>
+<main>
 
-<section class="panel">
-    <h2>Invoice Details</h2>
-    <div class="grid">
-        <div class="field">
-            <label>Invoice Number</label>
-            <input id="invoiceNo">
+<div id="notice" class="notice"></div>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+    <div class="cards">
+        <div class="stat">
+            <small>Today's Sales</small>
+            <strong id="dSales">₦0.00</strong>
         </div>
-        <div class="field">
-            <label>Invoice Date</label>
-            <input type="date" id="invoiceDate">
+
+        <div class="stat">
+            <small>Today's Cash Received</small>
+            <strong id="dCash">₦0.00</strong>
         </div>
-        <div class="field">
-            <label>Customer Name</label>
-            <input id="customer" placeholder="Enter customer name">
+
+        <div class="stat">
+            <small>Stock Items</small>
+            <strong id="dProducts">0</strong>
         </div>
-        <div class="field">
-            <label>Customer Phone</label>
-            <input id="phone" placeholder="Enter phone number">
-        </div>
-        <div class="field">
-            <label>Payment Status</label>
-            <select id="status">
-                <option>Unpaid</option>
-                <option>Partially Paid</option>
-                <option>Paid</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Payment Method</label>
-            <select id="paymentMethod">
-                <option>Cash</option>
-                <option>Bank Transfer</option>
-                <option>POS</option>
-                <option>Credit</option>
-                <option>Other</option>
-            </select>
+
+        <div class="stat">
+            <small>Outstanding Balances</small>
+            <strong id="dDebt">₦0.00</strong>
         </div>
     </div>
-</section>
-
-<section class="panel">
-    <h2>Products / Items</h2>
-    <div class="table-wrap">
-        <table id="itemsTable">
-            <thead>
-                <tr>
-                    <th>Product Description</th>
-                    <th>Qty</th>
-                    <th>Unit Price (₦)</th>
-                    <th>Amount (₦)</th>
-                    <th class="delete-col no-print">Remove</th>
-                </tr>
-            </thead>
-            <tbody id="items"></tbody>
-        </table>
-    </div>
-    <div class="actions no-print">
-        <button class="gold" onclick="addRow()">＋ Add Another Product</button>
-    </div>
-</section>
-
-<section class="panel">
-    <h2>Payment Summary</h2>
 
     <div class="grid">
-        <div class="field">
-            <label>Discount (₦)</label>
-            <input type="number" id="discount" min="0" value="0">
+
+        <div class="card">
+            <h2>Low Stock Alerts</h2>
+            <div id="lowStock"></div>
         </div>
-        <div class="field">
-            <label>Amount Paid (₦)</label>
-            <input type="number" id="paid" min="0" value="0">
+
+        <div class="card">
+            <h2>Recent Sales</h2>
+            <div id="recentSales"></div>
         </div>
-        <div class="field">
-            <label>Additional Notes</label>
-            <textarea id="notes" rows="3" placeholder="Thank you for your patronage."></textarea>
-        </div>
+
     </div>
 
-    <div class="summary">
-        <div class="summary-row">
-            <span>Subtotal</span>
-            <strong id="subtotal">₦0.00</strong>
+    <div class="card">
+        <h2>Quick Actions</h2>
+
+        <div class="actions">
+            <button class="primary" onclick="newSale()">
+                ＋ New Sale / Invoice
+            </button>
+
+            <button class="gold" onclick="go('inventory')">
+                ＋ Add / Update Stock
+            </button>
+
+            <button class="light" onclick="go('reports')">
+                View Sales Reports
+            </button>
         </div>
-        <div class="summary-row">
-            <span>Discount</span>
-            <strong id="discountDisplay">₦0.00</strong>
-        </div>
-        <div class="summary-row">
-            <span>Amount Paid</span>
-            <strong id="paidDisplay">₦0.00</strong>
-        </div>
-        <div class="grand">
-            <span>GRAND TOTAL</span>
-            <span id="total">₦0.00</span>
-        </div>
-        <div class="summary-row">
-            <span>Balance Due</span>
-            <strong id="balance">₦0.00</strong>
-        </div>
+
+        <p class="muted">
+            This edition stores information locally in this browser.
+            Export backups regularly. It does not automatically sync
+            between devices.
+        </p>
     </div>
 
-    <div class="words">
-        <strong>Amount in Words:</strong>
-        <span id="amountWords">Zero Naira Only</span>
-    </div>
 </section>
 
-<section class="panel no-print">
-    <h2>Saved Invoices</h2>
-    <p style="font-size:12px;color:#65738a">
-        Invoices are saved in this browser on this device.
-        Export a backup regularly. Clearing browser data may erase saved invoices.
-    </p>
-    <div class="grid">
-        <div class="field">
-            <label>Find Saved Invoice</label>
-            <input id="searchInvoice" placeholder="Invoice number or customer"
-                   oninput="renderSavedInvoices()">
-        </div>
-        <div class="field">
-            <label>Load Invoice</label>
-            <select id="savedInvoices">
-                <option value="">Select saved invoice</option>
-            </select>
+<!-- POS / INVOICE -->
+<section id="pos" class="page">
+
+    <div class="card">
+        <h2>Invoice Details</h2>
+
+        <div class="grid3">
+
+            <div class="field">
+                <label>Invoice Number</label>
+                <input id="saleNo">
+            </div>
+
+            <div class="field">
+                <label>Date</label>
+                <input id="saleDate" type="date">
+            </div>
+
+            <div class="field">
+                <label>Customer</label>
+                <input id="saleCustomer"
+                       list="customerOptions"
+                       placeholder="Walk-in customer or name">
+
+                <datalist id="customerOptions"></datalist>
+            </div>
+
+            <div class="field">
+                <label>Customer Phone</label>
+                <input id="salePhone" placeholder="Phone number">
+            </div>
+
+            <div class="field">
+                <label>Payment Method</label>
+                <select id="saleMethod">
+                    <option>Cash</option>
+                    <option>Bank Transfer</option>
+                    <option>POS</option>
+                    <option>Credit</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Payment Status</label>
+                <select id="saleStatus">
+                    <option>Unpaid</option>
+                    <option>Partially Paid</option>
+                    <option>Paid</option>
+                </select>
+            </div>
+
         </div>
     </div>
-    <div class="actions">
-        <button class="primary" onclick="loadInvoice()">Load Selected</button>
-        <button class="danger" onclick="deleteInvoice()">Delete Selected</button>
-        <button class="gray" onclick="document.getElementById('backupFile').click()">
-            Import Backup
-        </button>
-        <input type="file" id="backupFile" accept=".json,application/json"
-               hidden onchange="importBackup(event)">
+
+    <div class="card">
+        <h2>Items on Invoice</h2>
+
+        <div class="grid no-print" style="margin-bottom:12px">
+
+            <div class="field">
+                <label>Add item from inventory</label>
+                <select id="productPicker">
+                    <option value="">Choose stock item…</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Or type a custom product</label>
+
+                <div style="display:flex;gap:7px">
+                    <input id="customName" placeholder="Product name">
+
+                    <button class="gold" onclick="addCustomLine()">
+                        Add
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price (₦)</th>
+                        <th>Amount (₦)</th>
+                        <th class="no-print">Remove</th>
+                    </tr>
+                </thead>
+
+                <tbody id="saleLines"></tbody>
+            </table>
+        </div>
+
+        <div class="actions no-print">
+            <button class="gold" onclick="addPickedProduct()">
+                ＋ Add Selected Item
+            </button>
+
+            <button class="light" onclick="addCustomLine()">
+                ＋ Add Custom Line
+            </button>
+        </div>
     </div>
+
+    <div class="card">
+        <h2>Payment & Summary</h2>
+
+        <div class="grid">
+
+            <div class="field">
+                <label>Discount (₦)</label>
+                <input type="number" min="0" id="saleDiscount" value="0">
+            </div>
+
+            <div class="field">
+                <label>Amount Paid Now (₦)</label>
+                <input type="number" min="0" id="salePaid" value="0">
+            </div>
+
+            <div class="field">
+                <label>Notes</label>
+                <textarea id="saleNotes" rows="3"
+                          placeholder="Thank you for your patronage."></textarea>
+            </div>
+
+        </div>
+
+        <div class="totalbox">
+
+            <div class="totalrow">
+                <span>Subtotal</span>
+                <strong id="saleSubtotal">₦0.00</strong>
+            </div>
+
+            <div class="totalrow">
+                <span>Discount</span>
+                <strong id="saleDiscountDisplay">₦0.00</strong>
+            </div>
+
+            <div class="grand">
+                <span>GRAND TOTAL</span>
+                <span id="saleTotal">₦0.00</span>
+            </div>
+
+            <div class="totalrow">
+                <span>Paid</span>
+                <strong id="salePaidDisplay">₦0.00</strong>
+            </div>
+
+            <div class="totalrow">
+                <span>Balance Due</span>
+                <strong id="saleBalance">₦0.00</strong>
+            </div>
+
+            <p class="muted" id="saleWords">Zero Naira Only</p>
+
+        </div>
+
+        <div class="actions no-print">
+
+            <button class="primary" onclick="completeSale()">
+                Save Sale & Update Stock
+            </button>
+
+            <button class="light" onclick="printInvoice()">
+                Print / Save PDF
+            </button>
+
+            <button class="light" onclick="shareSale()">
+                Share Summary on WhatsApp
+            </button>
+
+            <button class="danger" onclick="newSale()">
+                Clear / New Invoice
+            </button>
+
+        </div>
+
+        <p class="muted no-print">
+            Saving a sale reduces tracked inventory once. If stock is
+            insufficient, the sale will be stopped. Custom lines do not
+            affect inventory. Completed sales are locked to prevent
+            accidental duplicate stock deductions.
+        </p>
+
+    </div>
+
 </section>
+
+<!-- INVENTORY -->
+<section id="inventory" class="page">
+
+    <div class="card">
+        <h2>Add / Edit Product</h2>
+
+        <input id="editProductId" type="hidden">
+
+        <div class="grid3">
+
+            <div class="field">
+                <label>Product Name *</label>
+                <input id="pName" placeholder="e.g. Big Eva Water">
+            </div>
+
+            <div class="field">
+                <label>SKU / Code (optional)</label>
+                <input id="pSku" placeholder="e.g. EVA-BIG">
+            </div>
+
+            <div class="field">
+                <label>Category</label>
+                <input id="pCategory"
+                       placeholder="Water, Soft Drinks, Malt…">
+            </div>
+
+            <div class="field">
+                <label>Cost Price (₦)</label>
+                <input id="pCost" type="number" min="0" value="0">
+            </div>
+
+            <div class="field">
+                <label>Selling Price (₦)</label>
+                <input id="pPrice" type="number" min="0" value="0">
+            </div>
+
+            <div class="field">
+                <label>Opening / Current Stock</label>
+                <input id="pStock" type="number" min="0"
+                       step="any" value="0">
+            </div>
+
+            <div class="field">
+                <label>Low Stock Alert At</label>
+                <input id="pReorder" type="number" min="0"
+                       step="any" value="5">
+            </div>
+
+            <div class="field">
+                <label>Unit (pack, crate, bottle…)</label>
+                <input id="pUnit" value="Pack">
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="primary" onclick="saveProduct()">
+                Save Product
+            </button>
+
+            <button class="light" onclick="clearProductForm()">
+                Clear Form
+            </button>
+        </div>
+
+        <p class="muted">
+            When editing a product, the stock field is the new total stock
+            quantity. For restocking, increase the current quantity carefully.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Inventory List</h2>
+
+        <div class="field" style="max-width:420px;margin-bottom:12px">
+            <label>Search products</label>
+            <input id="productSearch"
+                   placeholder="Search name, SKU or category"
+                   oninput="renderInventory()">
+        </div>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Stock</th>
+                        <th>Cost</th>
+                        <th>Selling Price</th>
+                        <th>Stock Value (Cost)</th>
+                        <th class="no-print">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="inventoryRows"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- CUSTOMERS AND DEBTS -->
+<section id="customers" class="page">
+
+    <div class="cards">
+
+        <div class="stat">
+            <small>Customers Recorded</small>
+            <strong id="cCount">0</strong>
+        </div>
+
+        <div class="stat">
+            <small>Total Outstanding</small>
+            <strong id="cDebt">₦0.00</strong>
+        </div>
+
+        <div class="stat">
+            <small>Unpaid Invoices</small>
+            <strong id="cUnpaid">0</strong>
+        </div>
+
+        <div class="stat">
+            <small>Payments Received (all time)</small>
+            <strong id="cPaid">₦0.00</strong>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Customer Balances / Invoice History</h2>
+
+        <div class="field" style="max-width:420px;margin-bottom:12px">
+            <label>Search customer or invoice</label>
+            <input id="customerSearch"
+                   oninput="renderCustomers()"
+                   placeholder="Name, phone or invoice number">
+        </div>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th class="no-print">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="customerRows"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Record Additional Payment</h2>
+
+        <div class="grid3">
+
+            <div class="field">
+                <label>Invoice</label>
+                <select id="paymentInvoice">
+                    <option value="">Select unpaid invoice</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Amount Received (₦)</label>
+                <input id="extraPayment" type="number"
+                       min="0" placeholder="0">
+            </div>
+
+            <div class="field">
+                <label>Method</label>
+                <select id="extraMethod">
+                    <option>Cash</option>
+                    <option>Bank Transfer</option>
+                    <option>POS</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="primary" onclick="recordPayment()">
+                Record Payment
+            </button>
+        </div>
+
+        <p class="muted">
+            Additional payments update the selected invoice balance.
+            This is an offline local record.
+        </p>
+    </div>
+
+</section>
+
+<!-- REPORTS -->
+<section id="reports" class="page">
+
+    <div class="card">
+        <h2>Sales Reports</h2>
+
+        <div class="grid3">
+
+            <div class="field">
+                <label>From Date</label>
+                <input type="date" id="reportFrom">
+            </div>
+
+            <div class="field">
+                <label>To Date</label>
+                <input type="date" id="reportTo">
+            </div>
+
+            <div class="field" style="align-self:end">
+                <button class="primary" onclick="renderReports()">
+                    Run Report
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="cards">
+
+        <div class="stat">
+            <small>Sales Total</small>
+            <strong id="rSales">₦0.00</strong>
+        </div>
+
+        <div class="stat">
+            <small>Amount Received</small>
+            <strong id="rPaid">₦0.00</strong>
+        </div>
+
+        <div class="stat">
+            <small>Outstanding</small>
+            <strong id="rDebt">₦0.00</strong>
+        </div>
+
+        <div class="stat">
+            <small>Estimated Gross Profit*</small>
+            <strong id="rProfit">₦0.00</strong>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Invoice Details</h2>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="reportRows"></tbody>
+            </table>
+        </div>
+
+        <div class="actions no-print">
+            <button class="gold" onclick="exportReportCSV()">
+                Export Report CSV
+            </button>
+        </div>
+
+        <p class="muted">
+            *Estimated gross profit uses the product cost saved on each
+            invoice line. Custom items without a linked inventory product
+            are excluded.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Best-selling Products (selected period)</h2>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity Sold</th>
+                        <th>Sales Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody id="bestRows"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<!-- SETTINGS AND BACKUP -->
+<section id="settings" class="page">
+
+    <div class="card">
+        <h2>Business Details</h2>
+
+        <div class="grid">
+
+            <div class="field">
+                <label>Business Name</label>
+                <input id="sName">
+            </div>
+
+            <div class="field">
+                <label>Business Description</label>
+                <input id="sDesc">
+            </div>
+
+            <div class="field">
+                <label>Contact Numbers</label>
+                <input id="sContact">
+            </div>
+
+            <div class="field">
+                <label>Address</label>
+                <input id="sAddress">
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="primary" onclick="saveSettings()">
+                Save Business Details
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Data Backup & Restore</h2>
+
+        <p>
+            Back up products, invoices, customer transaction history and
+            settings to a JSON file. Store it safely. Restore only from
+            a trusted backup.
+        </p>
+
+        <div class="actions">
+
+            <button class="primary" onclick="exportBackup()">
+                Export Full Backup
+            </button>
+
+            <button class="gold" onclick="$('backupFile').click()">
+                Import Backup
+            </button>
+
+            <input type="file"
+                   id="backupFile"
+                   accept=".json,application/json"
+                   class="hidden"
+                   onchange="importBackup(event)">
+
+            <button class="danger" onclick="resetApp()">
+                Reset All App Data
+            </button>
+
+        </div>
+
+        <p class="muted">
+            Important: this is a single-device offline app. Clearing
+            browser storage can erase data. A backup is strongly
+            recommended before changing devices or resetting.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>About this version</h2>
+
+        <p>
+            KCIGS-SALESPRO is a local, browser-based POS and inventory
+            tool. It is not a cloud database, does not process payments,
+            and does not automatically sync across devices. Protect
+            customer data and keep backups secure.
+        </p>
+    </div>
+
+</section>
+
+</main>
 
 <div class="footer">
-    <strong>KC INTEGRATED GLOBAL SERVICES</strong><br>
-    Thank you for your patronage.
+    KC INTEGRATED GLOBAL SERVICES · KCIGS-SALESPRO Offline POS & Inventory
 </div>
 
 </div>
@@ -409,408 +1078,1249 @@ button:active { transform: scale(.98); }
 "use strict";
 
 const $ = id => document.getElementById(id);
-const money = n => "₦" + (Number(n) || 0).toLocaleString("en-NG", {
+
+const DBKEY = "KCIGS_SALESPRO_V2";
+
+let db = {
+    products: [],
+    sales: [],
+    settings: {},
+    nextProduct: 1
+};
+
+let currentSaleId = null;
+
+const fmt = n => "₦" + (Number(n) || 0).toLocaleString("en-NG", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
 });
 
-function today() {
+const num = v => Math.max(0, Number(v) || 0);
+
+function dateToday() {
     const d = new Date();
-    return [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, "0"),
-        String(d.getDate()).padStart(2, "0")
-    ].join("-");
+
+    return d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
 }
 
-function makeInvoiceNumber() {
-    const date = today().replaceAll("-", "");
-    const key = "kcisInvoiceCounter_" + date;
-    let counter = Number(localStorage.getItem(key) || 0) + 1;
-    localStorage.setItem(key, String(counter));
-    return "KCIGS-" + date + "-" + String(counter).padStart(3, "0");
+function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[c]));
 }
 
-function notify(message) {
-    $("notice").textContent = message;
+function notice(msg, bad = false) {
+    $("notice").textContent = msg;
+    $("notice").className = "notice" + (bad ? " bad" : "");
     $("notice").style.display = "block";
-    setTimeout(() => $("notice").style.display = "none", 3500);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    setTimeout(() => {
+        $("notice").style.display = "none";
+    }, 4500);
 }
 
-function addRow(item = {}) {
-    const tr = document.createElement("tr");
+function saveDB() {
+    try {
+        localStorage.setItem(DBKEY, JSON.stringify(db));
+        return true;
+    } catch (e) {
+        notice(
+            "Could not save data. Export a backup and free browser storage.",
+            true
+        );
+        return false;
+    }
+}
 
-    const nameTd = document.createElement("td");
-    const name = document.createElement("input");
-    name.placeholder = "Product name";
-    name.className = "product-name";
-    name.value = item.name || "";
-    nameTd.appendChild(name);
+function loadDB() {
+    try {
+        const d = JSON.parse(localStorage.getItem(DBKEY) || "null");
 
-    const qtyTd = document.createElement("td");
-    const qty = document.createElement("input");
-    qty.type = "number";
-    qty.min = "0";
-    qty.step = "any";
-    qty.value = item.qty ?? 1;
-    qty.className = "qty";
-    qty.setAttribute("aria-label", "Quantity");
-    qtyTd.appendChild(qty);
+        if (d && typeof d === "object") {
+            db = {
+                products: Array.isArray(d.products) ? d.products : [],
+                sales: Array.isArray(d.sales) ? d.sales : [],
+                settings: d.settings || {},
+                nextProduct: d.nextProduct || 1
+            };
+        }
+    } catch (e) {
+        notice(
+            "Stored data could not be read. Import a valid backup if available.",
+            true
+        );
+    }
+}
 
-    const priceTd = document.createElement("td");
-    const price = document.createElement("input");
-    price.type = "number";
-    price.min = "0";
-    price.step = "any";
-    price.value = item.price ?? 0;
-    price.className = "price";
-    price.setAttribute("aria-label", "Unit price");
-    priceTd.appendChild(price);
-
-    const amountTd = document.createElement("td");
-    amountTd.className = "amount";
-    amountTd.textContent = money((Number(qty.value) || 0) *
-                                  (Number(price.value) || 0));
-
-    const removeTd = document.createElement("td");
-    removeTd.className = "delete-col no-print";
-    const remove = document.createElement("button");
-    remove.className = "danger";
-    remove.textContent = "✕";
-    remove.type = "button";
-    remove.setAttribute("aria-label", "Remove product");
-    remove.onclick = () => {
-        tr.remove();
-        calculate();
-    };
-    removeTd.appendChild(remove);
-
-    tr.append(nameTd, qtyTd, priceTd, amountTd, removeTd);
-    $("items").appendChild(tr);
-
-    [name, qty, price].forEach(el => {
-        el.addEventListener("input", calculate);
+function go(page) {
+    document.querySelectorAll(".page").forEach(p => {
+        p.classList.toggle("active", p.id === page);
     });
 
-    calculate();
+    document.querySelectorAll(".navbtn").forEach(b => {
+        b.classList.toggle("active", b.dataset.page === page);
+    });
+
+    if (page === "dashboard") renderDashboard();
+    if (page === "inventory") renderInventory();
+    if (page === "customers") renderCustomers();
+    if (page === "reports") renderReports();
+    if (page === "pos") refreshProductPicker();
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function getItems() {
-    return [...$("items").rows].map(row => ({
-        name: row.querySelector(".product-name").value.trim(),
-        qty: Math.max(0, Number(row.querySelector(".qty").value) || 0),
-        price: Math.max(0, Number(row.querySelector(".price").value) || 0)
-    }));
+document.querySelectorAll(".navbtn").forEach(b => {
+    b.addEventListener("click", () => go(b.dataset.page));
+});
+
+function nextInvoice() {
+    return "KCIGS-" + dateToday().replaceAll("-", "") +
+        "-" + String(Date.now()).slice(-5);
 }
 
-function calculate() {
+function productById(id) {
+    return db.products.find(p => String(p.id) === String(id));
+}
+
+function settingsDefaults() {
+    return {
+        name: "KC INTEGRATED GLOBAL SERVICES",
+        desc: "Wholesale & Retail Drinks, Bottle Water and Consumer Products",
+        contact: "08023717432 | 08168021011",
+        address: "Opposite Dubiken Fueling Station, Nnewichi, Orieagbo"
+    };
+}
+
+function applySettings() {
+    const s = { ...settingsDefaults(), ...db.settings };
+
+    $("brandName").textContent = s.name;
+    $("brandDesc").textContent = s.desc;
+
+    $("brandContact").textContent =
+        "Tel: " + s.contact + " · " + s.address;
+
+    $("sName").value = s.name;
+    $("sDesc").value = s.desc;
+    $("sContact").value = s.contact;
+    $("sAddress").value = s.address;
+}
+
+function saveSettings() {
+    db.settings = {
+        name: $("sName").value.trim() || settingsDefaults().name,
+        desc: $("sDesc").value.trim(),
+        contact: $("sContact").value.trim(),
+        address: $("sAddress").value.trim()
+    };
+
+    if (saveDB()) {
+        applySettings();
+        notice("Business details saved.");
+    }
+}
+
+function addProductLine(p, qty = 1) {
+    if (currentSaleId) {
+        notice(
+            "This saved invoice is locked. Start a new invoice to make another sale.",
+            true
+        );
+        return;
+    }
+
+    const tr = document.createElement("tr");
+
+    tr.dataset.pid = p.id || "";
+    tr.dataset.cost = p.cost || 0;
+    tr.dataset.stockTracked = p.id ? "1" : "0";
+    tr.dataset.unit = p.unit || "unit";
+
+    tr.innerHTML =
+        '<td><input class="line-name" value="' +
+        esc(p.name || "") +
+        '" aria-label="Product name"></td>' +
+
+        '<td><input class="line-qty" type="number" min="0.001" ' +
+        'step="any" value="' + qty + '"></td>' +
+
+        '<td><input class="line-price" type="number" min="0" ' +
+        'step="any" value="' + num(p.price) + '"></td>' +
+
+        '<td class="line-amount right">' +
+        fmt(num(p.price) * qty) + '</td>' +
+
+        '<td class="no-print">' +
+        '<button class="danger" type="button">✕</button></td>';
+
+    tr.querySelector("button").onclick = () => {
+        tr.remove();
+        calcSale();
+    };
+
+    tr.querySelectorAll("input").forEach(i => {
+        i.addEventListener("input", () => {
+            if (i.classList.contains("line-name")) {
+                tr.dataset.pid = "";
+                tr.dataset.stockTracked = "0";
+                tr.dataset.cost = "0";
+            }
+
+            calcSale();
+        });
+    });
+
+    $("saleLines").appendChild(tr);
+
+    calcSale();
+}
+
+function addPickedProduct() {
+    const id = $("productPicker").value;
+
+    if (!id) {
+        return notice("Choose an inventory item first.", true);
+    }
+
+    const p = productById(id);
+
+    if (!p) {
+        return notice("Product not found.", true);
+    }
+
+    addProductLine(p, 1);
+    $("productPicker").value = "";
+}
+
+function addCustomLine() {
+    const name = $("customName").value.trim();
+
+    if (!name) {
+        return notice("Enter a custom product name first.", true);
+    }
+
+    addProductLine({
+        name,
+        price: 0,
+        cost: 0,
+        unit: "unit"
+    }, 1);
+
+    $("customName").value = "";
+}
+
+function refreshProductPicker() {
+    const sel = $("productPicker");
+
+    sel.replaceChildren(
+        new Option("Choose stock item…", "")
+    );
+
+    db.products
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(p => {
+            sel.add(new Option(
+                p.name + " · Stock " + p.stock + " · " + fmt(p.price),
+                p.id
+            ));
+        });
+
+    const dl = $("customerOptions");
+
+    dl.replaceChildren();
+
+    [...new Set(db.sales.map(s => s.customer).filter(Boolean))]
+        .forEach(n => dl.appendChild(new Option(n, n)));
+}
+
+function calcSale() {
     let subtotal = 0;
 
-    [...$("items").rows].forEach(row => {
-        const qty = Math.max(0, Number(row.querySelector(".qty").value) || 0);
-        const price = Math.max(0, Number(row.querySelector(".price").value) || 0);
-        const amount = qty * price;
-        row.cells[3].textContent = money(amount);
-        subtotal += amount;
+    [...$("saleLines").rows].forEach(r => {
+        const q = num(r.querySelector(".line-qty").value);
+        const p = num(r.querySelector(".line-price").value);
+        const a = q * p;
+
+        subtotal += a;
+
+        r.querySelector(".line-amount").textContent = fmt(a);
     });
 
     const discount = Math.min(
-        subtotal, Math.max(0, Number($("discount").value) || 0)
+        subtotal,
+        num($("saleDiscount").value)
     );
+
     const total = Math.max(0, subtotal - discount);
-    const paid = Math.min(total, Math.max(0, Number($("paid").value) || 0));
-    const balance = Math.max(0, total - paid);
 
-    $("subtotal").textContent = money(subtotal);
-    $("discountDisplay").textContent = money(discount);
-    $("paidDisplay").textContent = money(paid);
-    $("total").textContent = money(total);
-    $("balance").textContent = money(balance);
-    $("amountWords").textContent = amountInWords(Math.round(total)) +
-        (Math.round(total) === 1 ? " Naira Only" : " Naira Only");
+    const paid = Math.min(
+        total,
+        num($("salePaid").value)
+    );
 
-    return {subtotal, discount, total, paid, balance};
-}
+    $("saleSubtotal").textContent = fmt(subtotal);
+    $("saleDiscountDisplay").textContent = fmt(discount);
+    $("saleTotal").textContent = fmt(total);
+    $("salePaidDisplay").textContent = fmt(paid);
+    $("saleBalance").textContent = fmt(total - paid);
 
-function amountInWords(value) {
-    value = Math.floor(Math.max(0, value));
-    if (value === 0) return "Zero";
+    $("saleWords").textContent =
+        words(Math.round(total)) + " Naira Only";
 
-    const ones = ["", "One", "Two", "Three", "Four", "Five", "Six",
-        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
-        "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
-        "Nineteen"];
-    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty",
-        "Sixty", "Seventy", "Eighty", "Ninety"];
-
-    function underThousand(n) {
-        let s = "";
-        if (n >= 100) {
-            s += ones[Math.floor(n / 100)] + " Hundred";
-            n %= 100;
-            if (n) s += " ";
-        }
-        if (n >= 20) {
-            s += tens[Math.floor(n / 10)];
-            if (n % 10) s += " " + ones[n % 10];
-        } else if (n > 0) {
-            s += ones[n];
-        }
-        return s;
-    }
-
-    const scales = [
-        [1e9, "Billion"], [1e6, "Million"], [1e3, "Thousand"], [1, ""]
-    ];
-    let result = "";
-
-    for (const [scale, label] of scales) {
-        if (value >= scale) {
-            const group = Math.floor(value / scale);
-            value %= scale;
-            result += (result ? " " : "") + underThousand(group);
-            if (label) result += " " + label;
-        }
-    }
-    return result;
-}
-
-function invoiceData() {
-    const totals = calculate();
     return {
-        invoiceNo: $("invoiceNo").value.trim(),
-        invoiceDate: $("invoiceDate").value,
-        customer: $("customer").value.trim(),
-        phone: $("phone").value.trim(),
-        status: $("status").value,
-        paymentMethod: $("paymentMethod").value,
-        items: getItems(),
-        discount: totals.discount,
-        paid: totals.paid,
-        notes: $("notes").value,
-        updatedAt: new Date().toISOString()
+        subtotal,
+        discount,
+        total,
+        paid,
+        balance: total - paid
     };
 }
 
-function validateInvoice(data) {
-    if (!data.invoiceNo) {
-        notify("Please enter an invoice number.");
-        return false;
+$("saleDiscount").addEventListener("input", calcSale);
+
+$("salePaid").addEventListener("input", () => {
+    const t = calcSale();
+
+    if (t.paid >= t.total && t.total > 0) {
+        $("saleStatus").value = "Paid";
+    } else if (t.paid > 0) {
+        $("saleStatus").value = "Partially Paid";
+    } else {
+        $("saleStatus").value = "Unpaid";
     }
-    if (!data.customer) {
-        notify("Please enter the customer name.");
-        $("customer").focus();
-        return false;
-    }
-    if (!data.items.some(i => i.name && i.qty > 0)) {
-        notify("Add at least one product with a name and quantity.");
-        return false;
-    }
-    return true;
+});
+
+function newSale() {
+    currentSaleId = null;
+
+    $("saleNo").value = nextInvoice();
+    $("saleDate").value = dateToday();
+    $("saleCustomer").value = "";
+    $("salePhone").value = "";
+    $("saleMethod").value = "Cash";
+    $("saleStatus").value = "Unpaid";
+    $("saleDiscount").value = 0;
+    $("salePaid").value = 0;
+    $("saleNotes").value = "Thank you for your patronage.";
+
+    $("saleLines").replaceChildren();
+
+    addBlankLine();
+    toggleSaleLock(false);
 }
 
-function getSaved() {
-    try {
-        const data = JSON.parse(localStorage.getItem("kcisInvoices") || "{}");
-        return data && typeof data === "object" && !Array.isArray(data)
-            ? data : {};
-    } catch {
-        return {};
-    }
-}
+function addBlankLine() {
+    const tr = document.createElement("tr");
 
-function saveInvoice() {
-    const data = invoiceData();
-    if (!validateInvoice(data)) return;
+    tr.dataset.pid = "";
+    tr.dataset.cost = "0";
+    tr.dataset.stockTracked = "0";
 
-    const saved = getSaved();
-    saved[data.invoiceNo] = data;
+    tr.innerHTML =
+        '<td><input class="line-name" placeholder="Product name"></td>' +
 
-    try {
-        localStorage.setItem("kcisInvoices", JSON.stringify(saved));
-        renderSavedInvoices();
-        $("savedInvoices").value = data.invoiceNo;
-        notify("Invoice saved successfully on this device.");
-    } catch {
-        notify("Could not save. Browser storage may be full or unavailable.");
-    }
-}
+        '<td><input class="line-qty" type="number" min="0.001" ' +
+        'step="any" value="1"></td>' +
 
-function fillInvoice(data) {
-    $("invoiceNo").value = data.invoiceNo || "";
-    $("invoiceDate").value = data.invoiceDate || today();
-    $("customer").value = data.customer || "";
-    $("phone").value = data.phone || "";
-    $("status").value = data.status || "Unpaid";
-    $("paymentMethod").value = data.paymentMethod || "Cash";
-    $("discount").value = data.discount || 0;
-    $("paid").value = data.paid || 0;
-    $("notes").value = data.notes || "";
-    $("items").replaceChildren();
-    (data.items || []).forEach(addRow);
-    if (!(data.items || []).length) addRow();
-    calculate();
-}
+        '<td><input class="line-price" type="number" min="0" ' +
+        'step="any" value="0"></td>' +
 
-function renderSavedInvoices() {
-    const saved = getSaved();
-    const query = ($("searchInvoice").value || "").toLowerCase();
-    const select = $("savedInvoices");
-    select.replaceChildren(new Option("Select saved invoice", ""));
+        '<td class="line-amount right">₦0.00</td>' +
 
-    Object.values(saved)
-        .filter(d => ((d.invoiceNo || "") + " " + (d.customer || ""))
-            .toLowerCase().includes(query))
-        .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
-        .forEach(d => {
-            select.add(new Option(
-                (d.invoiceNo || "Invoice") + " — " + (d.customer || "Customer"),
-                d.invoiceNo
-            ));
+        '<td class="no-print">' +
+        '<button class="danger" type="button">✕</button></td>';
+
+    tr.querySelector("button").onclick = () => {
+        tr.remove();
+        calcSale();
+    };
+
+    tr.querySelectorAll("input").forEach(i => {
+        i.addEventListener("input", () => {
+            tr.dataset.pid = "";
+            tr.dataset.cost = "0";
+            tr.dataset.stockTracked = "0";
+
+            calcSale();
         });
-}
-
-function loadInvoice() {
-    const id = $("savedInvoices").value;
-    const data = getSaved()[id];
-    if (!data) return notify("Select a saved invoice first.");
-    fillInvoice(data);
-    notify("Invoice loaded.");
-}
-
-function deleteInvoice() {
-    const id = $("savedInvoices").value;
-    if (!id) return notify("Select an invoice to delete.");
-    if (!confirm("Permanently delete invoice " + id + "?")) return;
-
-    const saved = getSaved();
-    delete saved[id];
-    localStorage.setItem("kcisInvoices", JSON.stringify(saved));
-    renderSavedInvoices();
-    notify("Invoice deleted.");
-}
-
-function newInvoice() {
-    if (!confirm("Start a new invoice? Save your current invoice first if needed."))
-        return;
-
-    fillInvoice({
-        invoiceNo: makeInvoiceNumber(),
-        invoiceDate: today(),
-        customer: "",
-        phone: "",
-        status: "Unpaid",
-        paymentMethod: "Cash",
-        items: [{name:"", qty:1, price:0}],
-        discount: 0,
-        paid: 0,
-        notes: "Thank you for your patronage."
     });
-    window.scrollTo({top: 0, behavior: "smooth"});
+
+    $("saleLines").appendChild(tr);
 }
 
-function shareWhatsApp() {
-    const d = invoiceData();
-    if (!validateInvoice(d)) return;
+function toggleSaleLock(lock) {
+    [
+        "saleNo",
+        "saleDate",
+        "saleCustomer",
+        "salePhone",
+        "saleMethod",
+        "saleStatus",
+        "saleDiscount",
+        "salePaid",
+        "saleNotes",
+        "productPicker",
+        "customName"
+    ].forEach(id => {
+        $(id).disabled = lock;
+    });
 
-    const t = calculate();
+    document.querySelectorAll("#saleLines input, #saleLines button")
+        .forEach(e => {
+            e.disabled = lock;
+        });
+
+    document.querySelectorAll("#pos .actions button").forEach(b => {
+        if (b.textContent.includes("Save Sale")) {
+            b.disabled = lock;
+        }
+    });
+}
+
+function saleFromForm() {
+    const t = calcSale();
+
+    const lines = [...$("saleLines").rows]
+        .map(r => {
+            const pid = r.dataset.pid || null;
+            const p = pid ? productById(pid) : null;
+
+            return {
+                name: r.querySelector(".line-name").value.trim(),
+                qty: num(r.querySelector(".line-qty").value),
+                price: num(r.querySelector(".line-price").value),
+                productId: p ? p.id : null,
+                cost: p ? num(p.cost) : 0,
+                stockTracked: !!p,
+                unit: p ? p.unit : "unit"
+            };
+        })
+        .filter(x => x.name && x.qty > 0);
+
+    return {
+        id: currentSaleId || $("saleNo").value.trim(),
+        invoiceNo: $("saleNo").value.trim(),
+        date: $("saleDate").value || dateToday(),
+        customer: $("saleCustomer").value.trim() || "Walk-in Customer",
+        phone: $("salePhone").value.trim(),
+        method: $("saleMethod").value,
+        status: $("saleStatus").value,
+        lines,
+        subtotal: t.subtotal,
+        discount: t.discount,
+        total: t.total,
+        paid: t.paid,
+        balance: t.balance,
+        notes: $("saleNotes").value,
+        createdAt: new Date().toISOString()
+    };
+}
+
+function completeSale() {
+    if (currentSaleId) {
+        return notice(
+            "This invoice has already been saved. Start a new invoice for another sale.",
+            true
+        );
+    }
+
+    const s = saleFromForm();
+
+    if (!s.invoiceNo || !s.lines.length) {
+        return notice(
+            "Enter an invoice number and at least one valid product.",
+            true
+        );
+    }
+
+    if (s.lines.some(l => !l.name || l.qty <= 0)) {
+        return notice("Check product names and quantities.", true);
+    }
+
+    if (s.paid > s.total) {
+        return notice("Amount paid cannot exceed the invoice total.", true);
+    }
+
+    const required = {};
+
+    s.lines.forEach(l => {
+        if (l.stockTracked) {
+            required[l.productId] =
+                (required[l.productId] || 0) + l.qty;
+        }
+    });
+
+    for (const [id, q] of Object.entries(required)) {
+        const p = productById(id);
+
+        if (!p || p.stock < q) {
+            return notice(
+                "Insufficient stock for " +
+                (p ? p.name : "a selected product") +
+                ". Available: " + (p ? p.stock : 0) +
+                ", requested: " + q + ".",
+                true
+            );
+        }
+    }
+
+    if (db.sales.some(x => x.invoiceNo === s.invoiceNo)) {
+        return notice(
+            "Invoice number already exists. Start a new invoice number.",
+            true
+        );
+    }
+
+    s.status = s.balance <= 0
+        ? "Paid"
+        : s.paid > 0
+            ? "Partially Paid"
+            : "Unpaid";
+
+    for (const [id, q] of Object.entries(required)) {
+        const p = productById(id);
+        p.stock = Number((p.stock - q).toFixed(4));
+    }
+
+    db.sales.push(s);
+
+    if (!saveDB()) return;
+
+    currentSaleId = s.id;
+
+    toggleSaleLock(true);
+    refreshProductPicker();
+    renderAll();
+
+    notice("Sale saved. Inventory has been updated.");
+}
+
+function printInvoice() {
+    if (!$("saleNo").value.trim()) {
+        return notice("Enter invoice details first.", true);
+    }
+
+    document.querySelectorAll(".page")
+        .forEach(p => p.classList.remove("printing"));
+
+    $("pos").classList.add("printing");
+
+    window.print();
+
+    setTimeout(() => {
+        $("pos").classList.remove("printing");
+    }, 1000);
+}
+
+function shareSale() {
+    const s = currentSaleId
+        ? db.sales.find(x => x.id === currentSaleId)
+        : saleFromForm();
+
+    if (!s) return;
+
     const lines = [
-        "*KC INTEGRATED GLOBAL SERVICES*",
+        "*" + $("brandName").textContent + "*",
         "*INVOICE / SALES SUMMARY*",
-        "Invoice: " + d.invoiceNo,
-        "Date: " + d.invoiceDate,
-        "Customer: " + d.customer,
-        d.phone ? "Phone: " + d.phone : "",
+        "Invoice: " + s.invoiceNo,
+        "Date: " + s.date,
+        "Customer: " + s.customer,
+        s.phone ? "Phone: " + s.phone : "",
         "",
-        "*Items:*",
-        ...d.items.filter(i => i.name && i.qty > 0).map(i =>
-            i.name + " — " + i.qty + " × " + money(i.price) +
-            " = " + money(i.qty * i.price)
+        ...s.lines.map(l =>
+            l.name + " — " + l.qty + " × " +
+            fmt(l.price) + " = " + fmt(l.qty * l.price)
         ),
         "",
-        "Subtotal: " + money(t.subtotal),
-        "Discount: " + money(t.discount),
-        "*GRAND TOTAL: " + money(t.total) + "*",
-        "Paid: " + money(t.paid),
-        "Balance: " + money(t.balance),
-        "Payment status: " + d.status,
-        "Payment method: " + d.paymentMethod,
-        d.notes ? "Note: " + d.notes : "",
-        "",
-        "Thank you for your patronage."
-    ].filter(line => line !== "");
+        "Subtotal: " + fmt(s.subtotal),
+        "Discount: " + fmt(s.discount),
+        "*TOTAL: " + fmt(s.total) + "*",
+        "Paid: " + fmt(s.paid),
+        "Balance: " + fmt(s.balance),
+        "Status: " + s.status,
+        s.notes || ""
+    ].filter(Boolean);
 
-    const url = "https://wa.me/?text=" + encodeURIComponent(lines.join("\n"));
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(lines.join("\n")),
+        "_blank",
+        "noopener,noreferrer"
+    );
+}
+
+function saveProduct() {
+    const name = $("pName").value.trim();
+
+    if (!name) {
+        return notice("Product name is required.", true);
+    }
+
+    const id = $("editProductId").value;
+
+    const data = {
+        name,
+        sku: $("pSku").value.trim(),
+        category: $("pCategory").value.trim(),
+        cost: num($("pCost").value),
+        price: num($("pPrice").value),
+        stock: num($("pStock").value),
+        reorder: num($("pReorder").value),
+        unit: $("pUnit").value.trim() || "Pack"
+    };
+
+    if (id) {
+        const p = productById(id);
+
+        if (!p) {
+            return notice("Product no longer exists.", true);
+        }
+
+        Object.assign(p, data);
+    } else {
+        data.id = String(db.nextProduct++);
+        db.products.push(data);
+    }
+
+    if (saveDB()) {
+        clearProductForm();
+        renderAll();
+        notice("Product saved.");
+    }
+}
+
+function clearProductForm() {
+    ["editProductId", "pName", "pSku", "pCategory"].forEach(id => {
+        $(id).value = "";
+    });
+
+    $("pCost").value = 0;
+    $("pPrice").value = 0;
+    $("pStock").value = 0;
+    $("pReorder").value = 5;
+    $("pUnit").value = "Pack";
+}
+
+function editProduct(id) {
+    const p = productById(id);
+
+    if (!p) return;
+
+    $("editProductId").value = p.id;
+    $("pName").value = p.name;
+    $("pSku").value = p.sku || "";
+    $("pCategory").value = p.category || "";
+    $("pCost").value = p.cost;
+    $("pPrice").value = p.price;
+    $("pStock").value = p.stock;
+    $("pReorder").value = p.reorder;
+    $("pUnit").value = p.unit || "Pack";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function deleteProduct(id) {
+    const p = productById(id);
+
+    if (!p) return;
+
+    if (db.sales.some(s =>
+        s.lines.some(l => String(l.productId) === String(id))
+    )) {
+        return notice(
+            "This product is linked to saved sales. Set its stock to zero instead of deleting it.",
+            true
+        );
+    }
+
+    if (!confirm("Delete " + p.name + "?")) return;
+
+    db.products = db.products.filter(x => String(x.id) !== String(id));
+
+    saveDB();
+    renderAll();
+
+    notice("Product deleted.");
+}
+
+function renderInventory() {
+    const q = ($("productSearch").value || "").toLowerCase();
+
+    const rows = db.products.filter(p =>
+        (p.name + " " + p.sku + " " + p.category)
+            .toLowerCase().includes(q)
+    );
+
+    $("inventoryRows").innerHTML = rows.map(p => `
+        <tr>
+            <td>
+                <strong>${esc(p.name)}</strong><br>
+                <span class="muted">${esc(p.unit || "Pack")}</span>
+            </td>
+            <td>${esc(p.sku || "—")}</td>
+            <td>${esc(p.category || "—")}</td>
+            <td class="${p.stock <= p.reorder ? "low" : ""}">
+                ${p.stock}${p.stock <= p.reorder ? " ⚠" : ""}
+            </td>
+            <td>${fmt(p.cost)}</td>
+            <td>${fmt(p.price)}</td>
+            <td>${fmt(p.stock * p.cost)}</td>
+            <td class="no-print">
+                <button class="light"
+                    onclick="editProduct('${esc(p.id)}')">Edit</button>
+                <button class="danger"
+                    onclick="deleteProduct('${esc(p.id)}')">Delete</button>
+            </td>
+        </tr>
+    `).join("") || `
+        <tr>
+            <td colspan="8" class="empty">
+                No products found. Add your first product above.
+            </td>
+        </tr>
+    `;
+
+    refreshProductPicker();
+}
+
+function statusOf(s) {
+    return s.balance <= 0
+        ? '<span class="pill paid">Paid</span>'
+        : s.paid > 0
+            ? '<span class="pill partial">Partially Paid</span>'
+            : '<span class="pill unpaid">Unpaid</span>';
+}
+
+function renderCustomers() {
+    const q = ($("customerSearch").value || "").toLowerCase();
+
+    const rows = db.sales
+        .filter(s =>
+            (s.invoiceNo + " " + s.customer + " " + s.phone)
+                .toLowerCase().includes(q)
+        )
+        .slice()
+        .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+    $("customerRows").innerHTML = rows.map(s => `
+        <tr>
+            <td>${esc(s.invoiceNo)}</td>
+            <td>${esc(s.date)}</td>
+            <td>${esc(s.customer)}</td>
+            <td>${esc(s.phone || "—")}</td>
+            <td>${fmt(s.total)}</td>
+            <td>${fmt(s.paid)}</td>
+            <td>${fmt(s.balance)}</td>
+            <td>${statusOf(s)}</td>
+            <td class="no-print">
+                <button class="light"
+                    onclick="loadSaleToPOS('${esc(s.id)}')">View</button>
+            </td>
+        </tr>
+    `).join("") || `
+        <tr>
+            <td colspan="9" class="empty">No invoices found.</td>
+        </tr>
+    `;
+
+    const debt = db.sales.reduce((a, s) => a + s.balance, 0);
+    const paid = db.sales.reduce((a, s) => a + s.paid, 0);
+
+    $("cCount").textContent =
+        new Set(db.sales.map(s => s.customer).filter(Boolean)).size;
+
+    $("cDebt").textContent = fmt(debt);
+
+    $("cUnpaid").textContent =
+        db.sales.filter(s => s.balance > 0).length;
+
+    $("cPaid").textContent = fmt(paid);
+
+    const sel = $("paymentInvoice");
+    const old = sel.value;
+
+    sel.replaceChildren(new Option("Select unpaid invoice", ""));
+
+    db.sales.filter(s => s.balance > 0).forEach(s => {
+        sel.add(new Option(
+            s.invoiceNo + " · " + s.customer +
+            " · Balance " + fmt(s.balance),
+            s.id
+        ));
+    });
+
+    if ([...sel.options].some(o => o.value === old)) {
+        sel.value = old;
+    }
+}
+
+function loadSaleToPOS(id) {
+    const s = db.sales.find(x => String(x.id) === String(id));
+
+    if (!s) return;
+
+    go("pos");
+
+    currentSaleId = s.id;
+
+    $("saleNo").value = s.invoiceNo;
+    $("saleDate").value = s.date;
+    $("saleCustomer").value = s.customer;
+    $("salePhone").value = s.phone || "";
+    $("saleMethod").value = s.method || "Cash";
+    $("saleStatus").value = s.status;
+    $("saleDiscount").value = s.discount;
+    $("salePaid").value = s.paid;
+    $("saleNotes").value = s.notes || "";
+
+    $("saleLines").replaceChildren();
+
+    s.lines.forEach(l => {
+        addProductLine({
+            id: l.productId,
+            name: l.name,
+            price: l.price,
+            cost: l.cost,
+            unit: l.unit
+        }, l.qty);
+
+        const r = $("saleLines").lastElementChild;
+
+        r.dataset.pid = l.productId || "";
+        r.dataset.cost = l.cost || 0;
+        r.dataset.stockTracked = l.stockTracked ? "1" : "0";
+
+        r.querySelector(".line-name").readOnly = true;
+        r.querySelector(".line-qty").readOnly = true;
+        r.querySelector(".line-price").readOnly = true;
+    });
+
+    calcSale();
+    toggleSaleLock(true);
+
+    notice("Saved invoice opened in read-only mode.");
+}
+
+function recordPayment() {
+    const id = $("paymentInvoice").value;
+
+    const s = db.sales.find(x => String(x.id) === String(id));
+
+    const amount = num($("extraPayment").value);
+
+    if (!s) {
+        return notice("Select an unpaid invoice.", true);
+    }
+
+    if (amount <= 0) {
+        return notice("Enter a payment amount greater than zero.", true);
+    }
+
+    if (amount > s.balance) {
+        return notice(
+            "Payment exceeds the outstanding balance.",
+            true
+        );
+    }
+
+    s.paid = Number((s.paid + amount).toFixed(2));
+    s.balance = Number((s.total - s.paid).toFixed(2));
+
+    s.status = s.balance <= 0 ? "Paid" : "Partially Paid";
+
+    s.payments = s.payments || [];
+
+    s.payments.push({
+        amount,
+        method: $("extraMethod").value,
+        date: dateToday(),
+        at: new Date().toISOString()
+    });
+
+    if (saveDB()) {
+        $("extraPayment").value = "";
+        renderAll();
+
+        notice("Payment recorded against " + s.invoiceNo + ".");
+    }
+}
+
+function renderDashboard() {
+    const today = dateToday();
+
+    const sales = db.sales.filter(s => s.date === today);
+
+    $("dSales").textContent = fmt(
+        sales.reduce((a, s) => a + s.total, 0)
+    );
+
+    $("dCash").textContent = fmt(
+        sales.reduce((a, s) => a + s.paid, 0)
+    );
+
+    $("dProducts").textContent = db.products.length;
+
+    $("dDebt").textContent = fmt(
+        db.sales.reduce((a, s) => a + s.balance, 0)
+    );
+
+    const low = db.products.filter(p => p.stock <= p.reorder);
+
+    $("lowStock").innerHTML = low.map(p => `
+        <p>
+            ${esc(p.name)} —
+            <span class="low">
+                ${p.stock} ${esc(p.unit || "Pack")}
+            </span>
+        </p>
+    `).join("") || '<p class="muted">No low-stock alerts.</p>';
+
+    const recent = db.sales
+        .slice()
+        .sort((a, b) =>
+            (b.createdAt || "").localeCompare(a.createdAt || "")
+        )
+        .slice(0, 6);
+
+    $("recentSales").innerHTML = recent.map(s => `
+        <p>
+            <strong>${esc(s.invoiceNo)}</strong> · ${esc(s.customer)}<br>
+            ${fmt(s.total)} · ${statusOf(s)}
+        </p>
+    `).join("") || '<p class="muted">No sales recorded yet.</p>';
+}
+
+function reportSales() {
+    const from = $("reportFrom").value || "0000-01-01";
+    const to = $("reportTo").value || "9999-12-31";
+
+    return db.sales
+        .filter(s => s.date >= from && s.date <= to)
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function renderReports() {
+    const sales = reportSales();
+
+    $("rSales").textContent = fmt(
+        sales.reduce((a, s) => a + s.total, 0)
+    );
+
+    $("rPaid").textContent = fmt(
+        sales.reduce((a, s) => a + s.paid, 0)
+    );
+
+    $("rDebt").textContent = fmt(
+        sales.reduce((a, s) => a + s.balance, 0)
+    );
+
+    let profit = 0;
+    const best = {};
+
+    sales.forEach(s => {
+        s.lines.forEach(l => {
+            if (l.productId) {
+                profit += (l.price - l.cost) * l.qty;
+            }
+
+            const k = l.name;
+
+            best[k] = best[k] || {
+                qty: 0,
+                amount: 0
+            };
+
+            best[k].qty += l.qty;
+            best[k].amount += l.qty * l.price;
+        });
+    });
+
+    $("rProfit").textContent = fmt(profit);
+
+    $("reportRows").innerHTML = sales.map(s => `
+        <tr>
+            <td>${esc(s.invoiceNo)}</td>
+            <td>${esc(s.date)}</td>
+            <td>${esc(s.customer)}</td>
+            <td>${s.lines.length}</td>
+            <td>${fmt(s.total)}</td>
+            <td>${fmt(s.paid)}</td>
+            <td>${fmt(s.balance)}</td>
+            <td>${statusOf(s)}</td>
+        </tr>
+    `).join("") || `
+        <tr>
+            <td colspan="8" class="empty">
+                No sales in this date range.
+            </td>
+        </tr>
+    `;
+
+    $("bestRows").innerHTML = Object.entries(best)
+        .sort((a, b) => b[1].amount - a[1].amount)
+        .map(([name, v]) => `
+            <tr>
+                <td>${esc(name)}</td>
+                <td>${v.qty}</td>
+                <td>${fmt(v.amount)}</td>
+            </tr>
+        `).join("") || `
+            <tr>
+                <td colspan="3" class="empty">
+                    No products sold in this date range.
+                </td>
+            </tr>
+        `;
+}
+
+function renderAll() {
+    renderDashboard();
+    renderInventory();
+    renderCustomers();
+    renderReports();
+    refreshProductPicker();
+    applySettings();
 }
 
 function exportBackup() {
-    const data = getSaved();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
+    const blob = new Blob([
+        JSON.stringify({
+            app: "KCIGS-SALESPRO",
+            version: 2,
+            exportedAt: new Date().toISOString(),
+            data: db
+        }, null, 2)
+    ], {
         type: "application/json"
     });
-    const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "KCIGS-Invoice-Backup-" + today() + ".json";
+
+    a.href = URL.createObjectURL(blob);
+    a.download = "KCIGS-SALESPRO-Backup-" +
+        dateToday() + ".json";
+
     a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    notify("Backup export started.");
+
+    setTimeout(() => URL.revokeObjectURL(a.href), 1200);
+
+    notice("Backup export started. Keep the file in a safe place.");
 }
 
-function importBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+function importBackup(e) {
+    const f = e.target.files[0];
 
-    const reader = new FileReader();
+    if (!f) return;
 
-    reader.onload = () => {
+    const r = new FileReader();
+
+    r.onload = () => {
         try {
-            const incoming = JSON.parse(reader.result);
-            if (!incoming || typeof incoming !== "object" ||
-                Array.isArray(incoming)) throw new Error("Invalid format");
+            const raw = JSON.parse(r.result);
+            const incoming = raw.data || raw;
 
-            for (const [key, value] of Object.entries(incoming)) {
-                if (!value || typeof value !== "object" ||
-                    !Array.isArray(value.items) ||
-                    !value.invoiceNo) {
-                    throw new Error("Invalid invoice data");
-                }
+            if (
+                !Array.isArray(incoming.products) ||
+                !Array.isArray(incoming.sales)
+            ) {
+                throw Error("Invalid backup");
             }
 
-            if (!confirm("Import invoices? Existing invoices with matching " +
-                         "numbers will be replaced.")) return;
+            if (!confirm(
+                "Restore backup? This replaces current app data. " +
+                "Export your current data first."
+            )) {
+                return;
+            }
 
-            const saved = getSaved();
-            Object.assign(saved, incoming);
-            localStorage.setItem("kcisInvoices", JSON.stringify(saved));
-            renderSavedInvoices();
-            notify("Backup imported successfully.");
-        } catch {
-            notify("Import failed. Please select a valid KCIGS invoice backup.");
+            db = {
+                products: incoming.products,
+                sales: incoming.sales,
+                settings: incoming.settings || {},
+                nextProduct: incoming.nextProduct || 1
+            };
+
+            if (saveDB()) {
+                renderAll();
+                newSale();
+                notice("Backup restored successfully.");
+            }
+
+        } catch (err) {
+            notice("Could not import this backup file.", true);
         } finally {
-            event.target.value = "";
+            e.target.value = "";
         }
     };
 
-    reader.readAsText(file);
+    r.readAsText(f);
 }
 
-$("discount").addEventListener("input", calculate);
-$("paid").addEventListener("input", calculate);
+function resetApp() {
+    if (!confirm(
+        "This permanently clears all products, sales, invoices and " +
+        "settings stored in this browser. Export a backup first. Continue?"
+    )) {
+        return;
+    }
 
-fillInvoice({
-    invoiceNo: makeInvoiceNumber(),
-    invoiceDate: today(),
-    status: "Unpaid",
-    paymentMethod: "Cash",
-    items: [{name:"", qty:1, price:0}],
-    discount: 0,
-    paid: 0,
-    notes: "Thank you for your patronage."
-});
+    if (!confirm(
+        "Final confirmation: delete all KCIGS-SALESPRO local data?"
+    )) {
+        return;
+    }
 
-renderSavedInvoices();
+    db = {
+        products: [],
+        sales: [],
+        settings: {},
+        nextProduct: 1
+    };
+
+    saveDB();
+    newSale();
+    renderAll();
+    clearProductForm();
+
+    notice("App data reset.");
+}
+
+function exportReportCSV() {
+    const sales = reportSales();
+
+    const rows = [
+        [
+            "Invoice",
+            "Date",
+            "Customer",
+            "Phone",
+            "Subtotal",
+            "Discount",
+            "Total",
+            "Paid",
+            "Balance",
+            "Status",
+            "Items"
+        ],
+        ...sales.map(s => [
+            s.invoiceNo,
+            s.date,
+            s.customer,
+            s.phone,
+            s.subtotal,
+            s.discount,
+            s.total,
+            s.paid,
+            s.balance,
+            s.status,
+            s.lines.map(l => l.name + " x " + l.qty).join("; ")
+        ])
+    ];
+
+    const csv = rows.map(r =>
+        r.map(v =>
+            '"' + String(v ?? "").replace(/"/g, '""') + '"'
+        ).join(",")
+    ).join("\r\n");
+
+    const blob = new Blob(
+        ["\ufeff" + csv],
+        { type: "text/csv;charset=utf-8" }
+    );
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = "KCIGS-Sales-Report-" +
+        dateToday() + ".csv";
+
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(a.href), 1200);
+}
+
+function words(n) {
+    n = Math.floor(Math.max(0, n));
+
+    if (!n) return "Zero";
+
+    const o = [
+        "", "One", "Two", "Three", "Four", "Five",
+        "Six", "Seven", "Eight", "Nine", "Ten",
+        "Eleven", "Twelve", "Thirteen", "Fourteen",
+        "Fifteen", "Sixteen", "Seventeen", "Eighteen",
+        "Nineteen"
+    ];
+
+    const t = [
+        "", "", "Twenty", "Thirty", "Forty",
+        "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function u(x) {
+        let z = "";
+
+        if (x >= 100) {
+            z = o[Math.floor(x / 100)] + " Hundred";
+            x %= 100;
+
+            if (x) z += " ";
+        }
+
+        if (x >= 20) {
+            z += t[Math.floor(x / 10)];
+
+            if (x % 10) {
+                z += " " + o[x % 10];
+            }
+        } else if (x) {
+            z += o[x];
+        }
+
+        return z;
+    }
+
+    let out = "";
+
+    for (const [v, l] of [
+        [1e9, "Billion"],
+        [1e6, "Million"],
+        [1e3, "Thousand"],
+        [1, ""]
+    ]) {
+        if (n >= v) {
+            const x = Math.floor(n / v);
+
+            n %= v;
+
+            out += (out ? " " : "") +
+                u(x) + (l ? " " + l : "");
+        }
+    }
+
+    return out;
+}
+
+loadDB();
+
+applySettings();
+
+$("reportFrom").value = dateToday().slice(0, 8) + "01";
+$("reportTo").value = dateToday();
+
+newSale();
+renderAll();
+
 </script>
 </body>
 </html>
